@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian:bookworm
 
 RUN apt-get update && apt-get install -y \
 	postgresql \
@@ -6,10 +6,10 @@ RUN apt-get update && apt-get install -y \
 	postgresql-client \
 	&& rm -rf /var/lib/apt/lists/*
 
-COPY ./srcs/db/psql_setup.sh /tmp/
-COPY ./srcs/db/psql_setup.sql /tmp/
-RUN chmod +x /tmp/psql_setup.sh
+# RUN echo here
 
-EXPOSE 5432
+# COPY ./srcs/psql_setup.sh /tmp/
+# COPY ./srcs/db/srcs/psql_setup.sql /tmp/
+# RUN chmod +x /tmp/psql_setup.sh
 
-CMD ["/tmp/psql_setup.sh"]
+# CMD ["/tmp/psql_setup.sh"]
