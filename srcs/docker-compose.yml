@@ -1,14 +1,19 @@
 version: '3.8'
 services:
   db:
+    image: postgres:latest
     container_name: db
-    build:
-      context: ./db
-      dockerfile: ./Dockerfile
-    expose:
-      - "5432"
+    ports:
+        - "5432:5432"
+    environment:
+        POSTGRES_DB: django
+        POSTGRES_USER: skinner
+        POSTGRES_PASSWORD: kappa
     networks:
-      - trans-network
+        - trans-network
+    # volumes:
+        # - db-v:/var/lib/postgresql/data
+    restart: unless-stopped
   django:
     container_name: django
     build:
@@ -16,6 +21,22 @@ services:
       dockerfile: Dockerfile
     networks:
       - trans-network
+    # volumes:
+    #   - django-v:/serv/data
+  
+# volumes:
+#   django-v:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: './data/django'
+  # db-v:
+  #   driver: local
+  #   driver_opts:
+  #     type: 'none'
+  #     o: 'bind'
+  #     device: './data/db'
 
 networks:
   trans-network:
