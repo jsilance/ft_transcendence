@@ -2,9 +2,7 @@ FROM debian:bookworm
 
 RUN apt-get update && apt-get install -y \
 	postgresql \
-	postgresql-contrib \
-	postgresql-client \
-	&& rm -rf /var/lib/apt/lists/*
+	postgresql-contrib
 
 # RUN echo here
 
@@ -13,3 +11,4 @@ RUN apt-get update && apt-get install -y \
 # RUN chmod +x /tmp/psql_setup.sh
 
 # CMD ["/tmp/psql_setup.sh"]
+CMD ["postgres", "-D", "/serv/data"]

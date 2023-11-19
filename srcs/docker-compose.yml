@@ -3,9 +3,17 @@ services:
   db:
     container_name: db
     build:
-      context: ./db/srcs
+      context: ./db
+      dockerfile: ./Dockerfile
     expose:
       - "5432"
+    networks:
+      - trans-network
+  django:
+    container_name: django
+    build:
+      context: ./django
+      dockerfile: Dockerfile
     networks:
       - trans-network
 
