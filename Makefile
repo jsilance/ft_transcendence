@@ -5,8 +5,8 @@ all: build
 	# python3 ft_transcendence/manage.py runserver
 
 build:
-	mkdir -p ./data/db
-	mkdir -p ./data/django
+	mkdir -p ./srcs/data/db
+	mkdir -p ./srcs/data/django
 	docker-compose -f $(DOCK_COMP) up --build
 
 clean:

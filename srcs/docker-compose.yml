@@ -12,7 +12,7 @@ services:
     networks:
         - trans-network
     # volumes:
-        # - db-v:/var/lib/postgresql/data
+    #     - db-v:/var/lib/postgresql/data
     restart: unless-stopped
   django:
     container_name: django
@@ -36,7 +36,7 @@ services:
   #   driver_opts:
   #     type: 'none'
   #     o: 'bind'
-  #     device: './data/db'
+  #     device: '/Users/jusilanc/Projects/ft_transcendence/srcs/data/db'
 
 networks:
   trans-network:
