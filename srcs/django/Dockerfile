@@ -1,15 +1,22 @@
-FROM debian:bookworm
+FROM python:3.9.18-bookworm
 
-RUN apt-get update -y && apt-get upgrade
+RUN apt-get update -y && apt-get upgrade -y
+RUN apt-get install postgresql-client -y
 
-RUN apt-get install python3 python3-pip python3-django -y
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir psycopg2-binary \
+				django \
+				djangorestframework \
+				django-cors-headers
 
-# RUN python3 -m pip install Django
+COPY ./ft_transcendence /home/django/ft_transcendence
 
-# RUN sudo apt-get install python3-dev -y
+WORKDIR /home/django/ft_transcendence
 
-COPY ./ft_transcendence /serv/data
+COPY ./launch.sh /home/django/launch.sh 
 
-WORKDIR /serv/data
+RUN chmod +x /home/django/launch.sh
 
-CMD [ "python3", "manage.py", "runserver" ]
+CMD [ "/bin/bash", "/home/django/launch.sh" ]
+
+# CMD [ "python3", "manage.py", "runserver" ]

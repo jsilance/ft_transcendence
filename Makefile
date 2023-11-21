@@ -6,19 +6,24 @@ all: build
 
 build:
 	mkdir -p ./srcs/data/db
-	mkdir -p ./srcs/data/django
+	# mkdir -p ./srcs/data/django
 	docker-compose -f $(DOCK_COMP) up --build
 
 clean:
 	-docker-compose -f $(DOCK_COMP) down -v
 
 fclean: clean
-	-docker rmi srcs-db
+	-docker rmi postgres
 	-docker rmi srcs-django
-	# docker volume rm db
+	# docker volume rm postgres
 	# docker volume rm django
+
+rip: fclean
+	rm -rf ./srcs/data
 
 re: fclean all
 
-reset:
+reset: rip
 	rm -rf ./data/postgresql
+
+.PHONY: all build clean fclean rip re reset

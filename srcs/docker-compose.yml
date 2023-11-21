@@ -5,38 +5,51 @@ services:
     container_name: db
     ports:
         - "5432:5432"
+    expose:
+      - 5432
     environment:
-        POSTGRES_DB: django
+        POSTGRES_DB: ft_trans
         POSTGRES_USER: skinner
         POSTGRES_PASSWORD: kappa
     networks:
         - trans-network
-    # volumes:
-    #     - db-v:/var/lib/postgresql/data
+    volumes:
+        - db-v:/var/lib/postgresql/data
     restart: unless-stopped
   django:
     container_name: django
     build:
       context: ./django
       dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
+    environment:
+        POSTGRES_DB: ft_trans
+        POSTGRES_USER: skinner
+        POSTGRES_PASSWORD: kappa
     networks:
       - trans-network
-    # volumes:
-    #   - django-v:/serv/data
+    volumes:
+      - django-v:/home/django/ft_transcendence
+    restart: unless-stopped
   
-# volumes:
-#   django-v:
-#     driver: local
-#     driver_opts:
-#       type: 'none'
-#       o: 'bind'
-#       device: './data/django'
-  # db-v:
-  #   driver: local
-  #   driver_opts:
-  #     type: 'none'
-  #     o: 'bind'
-  #     device: '/Users/jusilanc/Projects/ft_transcendence/srcs/data/db'
+volumes:
+  django-v:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/Users/jusilanc/Projects/ft_transcendence/srcs/django/ft_transcendence'
+  db-v:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/Users/jusilanc/Projects/ft_transcendence/srcs/data/db'
 
 networks:
   trans-network:
