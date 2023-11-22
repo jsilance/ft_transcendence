@@ -17,8 +17,6 @@ COPY ./launch.sh /home/django/launch.sh
 
 RUN chmod +x /home/django/launch.sh
 
-EXPOSE 8000
-
 CMD [ "/bin/bash", "/home/django/launch.sh" ]
 
 # CMD [ "python3", "manage.py", "runserver" ]
