@@ -7,12 +7,9 @@ services:
         - "5432:5432"
     expose:
       - 5432
-    environment:
-        POSTGRES_DB: ft_trans
-        POSTGRES_USER: skinner
-        POSTGRES_PASSWORD: kappa
     networks:
         - trans-network
+    env_file: ../.env
     volumes:
         - db-v:/var/lib/postgresql/data
     restart: unless-stopped
@@ -27,10 +24,7 @@ services:
       - "8000:8000"
     expose:
       - 8000
-    environment:
-        POSTGRES_DB: ft_trans
-        POSTGRES_USER: skinner
-        POSTGRES_PASSWORD: kappa
+    env_file: ../.env
     networks:
       - trans-network
     volumes:
@@ -43,13 +37,13 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/Users/jusilanc/Projects/ft_transcendence/srcs/django/ft_transcendence'
+      device: './srcs/django/ft_transcendence'
   db-v:
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: '/Users/jusilanc/Projects/ft_transcendence/srcs/data/db'
+      device: './srcs/data/db'
 
 networks:
   trans-network:
