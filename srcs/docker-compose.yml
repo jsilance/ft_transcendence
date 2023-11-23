@@ -37,13 +37,13 @@ volumes:
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: './srcs/django/ft_transcendence'
+      device: "${PWD}/srcs/django/ft_transcendence"
   db-v:
     driver: local
     driver_opts:
       type: 'none'
       o: 'bind'
-      device: './srcs/data/db'
+      device: "${PWD}/srcs/data/db"
 
 networks:
   trans-network:
