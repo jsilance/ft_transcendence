@@ -1,3 +1,4 @@
 .env
 table.txt
 .vscode
+./srcs/data
