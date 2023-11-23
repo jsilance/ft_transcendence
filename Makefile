@@ -18,12 +18,9 @@ fclean: clean
 	# docker volume rm postgres
 	# docker volume rm django
 
-rip: fclean
+reset: fclean
 	rm -rf ./srcs/data
 
 re: fclean all
 
-reset: rip
-	rm -rf ./data/postgresql
-
-.PHONY: all build clean fclean rip re reset
+.PHONY: all build clean fclean re reset
