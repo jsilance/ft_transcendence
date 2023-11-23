@@ -7,20 +7,20 @@
 </head>
 <body>
 
-    <div class="modal modal-sheet d-block bg-body-secondary p-4 py-md-3">
+    <div class="modal d-block bg-body-secondary modal-dialog modal-dialog-centered" style="max-width: 15%; text-align: center;">
         <div class="modal-content shadow-sm">
             <div class="modal-header">
                 <h2>Login</h2>
             </div>
             
-            <div class="modal-body flex-column">
+            <div class="modal-body">
                 <form method="post">
                     <div class="mb-3">
                         {{ form.as_p }}
                         {% csrf_token %}
                     </div>
-                    <div class="modal-footer flex-column w-20 gap-2 pb-3 border-top-0">
-                        <button type="submit" class="btn btn-lg btn-primary">Login</button>
+                    <div class="d-grid gap-2 col-10 mx-auto">
+                        <button type="submit" class="btn btn-primary">Login</button>
                     </div>
                 </form>
             </div>
