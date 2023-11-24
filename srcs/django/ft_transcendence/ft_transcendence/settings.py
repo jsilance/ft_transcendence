@@ -30,7 +30,7 @@ ALLOWED_HOSTS = []
 
 LOGIN_URL = 'login'
 
-LOGIN_REDIRECT_URL = ''  # Replace 'home' with the name of the URL you want to redirect to.
+LOGIN_REDIRECT_URL = '/'  # Replace 'home' with the name of the URL you want to redirect to.
 
 # Application definition
 
@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'login.apps.LoginConfig',
-    'user'
+    'user',
+    'home',
 ]
 
 MIDDLEWARE = [
