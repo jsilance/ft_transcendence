@@ -7,12 +7,26 @@
 </head>
 <body>
 
+    {% extends 'login/navbar.html' %}
+
+    
+    
+    
+</body>
+</html>
+
+{% extends 'login/navbar.html' %}
+
+{% block title %}
+    FT_TRANSCENDENCE
+{% endblock %}
+
+{% block body %}
     <div class="modal d-block bg-body-secondary modal-dialog modal-dialog-centered" style="max-width: 15%; text-align: center;">
         <div class="modal-content shadow-sm">
             <div class="modal-header">
                 <h2>Login</h2>
             </div>
-            
             <div class="modal-body">
                 <form method="post">
                     <div class="mb-3">
@@ -25,12 +39,8 @@
                 </form>
             </div>
             {% if form.errors %}
-            <p>Your username and password didn't match. Please try again.</p>
+                <p>Your username and password didn't match. Please try again.</p>
             {% endif %}
         </div>
     </div>
-
-   
-
-</body>
-</html>
+{% endblock %}

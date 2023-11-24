@@ -27,4 +27,3 @@ urlpatterns = [
     path('', welcome, name='welcome'),
     path('register/', register, name='register'),
 ]
-
