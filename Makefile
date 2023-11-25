@@ -2,7 +2,6 @@ DOCK_COMP = ./srcs/docker-compose.yml
 
 all: build
 	docker-compose -f $(DOCK_COMP) up -d
-	# python3 ft_transcendence/manage.py runserver
 
 build:
 	mkdir -p ./srcs/data/db

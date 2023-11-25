@@ -1,0 +1,20 @@
+{% extends 'navbar.html' %}
+
+{% block title %}
+	FT_TRANSCENDENCE
+{% endblock %}
+
+{% block body %}
+	<div class="container">
+		<div>	
+			<h2>Registeraaaaaaaaa</h2>
+		</div>
+		<div>	
+			<form method="post">
+				{% csrf_token %}
+				{{ form.as_p }}
+				<button type="submit">Register</button>
+			</form>
+		</div>
+	</div>
+{% endblock %}
