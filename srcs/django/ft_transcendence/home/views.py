@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from user.forms import RegisterForm
+from home.forms import RegisterForm
 
 
 @login_required
