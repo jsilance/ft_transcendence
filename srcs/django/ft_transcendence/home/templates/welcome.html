@@ -5,25 +5,27 @@
 {% endblock %}
 
 {% block body %}
-	<div class="container">
-		<div class="modal d-block bg-body-secondary modal-dialog modal-dialog-centered" style="text-align: center;">
-			<div class="modal-content shadow-sm">
-				<div class="modal-header">
-					<h1>Ft_transcendence</h1>
-				</div>
-				<div class="modal-body mb-3">	
-					<div>
-						<h3>Hi, {{ user.username }}!</h3>
-					</div>
-					<div>
-						<p>This is a simple welcome page for our Django project.</p>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<p>Thank you for visiting!</p>
-				</div>
+	<div class="container bg-white">
+		<div class="row">
+			<div class="col-2">
+				<h1>Ft_transcendence</h1>
 			</div>
 		</div>
-	</div>	
+		<div class="row">
+			<div class="col-5">
+				<h3>Hi, {{ user.username }}!</h3>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-5">
+				<p>This is a simple welcome page for our Django project.</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-5">
+				<p>Thank you for visiting!</p>
+			</div>
+		</div>	
+	</div>
 {% endblock %}
 

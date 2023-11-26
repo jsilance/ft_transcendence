@@ -1,0 +1,42 @@
+{% extends 'navbar.html' %}
+
+{% block title %}
+	FT_TRANSCENDENCE
+{% endblock %}
+
+{% block body %}
+	<div class="container bg-white">
+		<div class="row">
+			<div class="col-2">
+				<h1>Ft_transcendence</h1>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-5">
+				<h3>Hi, {{ user.username }}!</h3>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-5 mb-3">
+				<form class="form-control">
+					<label>Login:</label>
+					<input class="form-control" type="text" id="username" name="username" value="{{ user.username }}"></intput>
+					<label>Email:</label>
+					<input class="form-control" type="text" id="email" name="email" value="{{ user.email }}"></input>
+					<label>Avatar:</label>
+					<input class="form-control mb-3" type="file" id="avatar" name="avatar" value="{{ user.avatar }}"></input>
+					<div class="d-grid gap-2 col-10 mx-auto">
+						<button class="btn btn-primary mb-1" type="submit">Save</button>	
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-5">
+
+			</div>
+		</div>	
+	</div>
+
+{% endblock %}
+
