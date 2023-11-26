@@ -21,14 +21,18 @@
 						<div class="offcanvas-body">
 							<ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
 								<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-								<li class="nav-item"><a class="nav-link" href="/admin/">Admin</a></li>
+								{% if user.is_authenticated %}
+									{% if user.is_superuser %}
+										<li class="nav-item"><a class="nav-link" href="/admin/">Admin</a></li>
+									{% endif %}
+								{% endif %}
 								<li class="nav-item"><a class="nav-link" href="/leaderboard/">Leaderboard</li>
 								{% if user.is_authenticated %}
-								<li class="nav-item"><a class="nav-link" href="/profile/">Profile</a></li>
-								<li class="nav-item"><a class="btn btn-danger nav-link" role="button" href="/logout/" style="text-align: left; padding-left: 2px;">Log Out</a></li>
+									<li class="nav-item"><a class="nav-link" href="/profile/">Profile</a></li>
+									<li class="nav-item"><a class="btn btn-danger nav-link" role="button" href="/logout/" style="text-align: left; padding-left: 2px;">Log Out</a></li>
 								{% else %}
-								<li class="nav-item"><a class="nav-link" href="/login/">Log In</a></li>
-								<li class="nav-item"><a class="nav-link" href="/register/">Register</a></li>
+									<li class="nav-item"><a class="nav-link" href="/login/">Log In</a></li>
+									<li class="nav-item"><a class="nav-link" href="/register/">Register</a></li>
 								{% endif %}
 							</ul>
 						</div>
