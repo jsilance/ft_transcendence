@@ -13,7 +13,6 @@ Django version 4.2.7
 [USEFULL COMMANDS]
 	- python3 manage.py createsuperuser
 
-
 [.env]
 	POSTGRES_DB=example
 	POSTGRES_USER=example
