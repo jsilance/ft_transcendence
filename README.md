@@ -1,4 +1,4 @@
-Hello World!
+# Hello World!
 
 This is our readme.md about ft_transcendence!
 
