@@ -44,7 +44,26 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'home',
     'game',
+    'channels',
+    'channels_postgres'
 ]
+
+ASGI_APPLICATION = 'ft_transcendence.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_postgres.core.PostgresChannelLayer',
+        'CONFIG': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': environ.get('POSTGRES_DB'),
+            'USER': environ.get('POSTGRES_USER'),
+            'PASSWORD': environ.get('POSTGRES_PASSWORD'),
+            'HOST': 'db',
+            'PORT': '',
+
+            }
+        },
+    }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -88,7 +107,15 @@ DATABASES = {
         'PASSWORD': environ.get('POSTGRES_PASSWORD'),
         'HOST': 'db',
         'PORT': '',
-    }
+    },
+    	'channels_postgres': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': environ.get('POSTGRES_DB'),
+        'USER': environ.get('POSTGRES_USER'),
+        'PASSWORD': environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT': '',
+	}
 }
 
 

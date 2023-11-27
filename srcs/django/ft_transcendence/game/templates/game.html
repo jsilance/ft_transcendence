@@ -17,6 +17,33 @@
 
 <script type="module" src="{% static 'main.js' %}" defer></script>
 
+<!-- WebSocket setup -->
+<script type="module">
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const gameSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/game/'
+        );
+
+        gameSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            // Handle incoming messages/data
+        };
+
+        gameSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        // Function to send messages
+        function sendMessage(message) {
+            gameSocket.send(JSON.stringify(message));
+        }
+
+        // Example: Sending a message
+        // sendMessage({ action: 'some_action', value: 'some_value' });
+
+        // Add additional game logic here or in external scripts
+    });
+</script>
 {% endblock %}
 
 

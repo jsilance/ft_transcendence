@@ -7,7 +7,9 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir psycopg2-binary \
 				django \
 				djangorestframework \
-				django-cors-headers
+				django-cors-headers \
+				channels \
+				channels_postgres
 
 COPY ./ft_transcendence /home/django/ft_transcendence
 
