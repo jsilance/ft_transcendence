@@ -5,7 +5,6 @@ all: build
 
 build:
 	mkdir -p ./srcs/data/db
-	# mkdir -p ./srcs/data/django
 	docker-compose -f $(DOCK_COMP) up --build
 
 clean:
@@ -14,8 +13,6 @@ clean:
 fclean: clean
 	-docker rmi postgres
 	-docker rmi srcs-django
-	# docker volume rm postgres
-	# docker volume rm django
 
 reset: fclean
 	rm -rf ./srcs/data

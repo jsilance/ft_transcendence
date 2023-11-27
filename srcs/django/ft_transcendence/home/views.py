@@ -23,7 +23,6 @@ def register(request):
 			return redirect('login')  # Redirect to login page after successful registration
 	else:
 		form = RegisterForm()
-
 	return render(request, 'registration.html', {'form': form})
 
 def leaderboard(request):
