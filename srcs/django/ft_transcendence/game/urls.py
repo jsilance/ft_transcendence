@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import game
+from .views import websocket_test
 
 urlpatterns = [
-	path('', game, name='game'),
+	path('', websocket_test, name='game'),
 ]
