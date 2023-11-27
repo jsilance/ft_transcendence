@@ -11,5 +11,5 @@ def game(request):
 
 @login_required
 def websocket_test(request):
-    return render(request, 'websocket.html')
+    return render(request, 'chatbox.html')
 

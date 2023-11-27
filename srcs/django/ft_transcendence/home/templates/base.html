@@ -32,6 +32,7 @@
 								<li class="nav-item"><a class="nav-link" href="/leaderboard/">Leaderboard</li>
 								<li class="nav-item"><a class="nav-link" href="/game/">Play</li>
 								{% if user.is_authenticated %}
+									<li class="nav-item"><a class="nav-link" href="/game/chatbox/">Chatbox</a></li>
 									<li class="nav-item"><a class="nav-link" href="/profile/">Profile</a></li>
 									<li class="nav-item"><a class="btn btn-danger nav-link" role="button" href="/logout/" style="text-align: left; padding-left: 2px;">Log Out</a></li>
 								{% else %}
