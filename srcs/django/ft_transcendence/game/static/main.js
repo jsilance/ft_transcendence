@@ -72,9 +72,8 @@ const animate = () => {
 		shape.position.x = radius * Math.cos(angle);
 		shape.position.z = radius * Math.sin(angle);
 		// rotate around its center of radius
-		shape.rotateY(-0.01);
 
-		// shape.rotateY(-0.023);
+		shape.rotateY(-0.55 * Math.PI / 180);
 
 		angle += 0.01;
 		// shape.rotation.x += 0.01;
