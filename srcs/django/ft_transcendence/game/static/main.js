@@ -7,7 +7,7 @@ camera.position.z = 5;
 
 const renderer = new THREE.WebGLRenderer();
 
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth - 15, window.innerHeight - 16);
 
 const sceneBox = document.getElementById('scene-box');
 sceneBox.appendChild(renderer.domElement);
@@ -27,27 +27,28 @@ scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
 const threeJsShape = []
 
 for (const el of shapes) {
-	const {type, color} = el;
+	const {type, color, posx, posy} = el;
 	let geometry;
 	
 	switch (type) {
 		case 1:
-			geometry = new THREE.SphereGeometry(1, 20, 20);
+			geometry = new THREE.BoxGeometry(5, 0.1, 0.1);
 			break;
 		case 2:
-			geometry = new THREE.BoxGeometry(1, 1, 1);
+			geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 			break;
 		case 3:
-			geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
+			geometry = new THREE.SphereGeometry(0.2);
 			break;
 	}
 	
 	const material = new THREE.MeshPhongMaterial({color: color});
 	const shape = new THREE.Mesh(geometry, material);
 	
-	shape.position.x = (Math.random() - 0.5) * 5;
-	shape.position.y = Math.random() * 2 + 0.5;
-	shape.position.z = (Math.random() - 0.5) * 5;
+	shape.position.x = posx;
+	console.log(posx);
+	shape.position.y = 1;
+	shape.position.z = posy;
 	console.log(shape);
 	
 	scene.add(shape);
@@ -63,10 +64,21 @@ scene.add(directionalLight);
 
 // const controls = new OrbitControls(camera, renderer.domElement);	
 
+let angle = 0;
+let radius = 1;
+
 const animate = () => {
 	threeJsShape.forEach((shape) => {
-		shape.rotation.x += 0.01;
-		shape.rotation.y += 0.01;
+		shape.position.x = radius * Math.cos(angle);
+		shape.position.z = radius * Math.sin(angle);
+		// rotate around its center of radius
+		shape.rotateY(-0.01);
+
+		// shape.rotateY(-0.023);
+
+		angle += 0.01;
+		// shape.rotation.x += 0.01;
+		// shape.rotation.y += 0.01;
 	});
 	renderer.render(scene, camera);
 	requestAnimationFrame(animate);

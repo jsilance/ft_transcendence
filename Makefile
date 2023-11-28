@@ -12,7 +12,7 @@ clean:
 
 fclean: clean
 	-docker rmi postgres
-	-docker rmi srcs_django
+	-docker rmi srcs-django
 
 reset: fclean
 	rm -rf ./srcs/data
