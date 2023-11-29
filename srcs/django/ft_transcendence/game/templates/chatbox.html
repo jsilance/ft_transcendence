@@ -13,12 +13,10 @@
     <script type="module">
         document.addEventListener('DOMContentLoaded', () => {
             const username = "{{ username }}";  // Get the username from the Django context
-            const gameSocket = new WebSocket('ws://' + window.location.host + '/ws/game/');
+            const gameSocket = new WebSocket('ws://' + window.location.host + '/ws/chatbox/');
 
             gameSocket.onmessage = function(e) {
-                console.log(e.data);
                 const data = JSON.parse(e.data);
-                console.log(data.username);
                 document.getElementById('messages').innerHTML += '<p><b>' + data.username + ':</b> ' + data.message + '</p>';
             };
 

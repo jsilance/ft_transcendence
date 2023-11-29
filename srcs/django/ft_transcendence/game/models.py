@@ -15,3 +15,7 @@ class Shape(models.Model):
 
 	def __str__(self):
 		return str(self.id)
+
+class ChatMessage(models.Model):
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
