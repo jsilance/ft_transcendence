@@ -3,27 +3,6 @@ const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
 let positionX = 0;
 
-// socket.addEventListener('open', function (event) {
-// 	console.log('connected');
-// 	// socket.send(JSON.stringify({'posx': 0, 'posy': 0}));
-	
-// 	socket.addEventListener('message', function (event) {
-// 		console.log('Message from server ', event.data);
-// 		const data = JSON.parse(event.data);
-// 		const text = data.message;
-// 		positionX = data.posx;
-// 		console.log(text);
-// 	});
-	
-// 	socket.addEventListener('close', function (event) {
-// 		console.log('disconnected');
-// 	});
-	
-// 	socket.addEventListener('error', function (event) {
-// 		console.log('error');
-// 	});
-// });
-
 function updatePos()
 {
 	// actualiser la position du joueur concerné
@@ -104,7 +83,9 @@ console.log(camera.position);
 // ---------------------------------------------------------------------------------- //
 
 // Utilisation de webgl
+// const renderer = new THREE.WebGLRenderer();
 const renderer = new THREE.WebGLRenderer({antialias: true});
+// const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
 
 // 
 // window size
@@ -125,18 +106,20 @@ scene.add(plane);
 // ---------------------------------------------------------------------------------- //
 
 // creation du brouillard
-const fogColor = "#000";
-const fogNear = 2;
-const fogFar = 20;
-scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
+// const fogColor = "#000000";
+// const fogNear = 2;
+// const fogFar = 20;
+// scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
 // ---------------------------------------------------------------------------------- //
 
 
 // initialisation des borders, users et ball
 const threeJsShape = []
 
+// radius = 1 * mapSetting
+
 for (const el of shapes) {
-	const {type, color, posx, posy} = el;
+	const {party_id, item_id, type, color, posx, posy} = el;
 	let geometry;
 	
 	switch (type) {
@@ -157,8 +140,14 @@ for (const el of shapes) {
 	const shape = new THREE.Mesh(geometry, material);
 	
 	shape.position.x = posx;
-	shape.position.y = 0.2;
 	shape.position.z = posy;
+	// shape.position.x = Math.cos(360 / mapSetting.nbPlayer * Math.PI / 180) * radius;
+	// console.log(Math.cos(360 / int(mapSetting.nbPlayer) * Math.PI / 180) * radius);
+	// console.log(JSON.parse(mapSetting));
+	console.log(mapSetting); //probleme ici avec \ necessaire pour le " -> voir db
+	shape.position.y = 0.2;
+	// shape.rotateY(item_id * (Math.PI / 180));
+	// shape.position.z = Math.sin(360 / mapSetting.nbPlayer * Math.PI / 180) * radius;
 	
 	scene.add(shape);
 	threeJsShape.push(shape);
@@ -192,7 +181,5 @@ const animate = () => {
 	renderer.render(scene, camera);
 	requestAnimationFrame(animate);
 }
-
-console.log(mapSetting);
 
 animate();

@@ -14,8 +14,7 @@
 <script>
 	const shapes = JSON.parse('{{ shapes | safe }}');
     const user = '{{ user | safe }}';
-    // const user = JSON.parse('{{ user | safe }}');
-	const mapSetting = JSON.parse('{{ mapSetting | safe }}');
+	const mapSetting = '{{ mapSetting | safe }}';
 </script>
 
 <script type="module" src="{% static 'main.js' %}" defer></script>
