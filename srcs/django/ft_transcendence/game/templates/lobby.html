@@ -19,9 +19,31 @@
 	</p>
 </div>
 <div>
-	<h3>
-		<a href="/game/1">VIEW SECTION HERE</a>
-	</h3>
+	<form method="post" action="{% url 'lobby' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Page</button>
+    </form>
+</div>
+<div>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">ID</th>
+				<th scope="col">NB OF PLAYER</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for party in parties %}
+			<tr>
+				<th scope="row">{{ party.id }}</th>
+				<td>{{ party.nbPlayer }}</td>
+				<td><a href="/game/{{ party.id }}">JOIN</a></td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </div>
 
 {% endblock %}

@@ -18,10 +18,18 @@ class Shape(models.Model):
 		return str(self.type)
 
 class MapSettings(models.Model):
-	nbPlayer = models.CharField(max_length=3, help_text="number of users")
-	listOfPlayer = models.CharField(help_text="list of player in json and if they are ready in json")
+	nbPlayer = models.CharField(max_length=3, help_text="number of users", default=2)
+	listOfPlayer = models.CharField(help_text="list of player in json and if they are ready in json", default=0)
 	duringTime = models.CharField(help_text="time of the party", default=0)
 	date = models.DateField(auto_now=True)
 
 	def __str__(self):
 		return str(self.id)
+
+	def to_json(self):
+		return {
+            'id': self.id,
+			'nbPlayer': self.nbPlayer,
+			'listOfPlayer': self.listOfPlayer,
+			'duringTime': self.duringTime
+		}
