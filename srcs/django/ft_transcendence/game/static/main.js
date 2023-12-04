@@ -141,6 +141,8 @@ for (const el of shapes) {
 	
 	shape.position.x = posx;
 	shape.position.z = posy;
+	console.log(type);
+
 	// shape.position.x = Math.cos(360 / mapSetting.nbPlayer * Math.PI / 180) * radius;
 	// console.log(Math.cos(360 / int(mapSetting.nbPlayer) * Math.PI / 180) * radius);
 	// console.log(JSON.parse(mapSetting));

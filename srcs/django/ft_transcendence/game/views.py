@@ -24,7 +24,7 @@ def game(request, party_id):
 
 	founded = any(user_info["user"] == user for user_info in user_infos)
 
-	if not founded:
+	if not founded and user != "/":
 		user_infos.append({"user": user, "is_ready": False})
 		mapSetting.listOfPlayer = json.dumps(user_infos)
 		mapSetting.save()
