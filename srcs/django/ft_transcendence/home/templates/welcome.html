@@ -5,28 +5,16 @@
 	FT_TRANSCENDENCE
 {% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="{% static 'home/styles.css' %}">
+{% endblock%}
+
 {% block body %}
-	<div class="container bg-white">
-		<div class="row">
-			<div class="col-2">
-				<h1>Ft_transcendence</h1>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-5">
-				<h3>Hi, {{ user.username }}!</h3>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-5">
-				<p>This is a simple welcome page for our Django project.</p>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-5">
-				<p>Thank you for visiting!</p>
-			</div>
-		</div>	
+	<div>
+		<h1>Ft_transcendence</h1>
+		<h3>Hi, {{ user.username }}!</h3>
+		<p>This is a simple welcome page for our Django project.</p>
+		<p>Thank you for visiting!</p>
 	</div>
 {% endblock %}
 

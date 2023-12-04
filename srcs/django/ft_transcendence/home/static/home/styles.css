@@ -1,0 +1,217 @@
+/*******************************************************************************
+                              COMMON
+*******************************************************************************/
+hr {
+    border: 0;
+    height: .2px;
+    width: 100%;
+    background: var(--bg-layer2);
+    margin: 16px 0 24px;
+}
+
+input, textarea {
+    outline: none;
+    border-radius: 4px;
+    border-radius: 5px;
+    border: 1px solid var(--main-bg-color);
+    height: 2rem;
+    background-color: var(--bg-layer2);
+    color: var(--text-color);
+    padding: 4px 8px;
+}
+
+input:focus, textarea:focus {
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 4px rgba(255, 0, 0, .5);
+}
+
+/*******************************************************************************
+                             LOGIN PAGE
+*******************************************************************************/
+
+.login_box {
+    min-height: 520px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    margin-top: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--accent2);
+
+    & > div:last-child {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 40px 20px;
+    
+        & div {
+            margin: auto;
+        }
+    }
+
+    & > div:first-child {
+        background-image: url('../../../static/images/spacepong.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        border-right: 1px solid var(--accent2);
+    }
+
+    & ul {
+        margin-bottom: 8px;
+
+        & li {
+            color: var(--alert);
+        }
+    }
+}
+
+.form_inputs {
+    & p {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/*******************************************************************************
+                             REGISTRATION
+*******************************************************************************/
+
+.signin_box {
+    margin-top: 40px;
+
+    & div {
+        width: 456px;
+        margin: auto;
+    }
+}
+
+.signin_form_inputs {
+    display: flex;
+    flex-direction: column;
+}
+
+/*******************************************************************************
+                             LEADERBOARD
+*******************************************************************************/
+
+.table {
+    margin: 40px 0;
+    background-color: var(--bg-layer1);
+    border-radius: 20px;
+    border: 1px solid var(--accent);
+    box-shadow: 0 0.4rem .8rem var(--secondary-bg-color);
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+}
+
+.table_header {
+    text-align: center;
+    background-color: var(--accent);
+
+    & h1 {
+        font-size: 32px;
+        padding: 8px 0;
+    }
+}
+
+.table_body {
+    display: flex;
+    justify-content: space-between;
+    width: 95%;
+    height: calc(89% - 1.6rem);
+    margin: .8rem auto;
+    border: 1px solid var(--bg-layer2);
+    border-radius: 0 0 10px 10px;
+    overflow: auto;
+}
+
+td {
+    display: flex;
+    align-items: center;
+
+    & img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+}
+
+table, th, td {
+    padding: 1rem;
+}
+
+tr {
+    display: flex;
+    justify-content: space-between;
+}
+
+thead th {
+    position: sticky;
+}
+
+tbody {
+
+    & tr {
+        cursor: pointer;
+    }
+
+    & tr:nth-child(even) {
+        background-color: var(--bg-layer1);
+    }
+
+    & tr:nth-child(odd) {
+        background-color: var(--bg-layer2);
+    }
+}
+
+tbody tr:hover {
+    background-color: rgb(136, 0, 255);
+}
+
+/*******************************************************************************
+                             PROFILE
+*******************************************************************************/
+
+
+
+.profile_container {
+    width: 456px;
+    margin: auto;
+    text-align: center;
+    
+    & div:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+
+        & img {
+            margin-bottom: 10px;
+        }
+    }
+
+    & div:last-child {
+        margin-top: 20px;
+    }
+}
+
+.option {
+    padding: 8px;
+    border-radius: 8px;
+    margin: 0 4px;
+
+    &.delete {
+        border: 1px solid var(--secondary-bg-color);
+        background-color: var(--alert);
+    }
+
+    &.edit {
+        background-color: #216ADD;
+    }
+}
