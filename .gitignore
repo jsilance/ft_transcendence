@@ -4,3 +4,4 @@ __pycache__/
 table.txt
 .vscode
 ./srcs/data
+.DS_Store
