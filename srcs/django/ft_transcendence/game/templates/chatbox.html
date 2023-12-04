@@ -3,36 +3,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ... head elements ... -->
+	<!-- ... head elements ... -->
 </head>
 <body>
-    <div id="messages"></div>
-    <input type="text" id="messageInput" placeholder="Type a message">
-    <button onclick="sendMessage()">Send</button>
+	<div id="messages"></div>
+	<input type="text" id="messageInput" placeholder="Type a message">
+	<button onclick="sendMessage()">Send</button>
 
-    <script type="module">
-        document.addEventListener('DOMContentLoaded', () => {
-            const username = "{{ username }}";  // Get the username from the Django context
-            const gameSocket = new WebSocket('ws://' + window.location.host + '/ws/game/');
+	<script type="module">
+		document.addEventListener('DOMContentLoaded', () => {
+			const username = "{{ username }}";  // Get the username from the Django context
+			const gameSocket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
-            gameSocket.onmessage = function(e) {
-                console.log(e.data);
-                const data = JSON.parse(e.data);
-                console.log(data.username);
-                document.getElementById('messages').innerHTML += '<p><b>' + data.username + ':</b> ' + data.message + '</p>';
-            };
+			gameSocket.onmessage = function(e) {
+				console.log(e.data);
+				const data = JSON.parse(e.data);
+				console.log(data.username);
+				document.getElementById('messages').innerHTML += '<p><b>' + data.username + ':</b> ' + data.message + '</p>';
+			};
 
-            gameSocket.onclose = function(e) {
-                console.error('Chat socket closed unexpectedly');
-            };
+			gameSocket.onclose = function(e) {
+				console.error('Chat socket closed unexpectedly');
+			};
 
-            window.sendMessage = function() {
-                const messageInput = document.getElementById('messageInput');
-                const message = messageInput.value;
-                gameSocket.send(JSON.stringify({ username: username, message: message }));
-                messageInput.value = '';
-            };
-        });
-    </script>
+			window.sendMessage = function() {
+				const messageInput = document.getElementById('messageInput');
+				const message = messageInput.value;
+				gameSocket.send(JSON.stringify({ username: username, message: message }));
+				messageInput.value = '';
+			};
+		});
+	</script>
 </body>
 </html>
