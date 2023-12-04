@@ -5,35 +5,39 @@
 	FT_TRANSCENDENCE
 {% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="{% static 'home/styles.css' %}">
+{% endblock%}
+
 {% block body %}
-	<div class="container bg-white">
-		<div class="row">
-			<div class="col-2">
+	<div>
+		<div>
+			<div>
 				<h1>Ft_transcendence</h1>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-5">
-				<h3>Hi, {{ user.username }}!</h3>
+		<div>
+			<div>
+				<h3>Hello, {{ user.username }}!</h3>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-5 mb-3">
-				<form class="form-control">
+		<div>
+			<div>
+				<form>
 					<label>Login:</label>
-					<input class="form-control" type="text" id="username" name="username" value="{{ user.username }}"></intput>
+					<input type="text" id="username" name="username" value="{{ user.username }}"></intput>
 					<label>Email:</label>
-					<input class="form-control" type="text" id="email" name="email" value="{{ user.email }}"></input>
+					<input type="text" id="email" name="email" value="{{ user.email }}"></input>
 					<label>Avatar:</label>
-					<input class="form-control mb-3" type="file" id="avatar" name="avatar" value="{{ user.avatar }}"></input>
-					<div class="d-grid gap-2 col-10 mx-auto">
-						<button class="btn btn-primary mb-1" type="submit">Save</button>	
+					<input type="file" id="avatar" name="avatar" value="{{ user.avatar }}"></input>
+					<div>
+						<button type="submit">Save</button>	
 					</div>
 				</form>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-5">
+		<div>
+			<div>
 
 			</div>
 		</div>	
