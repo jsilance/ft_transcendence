@@ -147,6 +147,7 @@ for (const el of shapes) {
 	// console.log(Math.cos(360 / int(mapSetting.nbPlayer) * Math.PI / 180) * radius);
 	// console.log(JSON.parse(mapSetting));
 	console.log(mapSetting); //probleme ici avec \ necessaire pour le " -> voir db
+	console.log(mapSetting.nbPlayer); //probleme ici avec \ necessaire pour le " -> voir db
 	shape.position.y = 0.2;
 	// shape.rotateY(item_id * (Math.PI / 180));
 	// shape.position.z = Math.sin(360 / mapSetting.nbPlayer * Math.PI / 180) * radius;

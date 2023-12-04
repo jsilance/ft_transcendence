@@ -19,6 +19,7 @@ def game(request, party_id):
 			raise ValueError("listOfPlayer is not a list")
 	except (json.JSONDecodeError, ValueError):
 		user_infos = [{"user": user, "is_ready": False}]
+		mapSetting.listOfPlayer = user_infos
 		mapSetting.listOfPlayer = json.dumps(user_infos)
 		mapSetting.save()
 
@@ -26,13 +27,16 @@ def game(request, party_id):
 
 	if not founded and user != "/":
 		user_infos.append({"user": user, "is_ready": False})
-		mapSetting.listOfPlayer = json.dumps(user_infos)
+		# mapSetting.listOfPlayer = json.dumps(user_infos)
+		mapSetting.listOfPlayer = user_infos
 		mapSetting.save()
 
-	map_json = json.dumps(mapSetting.to_json())
+	map_data = json.loads(json.dumps(mapSetting.to_json()))
+	map_data["listOfPlayer"] = user_infos
+	map_data = json.dumps(map_data)
 	generatemap(party_id)
 
-	context = {'shapes': shape_json, 'mapSetting': map_json, 'usern': user}
+	context = {'shapes': shape_json, 'mapSetting': map_data, 'user': user}
 	return render(request, 'game.html', context)
 
 @login_required

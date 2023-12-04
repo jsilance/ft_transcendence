@@ -32,6 +32,6 @@ class MapSettings(models.Model):
 		return {
             'id': self.id,
 			'nbPlayer': self.nbPlayer,
-			'listOfPlayer': self.listOfPlayer,
 			'duringTime': self.duringTime
 		}
+		# 'listOfPlayer': self.listOfPlayer,
