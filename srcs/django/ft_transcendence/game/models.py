@@ -30,8 +30,13 @@ class MapSettings(models.Model):
 
 	def to_json(self):
 		return {
-            'id': self.id,
+			'id': self.id,
 			'nbPlayer': self.nbPlayer,
 			'duringTime': self.duringTime
 		}
 		# 'listOfPlayer': self.listOfPlayer,
+
+	def delete(self, *args, **kwargs):
+		related_shapes = Shape.objects.filter(party_id=self.id)
+		related_shapes.delete()
+		super(MapSettings, self).delete(*args, **kwargs)
