@@ -1,7 +1,14 @@
+import {
+	Group
+} from "three.module.js";
+
 // Network interractions //
 const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
 let positionX = 0;
+let borderSize = 5;
+let userPartyId = 0;
+let thisUser;
 
 function updatePos()
 {
@@ -62,24 +69,24 @@ const scene = new THREE.Scene();
 // TO DO: create mutiple cameras and attribute to apropriate user
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-console.log(user)
+// console.log(user)
 
-let radius = 7;
-let angle = 0;
+let radius = borderSize / (2 - Math.tan(Math.PI / mapSetting.nbPlayer / 2)) * mapSetting.nbPlayer;
+let angle = 360 / (mapSetting.nbPlayer * 2);
 
-if (user === 'root')
+for (const el of mapSetting.listOfPlayer)
 {
-	angle = 0;
-}
-else
-{
-	angle = 45;
+	userPartyId++;
+	if (user == el.user)
+		break;
+	angle += 360 / mapSetting.nbPlayer;
 }
 
-camera.position.x = Math.sin(angle) * radius;
-camera.position.z = Math.cos(angle) * radius;
-camera.position.y = 1;
-console.log(camera.position);
+console.log("angle: " + angle)
+camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
+camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
+camera.position.y = 2;
+// console.log(camera.position);
 // ---------------------------------------------------------------------------------- //
 
 // Utilisation de webgl
@@ -98,9 +105,9 @@ sceneBox.appendChild(renderer.domElement);
 
 
 // creation du plane qui sert de sol
-const planeGeometry = new THREE.PlaneGeometry(10, 10);
+const planeGeometry = new THREE.PlaneGeometry(100, 100);
 planeGeometry.rotateX(Math.PI / 180 * -90);
-const planeMaterial = new THREE.MeshBasicMaterial({color: 0x00f0f0});
+const planeMaterial = new THREE.MeshBasicMaterial({color: 0xa04000});
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 scene.add(plane);
 // ---------------------------------------------------------------------------------- //
@@ -116,18 +123,32 @@ scene.add(plane);
 // initialisation des borders, users et ball
 const threeJsShape = []
 
-// radius = 1 * mapSetting
+angle = 90; // -> 3 pl
+let borderAngle = 90;
+let playerAngle = 30;
+
+let iter = 0;
+
+const UsersGroup = new Group();
+const BordersGroup = new Group();
+scene.add(UsersGroup);
+scene.add(BordersGroup);
 
 for (const el of shapes) {
 	const {party_id, item_id, type, color, posx, posy} = el;
 	let geometry;
+	iter++;
 	
 	switch (type) {
 		case 1:
-			geometry = new THREE.BoxGeometry(5, 0.1, 0.1);
+			geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
+			borderAngle += 360 / mapSetting.nbPlayer;
+			angle = borderAngle;
 			break;
 		case 2:
 			geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+			playerAngle += 360 / mapSetting.nbPlayer;
+			angle = playerAngle;
 			break;
 		case 3:
 			geometry = new THREE.SphereGeometry(0.2);
@@ -138,21 +159,21 @@ for (const el of shapes) {
 	const material = new THREE.MeshPhongMaterial({color: color});
 	// 
 	const shape = new THREE.Mesh(geometry, material);
+	if (type == 2 && iter == userPartyId)
+	{
+		// thisUser = shape;
+	}
+	let rradius = borderSize / (2 - Math.tan(Math.PI / mapSetting.nbPlayer / 2)) / 1;
+	shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
+	shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
+	shape.lookAt(new THREE.Vector3(0, 0, 0));
 	
-	shape.position.x = posx;
-	shape.position.z = posy;
-	console.log(type);
-
-	// shape.position.x = Math.cos(360 / mapSetting.nbPlayer * Math.PI / 180) * radius;
-	// console.log(Math.cos(360 / int(mapSetting.nbPlayer) * Math.PI / 180) * radius);
-	// console.log(JSON.parse(mapSetting));
-	console.log(mapSetting); //probleme ici avec \ necessaire pour le " -> voir db
-	console.log(mapSetting.nbPlayer); //probleme ici avec \ necessaire pour le " -> voir db
-	shape.position.y = 0.2;
-	// shape.rotateY(item_id * (Math.PI / 180));
-	// shape.position.z = Math.sin(360 / mapSetting.nbPlayer * Math.PI / 180) * radius;
-	
-	scene.add(shape);
+	if (type == 1)
+		BordersGroup.add(shape);
+	else if (type == 2)
+		UsersGroup.add(shape);
+	else
+		scene.add(shape);
 	threeJsShape.push(shape);
 }
 // ---------------------------------------------------------------------------------- //
@@ -171,8 +192,11 @@ scene.add(directionalLight);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
+console.log(UsersGroup);
+
 const animate = () => {
 	threeJsShape.forEach((shape) => {
+		// if (shape.)
 		if (keys.left)
 			positionX -= 0.1;
 		else if (keys.right)

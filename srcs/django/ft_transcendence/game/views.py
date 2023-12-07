@@ -37,6 +37,7 @@ def game(request, party_id):
 	generatemap(party_id)
 
 	context = {'shapes': shape_json, 'mapSetting': map_data, 'user': user}
+	# mapSetting.delete() # fonction pour delete une partie (mapSettings et tout les objets lier a celle-ci)
 	return render(request, 'game.html', context)
 
 @login_required

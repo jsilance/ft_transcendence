@@ -9,5 +9,9 @@ def generatemap(party_id):
 			for i in range(int(mapSetting.nbPlayer)):
 				new_shape = Shape(party_id=str(party_id), item_id=str(i), type="1", color='#ffffff', posx='0', posy='0')
 				new_shape.save()
+				new_shape = Shape(party_id=str(party_id), item_id=str(i), type="2", color='#000fff', posx='0', posy='0')
+				new_shape.save()
+			new_shape = Shape(party_id=str(party_id), item_id=str(0), type="3", color="#ff8000", posx='0', posy='0')
+			new_shape.save()
 		except:
 			print("****ERROR****")
