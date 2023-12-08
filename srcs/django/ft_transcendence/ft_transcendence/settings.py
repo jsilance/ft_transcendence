@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'home',
     'game',
     'channels',
-    'channels_postgres'
+    'channels_postgres',
+    'chatapp'
 ]
 
 ASGI_APPLICATION = 'ft_transcendence.asgi.application'
