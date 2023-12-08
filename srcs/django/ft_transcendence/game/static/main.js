@@ -1,6 +1,5 @@
-import {
-	Group
-} from "three.module.js";
+// import * as THREE from './threejs/src/Three.js';
+// import { Group } from './threejs/src/Three.js';
 
 // Network interractions //
 const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
@@ -71,7 +70,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 
 // console.log(user)
 
-let radius = borderSize / (2 - Math.tan(Math.PI / mapSetting.nbPlayer / 2)) * mapSetting.nbPlayer;
+let radius = borderSize / (2 - Math.tan(Math.PI / mapSetting.nbPlayer));
 let angle = 360 / (mapSetting.nbPlayer * 2);
 
 for (const el of mapSetting.listOfPlayer)
@@ -129,8 +128,8 @@ let playerAngle = 30;
 
 let iter = 0;
 
-const UsersGroup = new Group();
-const BordersGroup = new Group();
+const UsersGroup = new THREE.Group();
+const BordersGroup = new THREE.Group();
 scene.add(UsersGroup);
 scene.add(BordersGroup);
 
@@ -163,7 +162,7 @@ for (const el of shapes) {
 	{
 		// thisUser = shape;
 	}
-	let rradius = borderSize / (2 - Math.tan(Math.PI / mapSetting.nbPlayer / 2)) / 1;
+	let rradius = borderSize / (2 - Math.tan(Math.PI / mapSetting.nbPlayer));
 	shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
 	shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
 	shape.lookAt(new THREE.Vector3(0, 0, 0));
