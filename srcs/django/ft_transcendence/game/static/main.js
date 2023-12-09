@@ -4,22 +4,25 @@
 // Network interractions //
 const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
 
+let othrUsers = [];
 let positionX = 0;
 let borderSize = 5;
 let userPartyId = 0;
 let thisUser;
 
-function updatePos()
+function updatePos(userId)
 {
 	// actualiser la position du joueur concerné
 	socket.addEventListener('message', function (event) {
 		const data = JSON.parse(event.data);
-		if (data.userId == userPartyId)
-			positionX = data.posx;
-		console.log('Message from server ', event.data);
-		return (positionX);
+		if (elem.userId == userPartyId)
+			return (elem.posx);
+		return (0);
+			// console.log('Message from server ', event.data);
 	});
+		// return (1);
 	return (positionX);
+	// return (othrUsers[userId].posx);
 }
 
 function sendPos(data)
@@ -199,12 +202,14 @@ camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 // console.log(UsersGroup);
 
-console.log("UserGroup");
-console.log(UsersGroup.children);
+// console.log("UserGroup");
+// console.log(UsersGroup.children);
 // console.log(scene);
-console.log("UserGroup end");
+// console.log("UserGroup end");
 
 const animate = () => {
+	let it = 0;
+
 	UsersGroup.children.forEach((elem) => {
 	if (elem.name == userPartyId)
 	{
@@ -212,6 +217,7 @@ const animate = () => {
 			positionX -= 0.1;
 		else if (keys.right)
 			positionX += 0.1;
+		// console.log({'userId': userPartyId , 'posx': positionX});
 		sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
 	}
 	elem.position.x = updatePos();
