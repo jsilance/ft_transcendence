@@ -14,9 +14,9 @@ function updatePos()
 	// actualiser la position du joueur concerné
 	socket.addEventListener('message', function (event) {
 		const data = JSON.parse(event.data);
-		const text = data.message;
-		positionX = data.posx;
-		console.log(text);
+		if (data.userId == userPartyId)
+			positionX = data.posx;
+		console.log('Message from server ', event.data);
 		return (positionX);
 	});
 	return (positionX);
@@ -70,7 +70,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 
 // console.log(user)
 
-let radius = borderSize / (2 - Math.tan(Math.PI / mapSetting.nbPlayer));
+let radius = borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 + 3;
 let angle = 360 / (mapSetting.nbPlayer * 2);
 
 for (const el of mapSetting.listOfPlayer)
@@ -122,9 +122,10 @@ scene.add(plane);
 // initialisation des borders, users et ball
 const threeJsShape = []
 
-angle = 90; // -> 3 pl
-let borderAngle = 90;
-let playerAngle = 30;
+angle = 0; // -> 3 pl
+let borderAngle = 0;
+// let playerAngle = 45;
+let playerAngle = 360 / (mapSetting.nbPlayer * 2);
 
 let iter = 0;
 
@@ -136,7 +137,6 @@ scene.add(BordersGroup);
 for (const el of shapes) {
 	const {party_id, item_id, type, color, posx, posy} = el;
 	let geometry;
-	iter++;
 	
 	switch (type) {
 		case 1:
@@ -153,27 +153,33 @@ for (const el of shapes) {
 			geometry = new THREE.SphereGeometry(0.2);
 			break;
 	}
+				
+	// if (type == 2 && iter == userPartyId)
+	// {
+	// 	// color = "#ff0000";
+	// 	console.log(color);
+	// }
 	
 	// choix du shader
 	const material = new THREE.MeshPhongMaterial({color: color});
 	// 
 	const shape = new THREE.Mesh(geometry, material);
-	if (type == 2 && iter == userPartyId)
-	{
-		// thisUser = shape;
-	}
-	let rradius = borderSize / (2 - Math.tan(Math.PI / mapSetting.nbPlayer));
+	let rradius = borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2;
 	shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
 	shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
 	shape.lookAt(new THREE.Vector3(0, 0, 0));
 	
 	if (type == 1)
-		BordersGroup.add(shape);
-	else if (type == 2)
+	BordersGroup.add(shape);
+else if (type == 2)
+{
+		iter++;
+		shape.name = iter;
 		UsersGroup.add(shape);
+	}
 	else
 		scene.add(shape);
-	threeJsShape.push(shape);
+	// threeJsShape.push(shape);
 }
 // ---------------------------------------------------------------------------------- //
 
@@ -191,18 +197,25 @@ scene.add(directionalLight);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-console.log(UsersGroup);
+// console.log(UsersGroup);
+
+console.log("UserGroup");
+console.log(UsersGroup.children);
+// console.log(scene);
+console.log("UserGroup end");
 
 const animate = () => {
-	threeJsShape.forEach((shape) => {
-		// if (shape.)
+	UsersGroup.children.forEach((elem) => {
+	if (elem.name == userPartyId)
+	{
 		if (keys.left)
 			positionX -= 0.1;
 		else if (keys.right)
 			positionX += 0.1;
+		sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
+	}
+	elem.position.x = updatePos();
 		// actualiser la position du joueur concerné
-		sendPos(JSON.stringify({'posx': positionX}));
-		shape.position.x = updatePos();
 	});
 	renderer.render(scene, camera);
 	requestAnimationFrame(animate);
