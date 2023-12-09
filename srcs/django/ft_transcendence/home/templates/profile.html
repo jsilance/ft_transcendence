@@ -2,26 +2,23 @@
 {% load static %}
 
 {% block title %}
-	FT_TRANSCENDENCE
+	FT_TRANSCENDENCEEEE
 {% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'home/styles.css' %}">
+{% endblock%}
+
 {% block body %}
-	<div class="container">
-		<div class="modal d-block bg-body-secondary modal-dialog modal-dialog-centered" style="text-align: center;">
-			<div class="modal-content shadow-sm">
-				<div class="modal-header">
-					<h2>Profile</h2>
-				</div>
-				<div class="modal-body mb-3">	
-					<div>
-						<h3>Hi, {{ user.username }}!</h3>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<a class="btn btn-primary" href="/profile/edit/">Edit</a>
-					<a class="btn btn-danger" href="/profile/{{ user.username }}/delete/">Delete</a>
-				</div>
-			</div>
+	<div class="profile_container">
+		<div>
+			<img src="{% static 'images/user.png' %}" alt="">
+			<h1>Hello mister {{ user.username }}</h1>
+		</div>
+		<div>
+			<a class="option edit" href="/profile/edit/">Edit</a>
+			<a class="option delete" href="/profile/{{ user.username }}/delete/">Delete</a>
 		</div>
 	</div>	
-	{% endblock %}
+{% endblock %}
 	

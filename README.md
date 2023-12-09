@@ -15,4 +15,3 @@ Django version 4.2.7
 	POSTGRES_USER=example
 	POSTGRES_PASSWORD=example
 	POSTGRES_EMAIL=example
-

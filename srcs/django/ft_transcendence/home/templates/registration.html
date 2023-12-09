@@ -5,22 +5,41 @@
 	FT_TRANSCENDENCE
 {% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="{% static 'home/styles.css' %}">
+{% endblock %}
+
 {% block body %}
-	<div class="modal d-block bg-body-secondary modal-dialog modal-dialog-centered" style="text-align: center;">
-		<div class="modal-content shadow-sm">
-			<div class="modal-header">
-				<h2>Register</h2>
-			</div>
-			<div class="modal-body">	
+	<div class="signin_box">
+		<div>
+			<h1>Get Started</h1>
+			<p>Already have an account? <a href="/login/">Login</a></p>
+			<hr>
+			<div>
 				<form method="post">
-					<div class="mb-3">
+					<div class="signin_form_inputs">
+						<!-- {{ form.as_p }} -->
+						{{ form.username.label_tag }}
+						{{ form.username }}
+						<br>
+						{{ form.email.label_tag }}
+						{{ form.email }}
+						<br>
+						{{ form.password1.label_tag }}
+						{{ form.password1 }}
+						<br>
+						{{ form.password2.label_tag }}
+						{{ form.password2 }}
+						<br>
 						{% csrf_token %}
-						{{ form.as_p }}
 					</div>
-					<div class="d-grid gap-2 col-10 mx-auto">
-						<button class="btn btn-primary" type="submit">Register</button>
+					<div>
+						<button type="submit">Register</button>
 					</div>
 				</form>
+				{% if form.errors %}
+					<p>Please try again.</p>
+				{% endif %}
 			</div>
 		</div>
 	</div>

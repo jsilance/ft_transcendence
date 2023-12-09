@@ -1,4 +1,7 @@
+__pycache__/
+*.py[cod]
 .env
 table.txt
 .vscode
 ./srcs/data
+.DS_Store

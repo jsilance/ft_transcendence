@@ -5,28 +5,30 @@
     FT_TRANSCENDENCE
 {% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="{% static 'home/styles.css' %}">
+{% endblock%}
+
 {% block body %}
-    <div class="container">
-        <div class="modal d-block bg-body-secondary modal-dialog modal-dialog-centered" style="text-align: center;">
-            <div class="modal-content shadow-sm">
-                <div class="modal-header">
-                    <h2>Login</h2>
-                </div>
-                <div class="modal-body">
-                    <form method="post">
-                        <div class="mb-3">
-                            {{ form.as_p }}
-                            {% csrf_token %}
-                        </div>
-                        <div class="d-grid gap-2 col-10 mx-auto">
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </div>
-                    </form>
-                </div>
-                {% if form.errors %}
+    <main class="login_box">
+        <div></div>
+        <div>
+            <div>
+                <h1>Welcome Back</h1>
+                <p>Not registered yet? <a href="/register/">Sign up</a></p>
+                <hr>
+                <form method="post">
+                    <div class="form_inputs">
+                        {{ form.as_p }}
+                        <br>
+                        {% csrf_token %}
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <!-- {% if form.errors %}
                 <p>Your username and password didn't match. Please try again.</p>
-                {% endif %}
+                {% endif %} -->
             </div>
         </div>
-    </div>
+    </main>
 {% endblock %}
