@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Shape, MapSettings
 from django.contrib.auth.decorators import login_required
 from .generatemap import generatemap
@@ -6,15 +6,38 @@ import json
 from .forms import PartyForm
 
 def game(request, party_id):
+	user = request.user.username
+
 	shapes = [{"type":int(x.type), "color":x.color, "posx":int(x.posx), "posy":int(x.posy)} for x in Shape.objects.all()]
+	shape_json = json.dumps(shapes)
 	
 	mapSetting = MapSettings.objects.get(id=party_id)
-	map_json = json.dumps(mapSetting.to_json())
+	
+	try:
+		user_infos = json.loads(mapSetting.listOfPlayer)
+		if not isinstance(user_infos, list):
+			raise ValueError("listOfPlayer is not a list")
+	except (json.JSONDecodeError, ValueError):
+		user_infos = [{"user": user, "is_ready": False}]
+		mapSetting.listOfPlayer = user_infos
+		mapSetting.listOfPlayer = json.dumps(user_infos)
+		mapSetting.save()
 
-	user = request.user
+	founded = any(user_info["user"] == user for user_info in user_infos)
 
-	shape_json = json.dumps(shapes)
-	context = {'shapes': shape_json, 'mapSetting': map_json}
+	if not founded and user != "/":
+		user_infos.append({"user": user, "is_ready": False})
+		# mapSetting.listOfPlayer = json.dumps(user_infos)
+		mapSetting.listOfPlayer = user_infos
+		mapSetting.save()
+
+	map_data = json.loads(json.dumps(mapSetting.to_json()))
+	map_data["listOfPlayer"] = user_infos
+	map_data = json.dumps(map_data)
+	generatemap(party_id)
+
+	context = {'shapes': shape_json, 'mapSetting': map_data, 'user': user}
+	# mapSetting.delete() # fonction pour delete une partie (mapSettings et tout les objets lier a celle-ci)
 	return render(request, 'game.html', context)
 
 @login_required
@@ -24,12 +47,19 @@ def websocket_test(request, party_id):
 @login_required
 def lobby(request):
 	parties = MapSettings.objects.all()
-	user = request
+	user = request.user.username
+
 	if request.method == 'POST':
 		form = PartyForm(request.POST)
 		if form.is_valid():
 			page = form.save()
-			return redirect('/game/' + str(page.id), page=page)
+			
+			player_list = [{"user": str(user), "is_ready": False}]
+			
+			MapSettings.objects.filter(id=page.id).update(listOfPlayer=json.dumps(player_list))
+
+			return redirect('/game/' + str(page.id))
 	else:
 		form = PartyForm()
+
 	return render(request, 'lobby.html', {'parties': parties, 'form': form, 'user': user})

@@ -14,7 +14,8 @@ class MyGameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        message = text_data_json["message"] # provisoire pour tests
+        # message = "test"
 
         # Broadcast the message to the group
         await self.channel_layer.group_send(
