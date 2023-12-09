@@ -5,6 +5,7 @@ all: build
 
 build:
 	mkdir -p ./srcs/data/db
+	# chmod 777 ./srcs/data/db
 	docker-compose -f $(DOCK_COMP) up --build
 
 clean:
