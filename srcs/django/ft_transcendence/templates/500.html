@@ -1,0 +1,14 @@
+{% extends '500.html' %}
+
+{% load static %}
+
+{% block title %}
+    500 - Server error
+{% endblock %}
+
+{% block body %}
+    <h1>500 - Server Error</h1>
+    {% if message %}
+        <p>message</p>
+    {% endif %}
+{% endblock %}
