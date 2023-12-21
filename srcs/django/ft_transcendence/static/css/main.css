@@ -87,7 +87,7 @@ a {
     }
 }
 
-button {
+button:not(.btn_discrete) {
     padding: 9px 25px;
     /* background-color: var(--accent); */
     background: linear-gradient(#8F13FD, #7011F4);
@@ -99,6 +99,13 @@ button {
     &:hover {
         background: linear-gradient(#fd139f, #9211f4);
     }
+}
+
+.btn_discrete {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
 }
 
 /*******************************************************************************
@@ -181,7 +188,7 @@ header {
     width: 260px;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.5s;
+    transition: max-height 0.1s;
     z-index: 99;
 
     &.open_menu {
