@@ -1,7 +1,16 @@
-__pycache__/
-*.py[cod]
+# General
 .env
+*.DS_Store
+
 table.txt
-.vscode
 ./srcs/data
-.DS_Store
+
+# Django specific
+__pycache__/
+*.pyc
+*.py[cod]
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
