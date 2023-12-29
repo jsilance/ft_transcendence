@@ -16,8 +16,8 @@
 			<h1>Hello mister {{ user.username }}</h1>
 		</div>
 		<div>
-			<a class="option edit" href="/profile/edit/">Edit</a>
-			<a class="option delete" href="/profile/{{ user.username }}/delete/">Delete</a>
+			<a class="option edit" href="{% url 'accounts:profile_edit' %}">Edit</a>
+			<a class="option delete" href="{% url 'accounts:profile_delete' user.username %}">Delete</a>
 		</div>
 	</div>	
 {% endblock %}

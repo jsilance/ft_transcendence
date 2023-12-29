@@ -40,11 +40,11 @@ def game(request, party_id):
 	# mapSetting.delete() # fonction pour delete une partie (mapSettings et tout les objets lier a celle-ci)
 	return render(request, 'game.html', context)
 
-@login_required
+@login_required(login_url='/accounts/login/')
 def websocket_test(request, party_id):
 	return render(request, 'chatbox.html')
 
-@login_required
+@login_required(login_url='/accounts/login/')
 def lobby(request):
 	parties = MapSettings.objects.all()
 	user = request.user.username
