@@ -18,6 +18,7 @@ fclean: clean
 
 reset: fclean
 	rm -rf ./srcs/data
+	find . -type d -name '__pycache__' -exec rm -r {} +
 
 re: fclean all
 

@@ -36,11 +36,12 @@ function sendPos(data)
 
 // ---------------------------------------------------------------------------------- //
 
+
 // Keys interractions //
 
 const keys = {
-  left: false,
-  right: false
+	left: false,
+	right: false
 };
 
 document.addEventListener('keydown', handleKeyDown);
@@ -49,17 +50,17 @@ document.addEventListener('keyup', handleKeyUp);
 function handleKeyDown(event)
 {
 	if (event.key === 'ArrowLeft')
-		keys.left = true;
+	keys.left = true;
 	else if (event.key === 'ArrowRight')
-		keys.right = true;
+	keys.right = true;
 }
 
 function handleKeyUp(event)
 {
 	if (event.key === 'ArrowLeft')
-		keys.left = false;
+	keys.left = false;
 	else if (event.key === 'ArrowRight')
-		keys.right = false;
+	keys.right = false;
 }
 
 // ---------------------------------------------------------------------------------- //
@@ -80,11 +81,10 @@ for (const el of mapSetting.listOfPlayer)
 {
 	userPartyId++;
 	if (user == el.user)
-		break;
+	break;
 	angle += 360 / mapSetting.nbPlayer;
 }
 
-console.log("angle: " + angle)
 camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
 camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
 camera.position.y = 2;
@@ -100,14 +100,46 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 // window size
 renderer.setSize(window.innerWidth - 15, window.innerHeight - 16);
 // renderer.setSize(window.innerWidth - 80, window.innerHeight - 60);
+
+// let controls = new THREE.OrbitControls(camera);
+// controls.addEventListener('change', renderer);
+
 // ---------------------------------------------------------------------------------- //
+
+// --------------- Load skybox ------------------------------------------------------ //
+
+let skyboxMaterial = [];
+// load static image/img...
+let texture_ft = new THREE.TextureLoader().load('/static/game/object/mystic_ft.jpg');
+let texture_bk = new THREE.TextureLoader().load('/static/game/object/mystic_bk.jpg');
+let texture_up = new THREE.TextureLoader().load('/static/game/object/mystic_up.jpg');
+let texture_dn = new THREE.TextureLoader().load('/static/game/object/mystic_dn.jpg');
+let texture_rt = new THREE.TextureLoader().load('/static/game/object/mystic_rt.jpg');
+let texture_lf = new THREE.TextureLoader().load('/static/game/object/mystic_lf.jpg');
+
+skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_ft}));
+skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_bk}));
+skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_up}));
+skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_dn}));
+skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_rt}));
+skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_lf}));
+
+for (let i = 0; i < 6; i++)
+	skyboxMaterial[i].side = THREE.BackSide;
+
+let skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
+let skybox = new THREE.Mesh(skyboxGeo, skyboxMaterial);
+scene.add(skybox);
+
+// ---------------------------------------------------------------------------------- //
+
 
 const sceneBox = document.getElementById('scene-box');
 sceneBox.appendChild(renderer.domElement);
 
 
 // creation du plane qui sert de sol
-const planeGeometry = new THREE.PlaneGeometry(100, 100);
+const planeGeometry = new THREE.PlaneGeometry(40, 40);
 planeGeometry.rotateX(Math.PI / 180 * -90);
 const planeMaterial = new THREE.MeshBasicMaterial({color: 0xa04000});
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -115,9 +147,9 @@ scene.add(plane);
 // ---------------------------------------------------------------------------------- //
 
 // creation du brouillard
-// const fogColor = "#000000";
-// const fogNear = 2;
-// const fogFar = 20;
+// const fogColor = "#505050";
+// const fogNear = 20;
+// const fogFar = 2000;
 // scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
 // ---------------------------------------------------------------------------------- //
 
@@ -173,9 +205,9 @@ for (const el of shapes) {
 	shape.lookAt(new THREE.Vector3(0, 0, 0));
 	
 	if (type == 1)
-	BordersGroup.add(shape);
-else if (type == 2)
-{
+		BordersGroup.add(shape);
+	else if (type == 2)
+	{
 		iter++;
 		shape.name = iter;
 		UsersGroup.add(shape);
@@ -194,35 +226,37 @@ scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
 directionalLight.position.set(1, 2, 3);
-scene.add(directionalLight);
+// scene.add(directionalLight);
 
 // ---------------------------------------------------------------------------------- //
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-// console.log(UsersGroup);
-
-// console.log("UserGroup");
-// console.log(UsersGroup.children);
-// console.log(scene);
-// console.log("UserGroup end");
-
 const animate = () => {
 	let it = 0;
-
+	
 	UsersGroup.children.forEach((elem) => {
-	if (elem.name == userPartyId)
-	{
-		if (keys.left)
+		if (elem.name == userPartyId)
+		{
+			if (keys.left)
 			positionX -= 0.1;
-		else if (keys.right)
+			else if (keys.right)
 			positionX += 0.1;
-		// console.log({'userId': userPartyId , 'posx': positionX});
-		sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
-	}
-	elem.position.x = updatePos();
+			// console.log({'userId': userPartyId , 'posx': positionX});
+			sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
+		}
+		elem.position.x = updatePos();
 		// actualiser la position du joueur concerné
 	});
+
+	camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
+	camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
+	camera.position.y = 5;
+	angle += 0.1;
+	radius = 30;
+
+	camera.lookAt(new THREE.Vector3(0, 0, 0));
+
 	renderer.render(scene, camera);
 	requestAnimationFrame(animate);
 }
