@@ -1,5 +1,5 @@
 // import * as THREE from './threejs/src/Three.js';
-// import { Group } from './threejs/src/Three.js';
+import threeGltfLoader from 'https://cdn.skypack.dev/pin/three-gltf-loader@v1.111.0-nljU36r8PRJpg81IWD7g/mode=imports/optimized/three-gltf-loader.js';
 
 // Network interractions //
 const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
@@ -125,12 +125,21 @@ skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_rt}));
 skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_lf}));
 
 for (let i = 0; i < 6; i++)
-	skyboxMaterial[i].side = THREE.BackSide;
+skyboxMaterial[i].side = THREE.BackSide;
 
 let skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
 let skybox = new THREE.Mesh(skyboxGeo, skyboxMaterial);
 scene.add(skybox);
 
+// ---------------------------------------------------------------------------------- //
+
+// --------------- Load GLB Ball ---------------------------------------------------- //
+/*
+// let loader = new THREE.GLTFLoader();
+const loader = new threeGltfLoader();
+loader.load('/static/game/object/torus.glb', (gltf) => {
+	scene.add(glhf.scene);
+});*/
 // ---------------------------------------------------------------------------------- //
 
 
@@ -252,8 +261,8 @@ const animate = () => {
 	camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
 	camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
 	camera.position.y = 5;
-	angle += 0.1;
-	radius = 30;
+	angle += 0.5;
+	radius = 30.1;
 
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
 
