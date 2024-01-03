@@ -19,9 +19,4 @@ COPY ./launch.sh /home/django/launch.sh
 
 RUN chmod +x /home/django/launch.sh
 
-RUN wget https://github.com/mrdoob/three.js/archive/master.zip
-RUN unzip master.zip
-RUN mv three.js-master threejs
-RUN rm master.zip
-
 CMD [ "/bin/bash", "/home/django/launch.sh" ]
