@@ -12,15 +12,7 @@ let thisUser;
 
 function updatePos(userId)
 {
-	// actualiser la position du joueur concerné
-	socket.addEventListener('message', function (event) {
-		const data = JSON.parse(event.data);
-		if (elem.userId == userPartyId)
-			return (elem.posx);
-		return (0);
-			// console.log('Message from server ', event.data);
-	});
-		// return (1);
+	console.log("26: ",positionX);
 	return (positionX);
 	// return (othrUsers[userId].posx);
 }
@@ -75,19 +67,19 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 // console.log(user)
 
 let radius = borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 + 3;
-let angle = 360 / (mapSetting.nbPlayer * 2);
 
 for (const el of mapSetting.listOfPlayer)
 {
 	userPartyId++;
 	if (user == el.user)
-	break;
-	angle += 360 / mapSetting.nbPlayer;
+		break;
 }
 
-camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
-camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
-camera.position.y = 2;
+let angle = (360 / mapSetting.nbPlayer) * userPartyId + (360 / mapSetting.nbPlayer) / 2;
+
+camera.position.x = Math.cos(angle * Math.PI / 180) * radius;
+camera.position.z = Math.sin(angle * Math.PI / 180) * radius;
+camera.position.y = 3;
 // console.log(camera.position);
 // ---------------------------------------------------------------------------------- //
 
@@ -162,8 +154,6 @@ let borderAngle = 0;
 // let playerAngle = 45;
 let playerAngle = 360 / (mapSetting.nbPlayer * 2);
 
-let iter = 0;
-
 const UsersGroup = new THREE.Group();
 const BordersGroup = new THREE.Group();
 scene.add(UsersGroup);
@@ -176,30 +166,35 @@ for (const el of shapes) {
 	switch (type) {
 		case 1:
 			geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
-			borderAngle += 360 / mapSetting.nbPlayer;
+			borderAngle = (360 / mapSetting.nbPlayer) * item_id;
 			angle = borderAngle;
 			break;
 		case 2:
 			geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-			playerAngle += 360 / mapSetting.nbPlayer;
+			playerAngle = (360 / mapSetting.nbPlayer) * item_id + (360 / mapSetting.nbPlayer) / 2;
 			angle = playerAngle;
 			break;
 		case 3:
 			geometry = new THREE.SphereGeometry(0.2);
 			break;
-	}
-				
-	// if (type == 2 && iter == userPartyId)
-	// {
-	// 	// color = "#ff0000";
-	// 	console.log(color);
-	// }
+		}
 	
 	// choix du shader
-	const material = new THREE.MeshPhongMaterial({color: color});
-	// 
+
+	let material;
+
+	if (type == 2 && item_id == userPartyId)
+	{
+		material = new THREE.MeshPhongMaterial({color: "#ff0000"});
+		positionX = angle;
+	}
+	else
+		material = new THREE.MeshPhongMaterial({color: color});
+	
+
 	const shape = new THREE.Mesh(geometry, material);
 	let rradius = borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2;
+	rradius += (type == 2) ? 1 : 0;
 	shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
 	shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
 	shape.lookAt(new THREE.Vector3(0, 0, 0));
@@ -208,9 +203,9 @@ for (const el of shapes) {
 		BordersGroup.add(shape);
 	else if (type == 2)
 	{
-		iter++;
-		shape.name = iter;
+		shape.name = item_id;
 		UsersGroup.add(shape);
+		console.log(shape.position);
 	}
 	else
 		scene.add(shape);
@@ -232,28 +227,35 @@ directionalLight.position.set(1, 2, 3);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
+let offsetX = 0;
 const animate = () => {
 	let it = 0;
+	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.5;
 	
 	UsersGroup.children.forEach((elem) => {
 		if (elem.name == userPartyId)
 		{
-			if (keys.left)
-			positionX -= 0.1;
-			else if (keys.right)
-			positionX += 0.1;
-			// console.log({'userId': userPartyId , 'posx': positionX});
+			if (keys.left && offsetX < 10)
+				offsetX += 0.1;
+			else if (keys.right && offsetX > -10)
+				offsetX -= 0.1;
 			sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
+			elem.position.x = Math.cos((positionX + offsetX) * Math.PI / 180) * radius;
+			elem.position.z = Math.sin((positionX + offsetX) * Math.PI / 180) * radius;
+			elem.lookAt(new THREE.Vector3(0, 0, 0));
 		}
-		elem.position.x = updatePos();
 		// actualiser la position du joueur concerné
 	});
 
-	camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
-	camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
-	camera.position.y = 5;
-	angle += 0.1;
-	radius = 30;
+	// vue du lobby en mode attente
+	// if (ready < nb.player)
+	// {
+		// radius = 30;
+		// camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
+		// camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
+		// camera.position.y = 5;
+		// angle += 0.1;
+	// }
 
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
 
