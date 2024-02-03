@@ -64,6 +64,7 @@ const scene = new THREE.Scene();
 // TO DO: create mutiple cameras and attribute to apropriate user
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
+
 // console.log(user)
 
 let radius = borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 + 3;
@@ -72,7 +73,7 @@ for (const el of mapSetting.listOfPlayer)
 {
 	userPartyId++;
 	if (user == el.user)
-		break;
+	break;
 }
 
 let angle = (360 / mapSetting.nbPlayer) * userPartyId + (360 / mapSetting.nbPlayer) / 2;
@@ -90,7 +91,9 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 
 // 
 // window size
-renderer.setSize(window.innerWidth - 15, window.innerHeight - 16);
+renderer.setSize(window.innerWidth, window.innerHeight);
+// const controls = new OrbitControls(camera, renderer.domElement);
+// renderer.setSize(window.innerWidth - 15, window.innerHeight - 16);
 // renderer.setSize(window.innerWidth - 80, window.innerHeight - 60);
 
 // let controls = new THREE.OrbitControls(camera);
@@ -131,10 +134,14 @@ sceneBox.appendChild(renderer.domElement);
 
 
 // creation du plane qui sert de sol
-const planeGeometry = new THREE.PlaneGeometry(40, 40);
-planeGeometry.rotateX(Math.PI / 180 * -90);
-const planeMaterial = new THREE.MeshBasicMaterial({color: 0xa04000});
+// const planeGeometry = new THREE.PlaneGeometry(40, 40);
+const planeGeometry = new THREE.CylinderGeometry(radius, radius, 0.1, mapSetting.nbPlayer * 2);
+
+// planeGeometry.rotateX(Math.PI / 180 * -90);
+const planeMaterial = new THREE.MeshPhongMaterial({color: 0x5f5f5f});
+// const planeMaterial = new THREE.MeshBasicMaterial({color: 0x4f4f4f});
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+plane.position.y = -0.3;
 scene.add(plane);
 // ---------------------------------------------------------------------------------- //
 
@@ -160,9 +167,9 @@ scene.add(UsersGroup);
 scene.add(BordersGroup);
 
 for (const el of shapes) {
-	const {party_id, item_id, type, color, posx, posy} = el;
+	const {pparty_id, item_id, type, color, posx, posy} = el;
 	let geometry;
-	
+
 	switch (type) {
 		case 1:
 			geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
@@ -208,7 +215,11 @@ for (const el of shapes) {
 		console.log(shape.position);
 	}
 	else
+	{
+		shape.position.x = 0;
+		shape.position.z = 0;
 		scene.add(shape);
+	}
 	// threeJsShape.push(shape);
 }
 // ---------------------------------------------------------------------------------- //
@@ -228,17 +239,23 @@ directionalLight.position.set(1, 2, 3);
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 let offsetX = 0;
+
+function g_start()
+{
+	console.log("message");
+}
+
 const animate = () => {
 	let it = 0;
-	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.5;
+	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.0 + 10 / (mapSetting.nbPlayer ** 2);
 	
 	UsersGroup.children.forEach((elem) => {
 		if (elem.name == userPartyId)
 		{
-			if (keys.left && offsetX < 10)
-				offsetX += 0.1;
-			else if (keys.right && offsetX > -10)
-				offsetX -= 0.1;
+			if (keys.left && offsetX < (16 - parseInt(mapSetting.nbPlayer) + 2))
+				offsetX += 3 / radius;
+			else if (keys.right && offsetX > (-16 + parseInt(mapSetting.nbPlayer) - 2))
+				offsetX -= 3 / radius;
 			sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
 			elem.position.x = Math.cos((positionX + offsetX) * Math.PI / 180) * radius;
 			elem.position.z = Math.sin((positionX + offsetX) * Math.PI / 180) * radius;

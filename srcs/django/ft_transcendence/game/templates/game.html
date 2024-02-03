@@ -8,12 +8,16 @@
 
 {% block script %}
 <!-- three js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js" integrity="sha512-/WaZCC76Yn6MLEoK6b9np9yiLBet/RngBS33X1P0SHuag6j2E0e5rT7jbA2CvXCydN6+FkDYNx8FBM+vkzsthw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js" integrity="sha512-/WaZCC76Yn6MLEoK6b9np9yiLBet/RngBS33X1P0SHuag6j2E0e5rT7jbA2CvXCydN6+FkDYNx8FBM+vkzsthw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.js" integrity="sha512-HCh7TuJvWZ35Ixo/afKeBRbAUtnqQWOrpw5Fs1bdWjWILg175hy9XRmuqG/vWyAqBKvUZStGMAsqKmYKqP91YQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.module.js" integrity="sha512-D/H4UbEHZ2kTQjnKyESexnqZYe5+0SWtiD/Fu90+aMffVFZa1XcZ/4wvuQMPScpk5PeDD/0V64JWNN1bpyyFVQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
 	const shapes = JSON.parse('{{ shapes | safe }}');
+    console.log(shapes);
     const user = '{{ user | safe }}';
 	const mapSetting = JSON.parse('{{ mapSetting | safe }}');
+	const party_id = '{{ party_id | safe }}';
 </script>
 
 <script type="module" src="{% static 'main.js' %}" defer></script>

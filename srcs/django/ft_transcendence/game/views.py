@@ -8,7 +8,8 @@ from .forms import PartyForm
 def game(request, party_id):
 	user = request.user.username
 
-	shapes = [{"item_id": int(x.item_id), "type":int(x.type), "color":x.color, "posx":int(x.posx), "posy":int(x.posy)} for x in Shape.objects.all()]
+	shapes = [{"item_id": int(x.item_id), "type":int(x.type), "color":x.color, "posx":int(x.posx), "posy":int(x.posy)} for x in Shape.objects.filter(party_id=party_id)]
+	print(shapes)
 	shape_json = json.dumps(shapes)
 	
 	mapSetting = MapSettings.objects.get(id=party_id)
@@ -36,7 +37,7 @@ def game(request, party_id):
 	map_data = json.dumps(map_data)
 	generatemap(party_id)
 
-	context = {'shapes': shape_json, 'mapSetting': map_data, 'user': user}
+	context = {'shapes': shape_json, 'mapSetting': map_data, 'user': user, 'party_id': party_id}
 	# mapSetting.delete() # fonction pour delete une partie (mapSettings et tout les objets lier a celle-ci)
 	return render(request, 'game.html', context)
 
