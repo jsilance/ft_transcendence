@@ -1,7 +1,7 @@
 FROM python:3.9.18-bookworm
 
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt-get install postgresql-client -y
+RUN apt-get install postgresql-client wget unzip -y
 
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir psycopg2-binary \
@@ -20,5 +20,3 @@ COPY ./launch.sh /home/django/launch.sh
 RUN chmod +x /home/django/launch.sh
 
 CMD [ "/bin/bash", "/home/django/launch.sh" ]
-
-# CMD [ "python3", "manage.py", "runserver" ]

@@ -19,6 +19,7 @@ fclean: clean
 reset: fclean
 	rm -rf ./srcs/data
 	find . -type d -name '__pycache__' -exec rm -r {} +
+	rm -rf ./srcs/django/ft_transcendence/threejs
 
 re: fclean all
 
