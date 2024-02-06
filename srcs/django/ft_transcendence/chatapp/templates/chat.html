@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block body %}
+<html>
+<head>
+    <title>Chat</title>
+</head>
+<body>
+    <h1>Liste des utilisateurs</h1>
+    <ul>
+        {% for i in users %}
+            {% if i != request.user %}
+                {{ i.username }}
+                <form id="create-room-form" action="{% url 'create_room' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="name" name="name" value="">
+                    <input type="hidden" id="slug" name="slug" value="">
+                    <select id="users" name="users" multiple required>
+                        <option value="{{ request.user.id }}" selected>{{ request.user.username }}</option>
+                        <option value="{{ i.id }}" selected>{{ i.username }}</option>
+                    </select>
+                    <button type="button" onclick="generateRoom()">Chat</button>
+                </form>
+                <script>
+                    function generateRoom() {
+                        var name = "Room " + Math.floor(Math.random() * 1000);
+                        var slug = name.toLowerCase().replace(/\s+/g, '-');
+
+                        document.getElementById("name").value = name;
+                        document.getElementById("slug").value = slug;
+                    
+                        document.getElementById("create-room-form").submit();
+                    }
+                </script>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
+{% endblock %}

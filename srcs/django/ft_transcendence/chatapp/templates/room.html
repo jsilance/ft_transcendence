@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block body %}
+<html>
+<head>
+    <title>Chat</title>
+</head>
+<body>
+    <div
+      class="chat__item__container"
+      id="id_chat_item_container"
+      style="font-size: 20px"
+    >
+    {% for i in messages %}
+    {{i.user}} : {{i.content}}
+    <br>
+    {% endfor %}
+    </div>
+      <br />
+      <input type="text" id="id_message_send_input" />
+      <button type="submit" id="id_message_send_button">Send Message</button>
+      <br />
+      <br />
+    </div>
+    {{slug|json_script:"room_slug"}}
+    {{room_name |json_script:"room_name"}}
+    <script>
+      const roomSlug = JSON.parse(document.getElementById('room_slug').textContent);
+      const roomName = JSON.parse(document.getElementById('room_name').textContent);
+      const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomSlug + "/");
+      chatSocket.onopen = function (e) {
+        console.log("The connection was setup successfully !");
+      };
+      chatSocket.onclose = function (e) {
+        console.log("Something unexpected happened !");
+      };
+      document.querySelector("#id_message_send_input").focus();
+      document.querySelector("#id_message_send_input").onkeyup = function (e) {
+        if (e.keyCode == 13) {
+          document.querySelector("#id_message_send_button").click();
+        }
+      };
+      document.querySelector("#id_message_send_button").onclick = function (e) {
+        var messageInput = document.querySelector(
+          "#id_message_send_input"
+        ).value;
+        chatSocket.send(JSON.stringify({ message: messageInput, username : "{{request.user.username}}", room_name:roomName}));
+      };
+      chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        var div = document.createElement("div");
+        div.innerHTML = data.username + " : " + data.message;
+        document.querySelector("#id_message_send_input").value = "";
+        document.querySelector("#id_chat_item_container").appendChild(div);
+      };
+    </script>
+</body>
+</html>
+
+{% endblock %}
