@@ -3,10 +3,10 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Room(models.Model):
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
-    user1 = models.OneToOneField(User, related_name='user1', on_delete=models.CASCADE)
-    user2 = models.OneToOneField(User, related_name='user2', on_delete=models.CASCADE)
+    name = models.CharField()
+    slug = models.SlugField()
+    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='room_user1', default=1)
+    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='room_user2', default=2)
 
     def __str__(self):
         return self.name
