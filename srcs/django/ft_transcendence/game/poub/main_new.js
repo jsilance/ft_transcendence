@@ -1,5 +1,6 @@
 // import * as THREE from './threejs/src/Three.js';
 import threeGltfLoader from 'https://cdn.skypack.dev/pin/three-gltf-loader@v1.111.0-nljU36r8PRJpg81IWD7g/mode=imports/optimized/three-gltf-loader.js';
+// import keys from './events.js';
 
 // Network interractions //
 const socket = new WebSocket('ws://' + window.location.host + '/ws/game/');
@@ -10,32 +11,57 @@ let borderSize = 5;
 let userPartyId = 0;
 let thisUser;
 
-function updatePos(userId)
-{
-	// actualiser la position du joueur concerné
-	socket.addEventListener('message', function (event) {
-		const data = JSON.parse(event.data);
-		if (elem.userId == userPartyId)
-			return (elem.posx);
-		return (0);
-			// console.log('Message from server ', event.data);
-	});
-		// return (1);
-	return (positionX);
-	// return (othrUsers[userId].posx);
-}
+// socket.addEventListener('paddle', function (event) {
+// 	const data = JSON.parse(event.data);
+// 	if (elem.userId == userPartyId)
+// 		return (elem.posx);
+// 	return (0);
+// 		// console.log('Message from server ', event.data);
+// });
 
-function sendPos(data)
-{
-	socket.addEventListener('open', function (event) {
-		console.log('connected');
-		// console.log(JSON.stringify(data));
-		socket.send(JSON.stringify(data));
-	});
-}
+// function updatePos(userId)
+// {
+// 	// actualiser la position du joueur concerné
+// 		// return (1);
+// 	return (positionX);
+// 	// return (othrUsers[userId].posx);
+// }
+
+// function sendPos(data)
+// {
+// 	socket.addEventListener('open', function (event) {
+// 		console.log('connected');
+// 		// console.log(JSON.stringify(data));
+// 		socket.send(JSON.stringify(data));
+// 	});
+// }
 
 // ---------------------------------------------------------------------------------- //
 
+document.addEventListener('keydown', handleKeyDown);
+document.addEventListener('keyup', handleKeyUp);
+
+function handleKeyDown(event) {
+    const data = {
+        'type': 'paddle',
+        'event': 'keydown',
+        'key': event.key
+        // 'session_id': document.getElementById('session_id').value,
+        // 'player_id': document.getElementById('player_id').value,
+    };
+    socket.send(JSON.stringify(data));
+}
+
+function handleKeyUp(event) {
+    const data = {
+        'type': 'paddle',
+        'event': 'keyup',
+        'key': event.key
+        // 'session_id': document.getElementById('session_id').value,
+        // 'player_id': document.getElementById('player_id').value,
+    };
+    socket.send(JSON.stringify(data));
+}
 
 // Keys interractions //
 
@@ -44,24 +70,64 @@ const keys = {
 	right: false
 };
 
-document.addEventListener('keydown', handleKeyDown);
-document.addEventListener('keyup', handleKeyUp);
+const playerKeys = {};
 
-function handleKeyDown(event)
-{
-	if (event.key === 'ArrowLeft')
-	keys.left = true;
-	else if (event.key === 'ArrowRight')
-	keys.right = true;
+// Function to initialize keys for a new player
+function addPlayer(playerId) {
+    playerKeys[playerId] = {
+        left: false,
+        right: false
+    };
 }
 
-function handleKeyUp(event)
-{
-	if (event.key === 'ArrowLeft')
-	keys.left = false;
-	else if (event.key === 'ArrowRight')
-	keys.right = false;
+function updatePlayerKey(playerId, key, value) {
+    if (playerKeys[playerId]) {
+        playerKeys[playerId][key] = value;
+    }
 }
+
+// function updateKeyDown(data)
+// {
+// 	if (data.key === 'ArrowLeft')
+// 	    keys.left = true;
+// 	else if (data.key === 'ArrowRight')
+// 	    keys.right = true;
+// }
+
+// function updateKeyUp(data)
+// {
+// 	if (data.key === 'ArrowLeft')
+// 	    keys.left = false;
+// 	else if (data.key === 'ArrowRight')
+// 	    keys.right = false;
+// }
+
+socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.type == 'playerPadddleUpdate')
+    {
+		const playerId = data.playerId;
+		const key = data.key;
+		const value = data.value;
+		updatePlayerKey(playerId, key, value);
+    }
+    if (data.type == 'ball')
+    {
+        const ball = data.ball;
+    }
+    if (data.type == 'score')
+    {
+        const score = data.score;
+    }
+    if (data.type == 'winner')
+    {
+        const winner = data.winner;
+    }
+    if (data.type == 'game_over')
+    {
+        const game_over = data.game_over;
+    }
+};
 
 // ---------------------------------------------------------------------------------- //
 
@@ -251,8 +317,8 @@ const animate = () => {
 			positionX -= 0.1;
 			else if (keys.right)
 			positionX += 0.1;
-			// console.log({'userId': userPartyId , 'posx': positionX});
-			// sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
+			console.log({'userId': userPartyId , 'posx': positionX});
+			sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
 		}
 		elem.position.x = updatePos();
 		// actualiser la position du joueur concerné

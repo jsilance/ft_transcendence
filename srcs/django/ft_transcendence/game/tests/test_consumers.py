@@ -18,3 +18,4 @@ class MyGameConsumerTest(TestCase):
         
         # Close the connection
         await communicator.disconnect()
+
