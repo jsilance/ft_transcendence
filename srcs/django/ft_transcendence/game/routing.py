@@ -1,5 +1,5 @@
 # Import the path function and your WebSocket consumer
-from django.urls import path
+from django.urls import path, re_path
 from .consumers import MyGameConsumer
 
 websocket_urlpatterns = [
