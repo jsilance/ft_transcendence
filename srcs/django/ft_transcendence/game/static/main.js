@@ -17,43 +17,136 @@ function updatePos(userId)
 	// return (othrUsers[userId].posx);
 }
 
-function sendPos(data)
-{
-	socket.addEventListener('open', function (event) {
-		console.log('connected');
-		// console.log(JSON.stringify(data));
-		socket.send(JSON.stringify(data));
-	});
-}
+// function sendPos(data)
+// {
+// 	socket.addEventListener('open', function (event) {
+// 		console.log('connected');
+// 		// console.log(JSON.stringify(data));
+// 		socket.send(JSON.stringify(data));
+// 	});
+// }
 
 // ---------------------------------------------------------------------------------- //
 
 
 // Keys interractions //
 
-const keys = {
-	left: false,
-	right: false
-};
+// const keys = {
+// 	left: false,
+// 	right: false
+// };
+
+// document.addEventListener('keydown', handleKeyDown);
+// document.addEventListener('keyup', handleKeyUp);
+
+// function handleKeyDown(event)
+// {
+// 	if (event.key === 'ArrowLeft')
+// 	keys.left = true;
+// 	else if (event.key === 'ArrowRight')
+// 	keys.right = true;
+// }
+
+// function handleKeyUp(event)
+// {
+// 	if (event.key === 'ArrowLeft')
+// 	keys.left = false;
+// 	else if (event.key === 'ArrowRight')
+// 	keys.right = false;
+// }
 
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 
-function handleKeyDown(event)
-{
-	if (event.key === 'ArrowLeft')
-	keys.left = true;
-	else if (event.key === 'ArrowRight')
-	keys.right = true;
+function handleKeyDown(event) {
+    const data = {
+        'type': 'paddle',
+        'event': 'keydown',
+        'key': event.key
+        // 'session_id': document.getElementById('session_id').value,
+        // 'player_id': document.getElementById('player_id').value,
+    };
+    socket.send(JSON.stringify(data));
 }
 
-function handleKeyUp(event)
-{
-	if (event.key === 'ArrowLeft')
-	keys.left = false;
-	else if (event.key === 'ArrowRight')
-	keys.right = false;
+function handleKeyUp(event) {
+    const data = {
+        'type': 'paddle',
+        'event': 'keyup',
+        'key': event.key
+        // 'session_id': document.getElementById('session_id').value,
+        // 'player_id': document.getElementById('player_id').value,
+    };
+    socket.send(JSON.stringify(data));
 }
+
+// Keys interractions //
+
+const playerKeys = {};
+
+// Function to initialize keys for a new player
+function addPlayer(playerId) {
+    playerKeys[playerId] = {
+        left: false,
+        right: false
+    };
+}
+
+function updatePlayerKey(playerId, key, value) {
+    if (playerKeys[playerId]) {
+        playerKeys[playerId][key] = value;
+    }
+}
+
+// function updateKeyDown(data)
+// {
+// 	if (data.key === 'ArrowLeft')
+// 	    keys.left = true;
+// 	else if (data.key === 'ArrowRight')
+// 	    keys.right = true;
+// }
+
+// function updateKeyUp(data)
+// {
+// 	if (data.key === 'ArrowLeft')
+// 	    keys.left = false;
+// 	else if (data.key === 'ArrowRight')
+// 	    keys.right = false;
+// }
+
+socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.type == 'playerPadddleUpdate')
+    {
+		const playerId = data.playerId;
+		const key = data.key;
+		const value = data.value;
+		updatePlayerKey(playerId, key, value);
+    }
+    if (data.type == 'ball')
+    {
+        const ball = data.ball;
+    }
+    if (data.type == 'score')
+    {
+        const score = data.score;
+    }
+    if (data.type == 'winner')
+    {
+        const winner = data.winner;
+    }
+    if (data.type == 'game_over')
+    {
+        const game_over = data.game_over;
+    }
+};
+
+socket.onclose = function(e) {
+    console.error('Socket closed unexpectedly. Attempting to reconnect...');
+    setTimeout(function() {
+        // Implement reconnection logic here
+    }, 1000); // Adjust delay and implement exponential backoff
+};
 
 // ---------------------------------------------------------------------------------- //
 
@@ -68,12 +161,17 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 // console.log(user)
 
 let radius = borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 + 3;
+let i;
 
 for (const el of mapSetting.listOfPlayer)
 {
-	userPartyId++;
+	i++;
 	if (user == el.user)
-	break;
+	{
+		userPartyId = i;
+	}
+	// addPlayer(el.user);
+	console.log(el.user);
 }
 
 let angle = (360 / mapSetting.nbPlayer) * userPartyId + (360 / mapSetting.nbPlayer) / 2;
@@ -247,7 +345,7 @@ directionalLight.position.set(1, 2, 3);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-let offsetX = 0;
+let offsetX = {};
 
 function g_start()
 {
@@ -259,17 +357,14 @@ const animate = () => {
 	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.0 + 10 / (mapSetting.nbPlayer ** 2);
 	
 	UsersGroup.children.forEach((elem) => {
-		if (elem.name == userPartyId)
-		{
-			if (keys.left && offsetX < (16 - parseInt(mapSetting.nbPlayer) + 2))
-				offsetX += 3 / radius;
-			else if (keys.right && offsetX > (-16 + parseInt(mapSetting.nbPlayer) - 2))
-				offsetX -= 3 / radius;
-			sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
-			elem.position.x = Math.cos((positionX + offsetX) * Math.PI / 180) * radius;
-			elem.position.z = Math.sin((positionX + offsetX) * Math.PI / 180) * radius;
-			elem.lookAt(new THREE.Vector3(0, 0, 0));
-		}
+		if (playerKeys[elem.name][left] && offsetX[elem.name] < (16 - parseInt(mapSetting.nbPlayer) + 2))
+			offsetX[elem.name] += 3 / radius;
+		else if (playerKeys[elem.name][right] && offsetX[elem.name] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
+			offsetX[elem.name] -= 3 / radius;
+		sendPos(JSON.stringify({'userId': userPartyId , 'posx': positionX}));
+		elem.position.x = Math.cos((positionX + offsetX) * Math.PI / 180) * radius;
+		elem.position.z = Math.sin((positionX + offsetX) * Math.PI / 180) * radius;
+		elem.lookAt(new THREE.Vector3(0, 0, 0));
 		// actualiser la position du joueur concerné
 	});
 
