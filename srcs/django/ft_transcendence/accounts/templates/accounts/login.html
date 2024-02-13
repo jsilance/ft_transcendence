@@ -6,13 +6,13 @@
 {% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{% static 'home/styles.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 {% endblock%}
 
 {% block body %}
     <main class="login_box">
         <div></div>
-        <div>
+        <div class="form">
             <div>
                 <h1>Welcome Back</h1>
                 <p>Not registered yet? <a href="{% url 'accounts:signup'%}">Sign up</a></p>
