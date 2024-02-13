@@ -23,7 +23,13 @@
                         <br>
                         {% csrf_token %}
                     </div>
-                    <button type="submit">Login</button>
+                    <div class="form_cta">
+                        <button type="submit">Login</button>
+                        <a class="row" href="{{ authorize_uri }}">
+                            <span>or use</span>
+                            <img class="icon" src="{% static 'icons/42-logo.svg' %}" alt="42 school logo">
+                        </a>
+                    </div>
                 </form>
                 <!-- {% if form.errors %}
                 <p>Your username and password didn't match. Please try again.</p>
