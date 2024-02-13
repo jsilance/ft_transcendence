@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Shape, MapSettings
 from django.contrib.auth.decorators import login_required
 from .generatemap import generatemap
+from django.http import HttpResponse
 import json
 from .forms import PartyForm
 
@@ -14,22 +15,30 @@ def game(request, party_id):
 	
 	mapSetting = MapSettings.objects.get(id=party_id)
 	
+	# chope la partie sinon la cree
+	# user_infos = json.loads(mapSetting.listOfPlayer)
 	try:
 		user_infos = json.loads(mapSetting.listOfPlayer)
-		if not isinstance(user_infos, list):
-			raise ValueError("listOfPlayer is not a list")
+		# if not isinstance(user_infos, list):
+		# 	raise ValueError("listOfPlayer is not a list")
 	except (json.JSONDecodeError, ValueError):
 		user_infos = [{"user": user, "is_ready": False}]
 		mapSetting.listOfPlayer = user_infos
-		mapSetting.listOfPlayer = json.dumps(user_infos)
+		# mapSetting.listOfPlayer = json.dumps(user_infos)
+		# return HttpResponse("<h1>ERROR RE-CREATION OF MAP</h1>")
 		mapSetting.save()
+	# ----------------------------- 
 
 	founded = any(user_info["user"] == user for user_info in user_infos)
 
 	if not founded and user != "/":
+
+		# return HttpResponse(user_infos)
+		# user_infos_list = []
 		user_infos.append({"user": user, "is_ready": False})
-		# mapSetting.listOfPlayer = json.dumps(user_infos)
-		mapSetting.listOfPlayer = user_infos
+		mapSetting.listOfPlayer = json.dumps(user_infos)
+		# return HttpResponse(json.dumps(user_infos))
+		# mapSetting.listOfPlayer = user_infos
 		mapSetting.save()
 
 	map_data = json.loads(json.dumps(mapSetting.to_json()))
