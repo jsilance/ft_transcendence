@@ -1,7 +1,7 @@
 {% load static %}
 
 <header class="navbar">
-    <div class="row">
+    <div class="row_custom">
         <a class="logo" href="/">Transcendance</a>
         <nav>
             <ul class="nav_links" alt="logo">
@@ -16,7 +16,7 @@
             </ul>
         </nav>
     </div>
-    <div class="row">
+    <div class="row_custom">
         {% if user.is_authenticated %}
         <img class="user_pic" onclick="toggleMenu()" src="{% static 'images/user.png' %}" width="48px" alt="user image">
 

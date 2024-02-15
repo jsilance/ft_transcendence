@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .forms import UserRegisterForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.http import HttpResponse, HttpResponseBadRequest
 import requests
 from dotenv import load_dotenv
@@ -23,13 +25,15 @@ fromSignup = '7d2abf2d0fa7c3a0c13236910f30bc43'
 
 def signup_v(req):
     if req.method == 'POST':
-        form = UserCreationForm(req.POST)
+        form = UserRegisterForm(req.POST)
         if form.is_valid():
             user = form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(req, f'Account created for {username}')
             login(req, user)
             return redirect('home:welcome')
     else:
-        form = UserCreationForm()
+        form = UserRegisterForm()
     return render(req, 'accounts/signup.html', {
         'form': form,
         'authorize_uri': authorize_uri+fromSignup
@@ -50,7 +54,7 @@ def login_v(req):
     return render(req, 'accounts/login.html', {
         'form': form,
         'authorize_uri': authorize_uri+fromLogin,
-        'known_users': User.objects.all(),
+        # 'known_users': User.objects.all(),
     })
 
 """
@@ -63,21 +67,28 @@ def callback(req):
     temporary_code = req.GET.get('code')
     if temporary_code is None:
         return HttpResponseBadRequest("Bad Request: Missing 'code' parameter")
-
+    
+    # exchange authorization code for access token
     o42 = oauth42()
     token = o42.get_token(temporary_code)
-    data = o42.get_user_data(token)
-    intra_login = data.get('login')
 
-    if intra_login in str(User.objects.all()):
-        user = User.objects.get(username=intra_login)
-        login(req, user)
-        if 'next' in req.POST:
-            return redirect(req.POST.get('next'))
+    data = o42.get_user_data(token)
+
+    # login: 
+    if req.GET.get('state') == fromLogin:
+        intra_login = data.get('login')
+        # check if 42student
+        if intra_login in str(User.objects.all()):
+            user = User.objects.get(username=intra_login)
+            login(req, user)
+            if 'next' in req.POST:
+                return redirect(req.POST.get('next'))
+            else:
+                return redirect('home:welcome')
         else:
-            return redirect('home:welcome')
+            return redirect('accounts:login')
     else:
-        return redirect('accounts:login')
+        ...
 
 class oauth42:
     # exchange temporary code for access token
@@ -97,7 +108,6 @@ class oauth42:
         else:
             # Handle error
             return response
-
     # use access token to access user data
     def get_user_data(self, access_token):
         # Make a request to the provider's API to get user information
@@ -109,7 +119,6 @@ class oauth42:
             return user_data
         else:
             return None
-
 
 def logout_v(req):
     if req.method == 'POST':

@@ -11,7 +11,9 @@ RUN pip install --no-cache-dir psycopg2-binary \
 				channels \
 				channels_postgres \
 				requests \
-				python-dotenv
+				python-dotenv \
+				django-crispy-forms \
+				crispy-bootstrap4
 
 COPY ./ft_transcendence /home/django/ft_transcendence
 
