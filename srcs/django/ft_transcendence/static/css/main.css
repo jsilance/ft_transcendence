@@ -107,10 +107,6 @@ button:not(.btn_discrete):hover {
     border: none;
     margin: 0;
     padding: 0;
-}
-nav {
-    margin: none;
-    padding: none;
     height: auto;
 }
 
@@ -203,6 +199,7 @@ header {
 
 .nav_links {
     list-style: none;
+    margin-bottom: 0;
 }
 
 .nav_links li {

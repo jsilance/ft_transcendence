@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block title %}
 	FT_TRANSCENDENCE
@@ -23,15 +24,12 @@
 		</div>
 		<div>
 			<div>
-				<form>
-					<label>Login:</label>
-					<input type="text" id="username" name="username" value="{{ user.username }}"></intput>
-					<label>Email:</label>
-					<input type="text" id="email" name="email" value="{{ user.email }}"></input>
-					<label>Avatar:</label>
-					<input type="file" id="avatar" name="avatar" value="{{ user.avatar }}"></input>
+				<form method="POST" enctype="multipart/form-data">
+					{% csrf_token %}
+					{{ u_form | crispy }}
+					{{ p_form | crispy }}
 					<div>
-						<button type="submit">Save</button>	
+						<button type="submit">Update</button>	
 					</div>
 				</form>
 			</div>
