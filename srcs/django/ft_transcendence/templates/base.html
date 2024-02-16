@@ -17,7 +17,7 @@
 			{% if messages %}
 				{% for message in messages %}
 					<div class="success_msg">
-						{{ message }}
+						{{ message | safe }}
 					</div>
 				{% endfor %}
 			{% endif %}

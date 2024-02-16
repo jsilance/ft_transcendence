@@ -70,22 +70,42 @@ def callback(req):
     token = o42.get_token(temporary_code)
 
     data = o42.get_user_data(token)
+    intra_login = data.get('login')
 
     # login: 
     if req.GET.get('state') == fromLogin:
-        intra_login = data.get('login')
-        # check if 42student
         if intra_login in str(User.objects.all()):
-            user = User.objects.get(username=intra_login)
-            login(req, user)
-            if 'next' in req.POST:
-                return redirect(req.POST.get('next'))
+            knownUser = User.objects.get(username=intra_login)
+            if knownUser.profile.isstudent:
+                login(req, knownUser)
+                if 'next' in req.POST:
+                    return redirect(req.POST.get('next'))
+                else:
+                    return redirect('home:welcome')
             else:
-                return redirect('home:welcome')
+                messages.info(req, "The account you're trying to connect to was created without 42intra. Please enter your credentials to log in.")
+                return redirect(req, 'accounts:login')
         else:
+            messages.info(req, "No corresponding account was found. Please sign-up first.")
+            return redirect('accounts:signup')
+    elif req.GET.get('state') == fromSignup:
+        if intra_login in str(User.objects.all()):
+            knownUser = User.objects.get(username=intra_login)
+            if knownUser.profile.isstudent:
+                login(req, knownUser)
+                if 'next' in req.POST:
+                    return redirect(req.POST.get('next'))
+                else:
+                    return redirect('home:welcome')
+            else:
+                messages.error(req, f'The username <strong>{intra_login}</strong> already exists. Pleaser enter another one.')
+                return redirect('accounts:signup')
+        else:
+            newUser = User.objects.create_user(intra_login, data.get('email'))
+            newUser.profile.isstudent = True
+            newUser.profile.save()
+            messages.success(req, f'Your account has been created! You are now able to log in.')
             return redirect('accounts:login')
-    else:
-        ...
 
 class oauth42:
     # exchange temporary code for access token
