@@ -11,5 +11,7 @@ def create_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_profile(sender, instance, **kwargs):
+    # prevents access of Profile before it has been associated
+    # with the User model, which leads to AttributeError
     if hasattr(instance, 'profile'):
         instance.profile.save()
