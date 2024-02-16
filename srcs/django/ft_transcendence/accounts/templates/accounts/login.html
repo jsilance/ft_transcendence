@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block title %}
     FT_TRANSCENDENCE
@@ -15,17 +16,16 @@
         <div class="form">
             <div>
                 <h1>Welcome Back</h1>
-                <p>Not registered yet? <a href="{% url 'accounts:signup'%}">Sign up</a></p>
+                <p>Not registered yet? <a href="{% url 'accounts:signup' %}">Sign up</a></p>
                 <hr>
                 <form method="post">
                     <div class="form_inputs">
-                        {{ form.as_p }}
-                        <br>
                         {% csrf_token %}
+                        {{ form | crispy }}
                     </div>
-                    <div class="form_cta">
+                    <div class="form_cta mt-4">
                         <button type="submit">Login</button>
-                        <a class="row" href="{{ authorize_uri }}">
+                        <a class="row_custom" href="{{ authorize_uri }}">
                             <span>or use</span>
                             <img class="icon" src="{% static 'icons/42-logo.svg' %}" alt="42 school logo">
                         </a>

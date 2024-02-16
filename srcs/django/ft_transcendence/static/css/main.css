@@ -107,6 +107,7 @@ button:not(.btn_discrete):hover {
     border: none;
     margin: 0;
     padding: 0;
+    height: auto;
 }
 
 hr {
@@ -152,15 +153,16 @@ input:focus, textarea:focus {
                         CONTAINERS & LAYOUT TAGS
 *******************************************************************************/
 
-.global_container {
+.global_container_ {
     max-width: 756px;
     margin: auto;
 }
 
-.row {
+.row_custom {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
 }
 
 /*******************************************************************************
@@ -197,6 +199,7 @@ header {
 
 .nav_links {
     list-style: none;
+    margin-bottom: 0;
 }
 
 .nav_links li {
@@ -283,4 +286,18 @@ header {
 
 .user_info h3 {
     font-weight: 600;
+}
+
+/*******************************************************************************
+                                    ALERTS
+*******************************************************************************/
+
+.success_msg {
+    background-color: #D4EDDA;
+    color: #155723;
+    border: solid 1px #155723;
+    border-radius: 4px;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
 }
