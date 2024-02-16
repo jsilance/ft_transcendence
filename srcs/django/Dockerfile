@@ -11,9 +11,13 @@ RUN pip install --no-cache-dir psycopg2-binary \
 				channels \
 				channels_postgres \
 				requests \
+				# access environment variables
 				python-dotenv \
+				# forms styling + bootstrap
 				django-crispy-forms \
-				crispy-bootstrap4
+				crispy-bootstrap4 \
+				# for ImageField in models
+				Pillow
 
 COPY ./ft_transcendence /home/django/ft_transcendence
 

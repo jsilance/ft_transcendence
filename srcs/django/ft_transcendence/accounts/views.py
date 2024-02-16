@@ -28,10 +28,8 @@ def signup_v(req):
         form = UserRegisterForm(req.POST)
         if form.is_valid():
             user = form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(req, f'Account created for {username}')
-            login(req, user)
-            return redirect('home:welcome')
+            messages.success(req, f'Your account has been created! You are now able to log in.')
+            return redirect('accounts:login')
     else:
         form = UserRegisterForm()
     return render(req, 'accounts/signup.html', {
@@ -54,7 +52,6 @@ def login_v(req):
     return render(req, 'accounts/login.html', {
         'form': form,
         'authorize_uri': authorize_uri+fromLogin,
-        # 'known_users': User.objects.all(),
     })
 
 """
@@ -123,6 +120,7 @@ class oauth42:
 def logout_v(req):
     if req.method == 'POST':
         logout(req)
+        messages.info(req, f'You have been logged out.')
         return redirect('home:welcome')
 
 ################################################################################

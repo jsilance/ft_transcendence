@@ -12,7 +12,7 @@
 {% block body %}
 	<div class="profile_container">
 		<div>
-			<img src="{% static 'images/user.png' %}" alt="">
+			<img src="{{ user.profile.image.url }}" width="48px" height="48px" alt="profile picture">
 			<h1>Hello mister {{ user.username }}</h1>
 		</div>
 		<div>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block title %}
     FT_TRANSCENDENCE
@@ -19,9 +20,8 @@
                 <hr>
                 <form method="post">
                     <div class="form_inputs">
-                        {{ form.as_p }}
-                        <br>
                         {% csrf_token %}
+                        {{ form | crispy }}
                     </div>
                     <div class="form_cta">
                         <button type="submit">Login</button>

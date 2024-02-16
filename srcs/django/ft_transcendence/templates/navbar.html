@@ -18,7 +18,7 @@
     </div>
     <div class="row_custom">
         {% if user.is_authenticated %}
-        <img class="user_pic" onclick="toggleMenu()" src="{% static 'images/user.png' %}" width="48px" alt="user image">
+        <img class="user_pic" onclick="toggleMenu()" src="{{ user.profile.image.url }}" width="48px" height="48px" alt="user image">
 
         <div class="sub_menu_wrapper" id="dropdown_menu">
             <div class="sub_menu">
