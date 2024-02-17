@@ -8,6 +8,8 @@ class Profile(models.Model):
     image = models.ImageField(default='default.png', upload_to='profile_pics')
     isstudent = models.BooleanField(default=False)
     friends = ArrayField(models.CharField(max_length=30), null=True, blank=True)
+    wins = models.IntegerField(default=0)
+    losses = models.IntegerField(default=0)
 
     def __str__(self):
         return f'{self.user.username} Profile'
