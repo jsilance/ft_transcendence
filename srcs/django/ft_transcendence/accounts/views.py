@@ -20,8 +20,9 @@ authorize_uri = "https://api.intra.42.fr/oauth/authorize?\
 	&response_type=code\
 	&state="
 
-fromLogin = 'd56b699830e77ba53855679cb1d252da'
-fromSignup = '7d2abf2d0fa7c3a0c13236910f30bc43'
+# identify from which page oauth2 was invoked
+FROMLOGIN = 'd56b699830e77ba53855679cb1d252da'
+FROMSIGNUP = '7d2abf2d0fa7c3a0c13236910f30bc43'
 
 def signup_v(req):
     if req.method == 'POST':
@@ -34,7 +35,7 @@ def signup_v(req):
         form = UserRegisterForm()
     return render(req, 'accounts/signup.html', {
         'form': form,
-        'authorize_uri': authorize_uri+fromSignup
+        'authorize_uri': authorize_uri+FROMSIGNUP
     })
 
 def login_v(req):
@@ -51,7 +52,7 @@ def login_v(req):
         form = AuthenticationForm()
     return render(req, 'accounts/login.html', {
         'form': form,
-        'authorize_uri': authorize_uri+fromLogin,
+        'authorize_uri': authorize_uri+FROMLOGIN,
     })
 
 """
@@ -61,51 +62,46 @@ catches tmp_code, exchanges it for an access token, use that
 token to get user informations
 """
 def callback(req):
-    temporary_code = req.GET.get('code')
-    if temporary_code is None:
+    page_origin = req.GET.get('state')
+    authorization_code = req.GET.get('code')
+    if authorization_code is None:
         return HttpResponseBadRequest("Bad Request: Missing 'code' parameter")
     
     # exchange authorization code for access token
     o42 = oauth42()
-    token = o42.get_token(temporary_code)
+    token = o42.get_token(authorization_code)
 
-    data = o42.get_user_data(token)
-    intra_login = data.get('login')
+    # use token to request user data
+    user_data = o42.get_user_data(token)
+    username_42 = user_data.get('login')
+    email_42 = user_data.get('email')
 
-    # login: 
-    if req.GET.get('state') == fromLogin:
-        if intra_login in str(User.objects.all()):
-            knownUser = User.objects.get(username=intra_login)
-            if knownUser.profile.isstudent:
-                login(req, knownUser)
-                if 'next' in req.POST:
-                    return redirect(req.POST.get('next'))
-                else:
-                    return redirect('home:welcome')
+    # when user is in database
+    if username_42 in str(User.objects.all()):
+        known_user = User.objects.get(username=username_42)
+        if known_user.profile.isstudent:
+            login(req, known_user)
+            if 'next' in req.POST:
+                return redirect(req.POST.get('next'))
             else:
-                messages.info(req, "The account you're trying to connect to was created without 42intra. Please enter your credentials to log in.")
-                return redirect(req, 'accounts:login')
+                return redirect('home:welcome')
         else:
-            messages.info(req, "No corresponding account was found. Please sign-up first.")
-            return redirect('accounts:signup')
-    elif req.GET.get('state') == fromSignup:
-        if intra_login in str(User.objects.all()):
-            knownUser = User.objects.get(username=intra_login)
-            if knownUser.profile.isstudent:
-                login(req, knownUser)
-                if 'next' in req.POST:
-                    return redirect(req.POST.get('next'))
-                else:
-                    return redirect('home:welcome')
+            if page_origin == FROMLOGIN:
+                messages.warning(req, "The account you're trying to connect to was created without 42intra. Please enter your credentials to log in.")
+                return redirect('accounts:login')
             else:
-                messages.error(req, f'The username <strong>{intra_login}</strong> already exists. Pleaser enter another one.')
+                messages.warning(req, f'The username <strong>{username_42}</strong> already exists. Pleaser enter another one.')
                 return redirect('accounts:signup')
-        else:
-            newUser = User.objects.create_user(intra_login, data.get('email'))
-            newUser.profile.isstudent = True
-            newUser.profile.save()
-            messages.success(req, f'Your account has been created! You are now able to log in.')
-            return redirect('accounts:login')
+    # when user is NOT in database
+    if page_origin == FROMLOGIN:
+        messages.info(req, "No corresponding account was found. Please sign-up first.")
+        return redirect('accounts:signup')
+    elif page_origin == FROMSIGNUP:
+        newUser = User.objects.create_user(username_42, email_42)
+        newUser.profile.isstudent = True
+        newUser.profile.save()
+        messages.success(req, f'Your account has been created! You are now able to log in.')
+        return redirect('accounts:login')
 
 class oauth42:
     # exchange temporary code for access token
@@ -175,7 +171,7 @@ def editprofile(request):
             p_form.save()
             messages.success(request, 'Your account has been updated!')
             return redirect('accounts:profile_edit')
-        messages.error(request, 'NOT VALID')
+        messages.warning(request, 'NOT VALID')
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
