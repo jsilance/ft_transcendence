@@ -141,6 +141,10 @@ socket.onmessage = function(event) {
     }
 };
 
+socket.onopen = function(e) {
+	console.log("Connection etablished!");
+};
+
 socket.onclose = function(e) {
     console.error('Socket closed unexpectedly. Attempting to reconnect...');
     setTimeout(function() {
