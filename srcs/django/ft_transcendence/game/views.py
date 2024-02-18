@@ -10,7 +10,6 @@ def game(request, party_id):
 	user = request.user.username
 
 	shapes = [{"item_id": int(x.item_id), "type":int(x.type), "color":x.color, "posx":int(x.posx), "posy":int(x.posy)} for x in Shape.objects.filter(party_id=party_id)]
-	print(shapes)
 	shape_json = json.dumps(shapes)
 	
 	mapSetting = MapSettings.objects.get(id=party_id)

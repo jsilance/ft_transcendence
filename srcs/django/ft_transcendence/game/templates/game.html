@@ -15,7 +15,6 @@
 
 <script>
 	const shapes = JSON.parse('{{ shapes | safe }}');
-    console.log(shapes);
     const user = '{{ user | safe }}';
 	const mapSetting = JSON.parse('{{ mapSetting | safe }}');
 	const party_id = '{{ party_id | safe }}';
@@ -23,7 +22,7 @@
 
 <script type="module" src="{% static 'main.js' %}" defer></script>
 
-<!-- WebSocket setup -->
+<!-- WebSocket setup --><!--
 <script type="module">
     document.addEventListener('DOMContentLoaded', (event) => {
         const gameSocket = new WebSocket(
@@ -50,6 +49,7 @@
         // Add additional game logic here or in external scripts
     });
 </script>
+-->
 {% endblock %}
 
 
