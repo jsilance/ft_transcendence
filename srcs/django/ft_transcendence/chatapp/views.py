@@ -28,12 +28,16 @@ def create_room(request):
         user2_id = request.POST.get('user2_id')
         user2 = User.objects.get(id=user2_id)
 
-        existing_room = Room.objects.filter(user1=user1, user2=user2).exists()
+        # Ensure consistent order of usernames for room slug
+        user1_username = user1.username
+        user2_username = user2.username
+        room_slug = '_'.join(sorted([user1_username, user2_username]))
+
+        existing_room = Room.objects.filter(slug=room_slug).exists()
         if not existing_room:
             # Create a new room
-            room = Room.objects.create(name=name, slug=slug,user1=user1, user2=user2)
-            return redirect('room', slug=slug)
+            room = Room.objects.create(name=name, slug=room_slug, user1=user1, user2=user2)
+            return redirect('room', slug=room_slug)
         else:
             # Room already exists, redirect to the existing room
-            room = Room.objects.get(user1=user1, user2=user2)
-            return redirect('room', slug=room.slug)
+            return redirect('room', slug=room_slug)
