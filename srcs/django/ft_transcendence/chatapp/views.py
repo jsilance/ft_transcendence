@@ -16,7 +16,7 @@ def chat_page(request):
 def room(request, slug):
     room_name=Room.objects.get(slug=slug).name
     messages=Message.objects.filter(room=Room.objects.get(slug=slug))
-    context = {"slug":slug, "room_name":room_name, 'messages':messages}
+    context = {"slug":slug, "room_name":room_name, 'messages':messages, 'user_id':request.user.id}
     return render(request, "room.html", context)
 
 def create_room(request):

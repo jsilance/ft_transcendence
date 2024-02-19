@@ -3,13 +3,65 @@
 <html>
 <head>
     <title>Chat</title>
+    <style>
+      .chat__item__container {
+        display: flex;
+        flex-direction: column;
+      }
+      .message {
+        padding: 5px 10px;
+        margin: 5px;
+        border-radius: 10px;
+        display: inline-block;
+        max-width: 60%;
+      }
+      .own-message {
+        background-color: #343435;
+        margin-left: auto;
+        border-bottom-right-radius: 0;
+      }
+      .other-message {
+        background-color: #6601FE;
+        margin-right: auto;
+        border-bottom-left-radius: 0;
+      }
+      .header {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #282633;
+            border-bottom: 1px solid #ddd;
+      }
+      .back-button {
+          cursor: pointer;
+          background-color: #ddd;
+          border: none;
+          padding: 5px 10px;
+          border-radius: 5px;
+          margin-right: 10px; /* Added margin for spacing */
+      }
+      .user-name {
+          display: flex;
+          align-items: center;
+      }
+      .user-name::before {
+          content: '|';
+          margin-right: 10px;
+          color: #ddd; /* Adjust color as needed */
+      }
+    </style>
 </head>
 <body>
+  <div class="header">
+    <button class="back-button" onclick="window.history.back();">&#8592;</button>
+    <span class="user-name" id="chatWith"></span> <!-- Updated class for styling -->
+  </div>
   <div class="chat__item__container" id="id_chat_item_container" style="font-size: 20px">
-  {% for i in messages %}
-      {{ i.user }} : {{ i.content }}
-      <br>
-  {% endfor %}
+    {% for i in messages %}
+      <div class="{% if i.user_id == user_id %}message own-message{% else %}message other-message{% endif %}">
+        {{ i.content }}
+      </div>
+    {% endfor %}
   </div>
   <br />
   <input type="text" id="id_message_send_input" />
@@ -50,10 +102,25 @@
     chatSocket.onmessage = function (e) {
       const data = JSON.parse(e.data);
       const messageElement = document.createElement("div");
-      messageElement.innerText = data.username + " : " + data.message;
+      messageElement.innerText = data.message;
+
+      // Apply different classes based on the sender
+      if (data.username === username) {
+        messageElement.className = "message own-message";
+      } else {
+        messageElement.className = "message other-message";
+      }
+
       document.querySelector("#id_chat_item_container").appendChild(messageElement);
-      document.querySelector("#id_message_send_input").value = ""; // Clear input after sending
     };
+
+    function updateChatHeader() {
+        const usernames = roomSlug.split('_'); // Split the slug to get both usernames
+        const otherUsername = usernames.find(u => u !== username); // Find the username that is not the current user's
+        document.getElementById('chatWith').textContent = `${otherUsername}`; // Update the header span
+    }
+
+    updateChatHeader();
   </script>
 </body>
 </html>
