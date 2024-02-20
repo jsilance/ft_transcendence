@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'game',
     'channels',
     'channels_postgres',
+    'chatapp',
     'accounts',
 ]
 

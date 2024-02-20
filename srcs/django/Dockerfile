@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir psycopg2-binary \
 				django-cors-headers \
 				channels \
 				channels_postgres \
+				daphne \
 				requests \
 				# access environment variables
 				python-dotenv \
