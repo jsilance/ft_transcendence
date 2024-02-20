@@ -6,13 +6,7 @@ from .models import Score
 
 @login_required(login_url='/accounts/login/')
 def welcome(request):
-	# Logic for the view goes here (if any)
 	return render(request, 'welcome.html')
-
-@login_required(login_url='/accounts/login/')
-def profile(request):
-	# Logic for the view goes here (if any)
-	return render(request, 'profile.html')
 
 def leaderboard(request):
 	users = Score.objects.all()
