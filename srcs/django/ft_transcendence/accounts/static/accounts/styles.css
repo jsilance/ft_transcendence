@@ -1,0 +1,119 @@
+/*******************************************************************************
+                             LOGIN PAGE
+*******************************************************************************/
+
+.login_box {
+    /* min-height: 520px; */
+    margin: auto;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    margin-top: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--accent2);
+}
+
+.login_box ul {
+    margin-bottom: 8px;
+}
+
+.login_box ul li {
+    color: var(--alert);
+}
+
+.login_box > div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.login_box > div:last-child div {
+    margin: auto;
+}
+
+.login_box > div:first-child {
+    background-image: url('../../../static/images/spacepong.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-right: 1px solid var(--accent2);
+}
+
+.form {
+    width: 75%;
+    margin: 0 auto;
+}
+
+.form_inputs p {
+        display: flex;
+        flex-direction: column;
+}
+
+.form_cta {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+.form_cta button {
+    margin-right: 12px;
+}
+
+/*******************************************************************************
+                             REGISTRATION
+*******************************************************************************/
+
+.signin_box {
+    margin-top: 40px;
+}
+
+.signin_box div {
+    width: 456px;
+    margin: auto;
+}
+
+.signin_form_inputs {
+    display: flex;
+    flex-direction: column;
+}
+
+/*******************************************************************************
+                             PROFILE
+*******************************************************************************/
+
+.profile_container {
+    width: 456px;
+    margin: auto;
+    text-align: center;
+
+}
+.profile_container div:last-child {
+    margin-top: 20px;
+}
+
+.profile_container div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.profile_container div:first-child img {
+    margin-bottom: 10px;
+}
+
+.option {
+    padding: 8px;
+    border-radius: 8px;
+    margin: 0 4px;
+}
+
+.option.edit {
+    background-color: #216ADD;
+}
+
+.option.delete {
+    border: 1px solid var(--secondary-bg-color);
+    background-color: var(--alert);
+}

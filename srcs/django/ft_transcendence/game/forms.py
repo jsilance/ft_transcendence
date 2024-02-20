@@ -4,4 +4,4 @@ from .models import MapSettings, Shape
 class PartyForm(forms.ModelForm):
     class Meta:
         model = MapSettings
-        fields = ['nbPlayer', 'listOfPlayer', 'duringTime']
+        fields = ['nbPlayer', 'duringTime']

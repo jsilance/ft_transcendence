@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+		<favicon href="favicon.ico">
 		<meta charset="UTF-8">
 		<title>{% block title %}{% endblock %}</title>
 		{% block script %}{% endblock %}
+		<style>
+			body { margin: 0; }
+		</style>
 	</head>
 	<body>
 		{% block body %}{% endblock %}

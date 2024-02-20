@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+	FT_TRANSCENDENCEEEE
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
+{% endblock%}
+
+{% block body %}
+	<div class="profile_container">
+		<div>
+			<img src="{{ user.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+			<h1>Hello mister {{ user.username }}</h1>
+		</div>
+		<div>
+			<a class="option edit" href="{% url 'accounts:profile_edit' %}">Edit</a>
+			<a class="option delete" href="{% url 'accounts:profile_delete' user.username %}">Delete</a>
+		</div>
+	</div>	
+{% endblock %}
+	

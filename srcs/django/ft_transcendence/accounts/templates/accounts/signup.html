@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% load static %}
 
 {% block title %}
@@ -6,19 +7,23 @@
 {% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{% static 'home/styles.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 {% endblock %}
 
 {% block body %}
 	<div class="signin_box">
 		<div>
 			<h1>Get Started</h1>
-			<p>Already have an account? <a href="/login/">Login</a></p>
+			<p>Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
 			<hr>
 			<div>
 				<form method="post">
 					<div class="signin_form_inputs">
-						<!-- {{ form.as_p }} -->
+						{% csrf_token %}
+						
+						{{ form | crispy }}	
+
+						<!-- {{ form.as_p }}
 						{{ form.username.label_tag }}
 						{{ form.username }}
 						<br>
@@ -30,11 +35,14 @@
 						<br>
 						{{ form.password2.label_tag }}
 						{{ form.password2 }}
-						<br>
-						{% csrf_token %}
+						<br> -->
 					</div>
-					<div>
+					<div class="form_cta">
 						<button type="submit">Register</button>
+						<a class="row_custom" href="{{ authorize_uri }}">
+                            <span>or use</span>
+                            <img class="icon" src="{% static 'icons/42-logo.svg' %}" alt="42 school logo">
+                        </a>
 					</div>
 				</form>
 				{% if form.errors %}
