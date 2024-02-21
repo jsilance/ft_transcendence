@@ -74,3 +74,37 @@ tbody tr:nth-child(odd) {
 tbody tr:hover {
     background-color: rgb(136, 0, 255);
 }
+
+.banner {
+    padding: 16px;
+}
+
+.banner_img {
+    margin-right: 20px;
+    border-radius: 200px;
+}
+
+.banner_info {
+}
+
+.banner_score {
+}
+
+.bs_v, .bs_l {
+    margin-right: 10px;
+}
+
+.banner_option {
+    padding:4px 12px;
+    border-radius: 8px;
+}
+
+/* FEED */
+.feed {
+    min-height: 50vh;
+    margin-top: 10px;
+    background-color: var(--main-bg-color);
+    /* height: 100vh; */
+    padding: 20px;
+    border-radius: 20px 20px 0 0;
+}

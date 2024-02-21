@@ -12,33 +12,13 @@
 
 {% block body %}
 	<div>
-		<div>
-			<div>
-				<h1>Ft_transcendence</h1>
-			</div>
-		</div>
-		<div>
-			<div>
-				<h3>Hello, {{ user.username }}!</h3>
-			</div>
-		</div>
-		<div>
-			<div>
-				<form method="POST" enctype="multipart/form-data">
-					{% csrf_token %}
-					{{ u_form | crispy }}
-					{{ p_form | crispy }}
-					<div>
-						<button type="submit">Update</button>	
-					</div>
-				</form>
-			</div>
-		</div>
-		<div>
-			<div>
-
-			</div>
-		</div>	
+		<h1 style="margin-bottom: 30px;">Edit Page</h1>
+		<form method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			{{ u_form | crispy }}
+			{{ p_form | crispy }}
+			<button style="margin-top: 20px;" type="submit">Update</button>	
+		</form>
 	</div>
 
 {% endblock %}

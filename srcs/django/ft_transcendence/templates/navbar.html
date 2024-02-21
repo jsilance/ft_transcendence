@@ -8,43 +8,32 @@
                 <ul class="nav_links" alt="logo">
                     <li><a href="/">Home</a></li>
                     <li><a href="/leaderboard/">Leaderboard</a></li>
-                    <li><a href="/chatapp/">Chat</a></li>
                     <li><a href="/game/">Game</a></li>
                     {% if request.user.is_authenticated %}
                         {% if request.user.is_superuser %}
                             <li><a href="/admin/">Admin</a></li>
                         {% endif %}
+                        <li><a href="/chatapp/">Chat</a></li>
+                        <li><a href="/accounts/profile/arurangi">Profile</a></li>
                     {% endif %}
                 </ul>
             </nav>
         </div>
         <div class="row_custom">
             {% if request.user.is_authenticated %}
+            <form action="{% url 'accounts:logout' %}" class="sub_menu_link" method="post">
+                {% csrf_token %}
+                <button type="submit" class="d-flex align-items-center btn_discrete" style="margin-right: 16px;">
+                    <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0z"/>
+                        <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708z"/>
+                    </svg>
+                    Logout
+                </button>
+            </form>
+            
             <img class="user_pic" onclick="toggleMenu()" src="{{ request.user.profile.image.url }}" width="48px" height="48px" alt="user image">
     
-            <div class="sub_menu_wrapper" id="dropdown_menu">
-                <div class="sub_menu">
-                    <div class="user_info">
-                        <h3>{{ request.user.username }}</h3>
-                    </div>
-                    <hr>
-                    <a href="{% url 'accounts:profile' %}" class="sub_menu_link">
-                        <img src="{% static 'icons/profile.svg' %}" alt="">
-                        <p>Your profile</p>
-                    </a>
-                    <a href="/game/chatbox/" class="sub_menu_link">
-                        <img src="{% static 'icons/chat.svg' %}" alt="">
-                        <p>Chat</p>
-                    </a>
-                        
-                    <form action="{% url 'accounts:logout' %}" class="sub_menu_link" method="post">
-                        <img src="{% static 'icons/logout.svg' %}" alt="">
-                        {% csrf_token %}
-                        <button type="submit" class="btn_discrete">Logout</button>
-                    </form>
-    
-                </div>
-            </div>
             {% else %}
                 <a href="{% url 'accounts:login' %}"><button class="cta">Log in</button></a>
                 <a href="{% url 'accounts:signup' %}"><button class="cta">Sign up</button></a>
