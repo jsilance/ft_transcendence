@@ -1,64 +1,114 @@
 {% extends 'base.html' %}
+{% block title %}
+Chat
+{% endblock %}
+{% block styles %}
+<style>
+  .chat__item__container {
+    display: flex;
+    flex-direction: column;
+  }
+  .message {
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 10px;
+    display: inline-block;
+    max-width: 60%;
+  }
+  .own-message {
+    background-color: #343435;
+    margin-left: auto;
+    border-bottom-right-radius: 0;
+  }
+  .other-message {
+    background-color: #6601FE;
+    margin-right: auto;
+    border-bottom-left-radius: 0;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #282633;
+    border-bottom: 1px solid #ddd;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .header > div {
+    display: flex;
+  }
+  .back-button {
+    cursor: pointer;
+    background-color: #ddd;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-right: 10px; /* Added margin for spacing */
+  }
+  .user-name {
+    display: flex;
+    align-items: center;
+  }
+  .user-name::before {
+    content: '|';
+    margin-right: 10px;
+    color: #ddd; /* Adjust color as needed */
+  }
+  /* Style pour le bouton du menu */
+  .dropbtn {
+    cursor: pointer;
+    padding: 8px;
+    margin-right: 5px;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-flex; /* Pour maintenir le dropdown intégré dans le flux flex */
+  }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+  }
+
+  .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+
+  .dropdown-content a:hover {background-color: #f1f1f1}
+
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+</style>
+{% endblock %}
 {% block body %}
-<html>
-<head>
-    <title>Chat</title>
-    <style>
-      .chat__item__container {
-        display: flex;
-        flex-direction: column;
-      }
-      .message {
-        padding: 5px 10px;
-        margin: 5px;
-        border-radius: 10px;
-        display: inline-block;
-        max-width: 60%;
-      }
-      .own-message {
-        background-color: #343435;
-        margin-left: auto;
-        border-bottom-right-radius: 0;
-      }
-      .other-message {
-        background-color: #6601FE;
-        margin-right: auto;
-        border-bottom-left-radius: 0;
-      }
-      .header {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            background-color: #282633;
-            border-bottom: 1px solid #ddd;
-      }
-      .back-button {
-          cursor: pointer;
-          background-color: #ddd;
-          border: none;
-          padding: 5px 10px;
-          border-radius: 5px;
-          margin-right: 10px; /* Added margin for spacing */
-      }
-      .user-name {
-          display: flex;
-          align-items: center;
-      }
-      .user-name::before {
-          content: '|';
-          margin-right: 10px;
-          color: #ddd; /* Adjust color as needed */
-      }
-    </style>
-</head>
-<body>
-  <div class="header">
+<div class="header">
+  <div>
     <button class="back-button" onclick="window.history.back();">&#8592;</button>
-    <span class="user-name" id="chatWith"></span> <!-- Updated class for styling -->
+    <span class="user-name" id="chatWith"></span>
   </div>
+  <div class="dropdown">
+    <button class="dropbtn">Options</button>
+    <div class="dropdown-content">
+      <a href="#" id="viewProfile">View Profile</a>
+      <a href="#" onclick="invitePlayer()">Invite Player</a>
+      <a href="#" onclick="blockPlayer()">Block Player</a>
+    </div>
+  </div>
+</div>
+
   <div class="chat__item__container" id="id_chat_item_container" style="font-size: 20px">
     {% for i in messages %}
-      <div class="{% if i.user_id == user_id %}message own-message{% else %}message other-message{% endif %}">
+    <div class="{% if i.user_id == user_id %}message own-message{% else %}message other-message{% endif %}">
         {{ i.content }}
       </div>
     {% endfor %}
@@ -67,62 +117,65 @@
   <input type="text" id="id_message_send_input" />
   <button type="submit" id="id_message_send_button">Send Message</button>
   <br /><br />
-  <script>
-    const roomSlug = "{{ slug }}";
-    const roomName = "{{ room_name }}";
-    const username = "{{ request.user.username }}";
-    const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/chat/" + roomSlug + "/");
+{% endblock %}
+{% block script_body %}
+<script>
+  const roomSlug = "{{ slug }}";
+  const roomName = "{{ room_name }}";
+  const username = "{{ request.user.username }}";
+  const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/chat/" + roomSlug + "/");
 
-    chatSocket.onopen = function (e) {
-      console.log("The connection was set up successfully!");
-    };
+  chatSocket.onopen = function (e) {
+    console.log("The connection was set up successfully!");
+  };
 
-    chatSocket.onclose = function (e) {
-      console.error("Chat socket closed unexpectedly.");
-    };
+  chatSocket.onclose = function (e) {
+    console.error("Chat socket closed unexpectedly.");
+  };
 
-    document.querySelector("#id_message_send_input").focus();
-    document.querySelector("#id_message_send_input").onkeyup = function (e) {
-      if (e.keyCode === 13) {  // Enter key
-        document.querySelector("#id_message_send_button").click();
-      }
-    };
+  document.querySelector("#id_message_send_input").focus();
+  document.querySelector("#id_message_send_input").onkeyup = function (e) {
+    if (e.keyCode === 13) {  // Enter key
+      document.querySelector("#id_message_send_button").click();
+    }
+  };
 
-    document.querySelector("#id_message_send_button").onclick = function (e) {
-      const messageInputDom = document.querySelector("#id_message_send_input");
-      const message = messageInputDom.value;
-      chatSocket.send(JSON.stringify({ 
-        message: message, 
-        username: username, 
-        room_name: roomName 
-      }));
-      messageInputDom.value = ""; // Clear the message input field.
-    };
+  document.querySelector("#id_message_send_button").onclick = function (e) {
+    const messageInputDom = document.querySelector("#id_message_send_input");
+    const message = messageInputDom.value;
+    chatSocket.send(JSON.stringify({ 
+      message: message, 
+      username: username, 
+      room_name: roomName 
+    }));
+    messageInputDom.value = ""; // Clear the message input field.
+  };
 
-    chatSocket.onmessage = function (e) {
-      const data = JSON.parse(e.data);
-      const messageElement = document.createElement("div");
-      messageElement.innerText = data.message;
+  chatSocket.onmessage = function (e) {
+    const data = JSON.parse(e.data);
+    const messageElement = document.createElement("div");
+    messageElement.innerText = data.message;
 
-      // Apply different classes based on the sender
-      if (data.username === username) {
-        messageElement.className = "message own-message";
-      } else {
-        messageElement.className = "message other-message";
-      }
-
-      document.querySelector("#id_chat_item_container").appendChild(messageElement);
-    };
-
-    function updateChatHeader() {
-        const usernames = roomSlug.split('_'); // Split the slug to get both usernames
-        const otherUsername = usernames.find(u => u !== username); // Find the username that is not the current user's
-        document.getElementById('chatWith').textContent = `${otherUsername}`; // Update the header span
+    // Apply different classes based on the sender
+    if (data.username === username) {
+      messageElement.className = "message own-message";
+    } else {
+      messageElement.className = "message other-message";
     }
 
-    updateChatHeader();
-  </script>
-</body>
-</html>
+    document.querySelector("#id_chat_item_container").appendChild(messageElement);
+  };
 
+  function updateChatHeader() {
+      const usernames = roomSlug.split('_'); // Split the slug to get both usernames
+      const otherUsername = usernames.find(u => u !== username); // Find the username that is not the current user's
+      document.getElementById('chatWith').textContent = `${otherUsername}`;
+
+      const profileUrl = `http://localhost:8000/accounts/profile/${otherUsername}`;
+      document.getElementById('viewProfile').href = profileUrl;
+  }
+
+  updateChatHeader();
+
+</script>
 {% endblock %}
