@@ -8,7 +8,7 @@
 
 {% block body %}
     <h1>500 - Server Error</h1>
-    {% if message %}
+    {% if request.message %}
         <p>message</p>
     {% endif %}
 {% endblock %}

@@ -146,7 +146,7 @@ def profile(request, username):
     try:
         display_user = User.objects.get(username=username)
     except User.DoesNotExist:
-        return render(request, '500.html', {'message': 'User not found'})
+        return render(request, '404.html', {'message': 'User not found'})
     return render(request, 'accounts/profile.html', {'display_user': display_user})
 
 @login_required(login_url='/accounts/login/')
