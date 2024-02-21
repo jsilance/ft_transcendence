@@ -17,43 +17,44 @@ function updatePos(userId)
 	// return (othrUsers[userId].posx);
 }
 
-// function sendPos(data)
-// {
-// 	socket.addEventListener('open', function (event) {
-// 		console.log('connected');
-// 		// console.log(JSON.stringify(data));
-// 		socket.send(JSON.stringify(data));
-// 	});
-// }
-
 // ---------------------------------------------------------------------------------- //
 
 
 // Keys interractions //
 
 const keys = {
-	left: false,
-	right: false
+	ArrowLeft: false,
+	ArrowRight: false
 };
 
-// document.addEventListener('keydown', handleKeyDown);
-// document.addEventListener('keyup', handleKeyUp);
+let i = 0;
+const playerKeys = {};
 
-// function handleKeyDown(event)
-// {
-// 	if (event.key === 'ArrowLeft')
-// 	keys.left = true;
-// 	else if (event.key === 'ArrowRight')
-// 	keys.right = true;
-// }
+for (const el of mapSetting.listOfPlayer)
+{
+	i++;
+	if (user == el.user)
+	{
+		userPartyId = i;
+	}
+	addPlayer(el.user);
+	console.log(el.user);
+}
 
-// function handleKeyUp(event)
-// {
-// 	if (event.key === 'ArrowLeft')
-// 	keys.left = false;
-// 	else if (event.key === 'ArrowRight')
-// 	keys.right = false;
-// }
+
+// Function to initialize keys for a new player
+function addPlayer(playerId) {
+    playerKeys[playerId] = {
+        ArrowLeft: false,
+        ArrowRight: false
+    };
+}
+
+function updatePlayerKey(playerId, key, value) {
+    if (playerKeys[playerId]) {
+        playerKeys[playerId][key] = value;
+    }
+}
 
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
@@ -66,6 +67,8 @@ function handleKeyDown(event) {
         // 'session_id': document.getElementById('session_id').value,
         // 'player_id': document.getElementById('player_id').value,
     };
+	updatePlayerKey("jsilance", event.key, true);
+	// console.log("jsilance", event.key, true);
     socket.send(JSON.stringify(data));
 }
 
@@ -77,42 +80,10 @@ function handleKeyUp(event) {
         // 'session_id': document.getElementById('session_id').value,
         // 'player_id': document.getElementById('player_id').value,
     };
+	updatePlayerKey("jsilance", event.key, false);
+	// console.log("jsilance", event.key, false);
     socket.send(JSON.stringify(data));
 }
-
-// Keys interractions //
-
-const playerKeys = {};
-
-// Function to initialize keys for a new player
-function addPlayer(playerId) {
-    playerKeys[playerId] = {
-        left: false,
-        right: false
-    };
-}
-
-function updatePlayerKey(playerId, key, value) {
-    if (playerKeys[playerId]) {
-        playerKeys[playerId][key] = value;
-    }
-}
-
-// function updateKeyDown(data)
-// {
-// 	if (data.key === 'ArrowLeft')
-// 	    keys.left = true;
-// 	else if (data.key === 'ArrowRight')
-// 	    keys.right = true;
-// }
-
-// function updateKeyUp(data)
-// {
-// 	if (data.key === 'ArrowLeft')
-// 	    keys.left = false;
-// 	else if (data.key === 'ArrowRight')
-// 	    keys.right = false;
-// }
 
 socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
@@ -158,27 +129,23 @@ socket.onclose = function(e) {
 
 const scene = new THREE.Scene();
 
-// TO DO: create mutiple cameras and attribute to apropriate user
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 
-// console.log(user)
 
 let radius = borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 + 3;
-let i = 0;
+// let i = 0;
 
-for (const el of mapSetting.listOfPlayer)
-{
-	i++;
-	if (user == el.user)
-	{
-		userPartyId = i;
-	}
-	addPlayer(el.user);
-	console.log(el.user);
-}
-console.log(playerKeys);
-console.log(userPartyId);
+// for (const el of mapSetting.listOfPlayer)
+// {
+// 	i++;
+// 	if (user == el.user)
+// 	{
+// 		userPartyId = i;
+// 	}
+// 	addPlayer(el.user);
+// 	console.log(el.user);
+// }
 let angle = (360 / mapSetting.nbPlayer) * userPartyId + (360 / mapSetting.nbPlayer) / 2;
 
 camera.position.x = Math.cos(angle * Math.PI / 180) * radius;
@@ -350,7 +317,7 @@ directionalLight.position.set(1, 2, 3);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-let offsetX = new Array(mapSetting.nbPlayer).fill(0);
+let offsetX = [];
 
 function g_start()
 {
@@ -360,6 +327,11 @@ function g_start()
 let nbPlayerCount = 0;
 mapSetting.listOfPlayer.forEach((usr) => {nbPlayerCount++});
 
+UsersGroup.children.forEach((elem) => {
+	thisUser = (mapSetting.listOfPlayer[elem.name]).user;
+	offsetX[thisUser] = 0;
+})
+
 const animate = () => {
 	let it = 0;
 	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.0 + 10 / (mapSetting.nbPlayer ** 2);
@@ -368,24 +340,14 @@ const animate = () => {
 	// if (mapSetting.nbPlayer == nbPlayerCount)
 	// {
 		UsersGroup.children.forEach((elem) => {
-			// if (keys.left && offsetX < (16 - parseInt(mapSetting.nbPlayer) + 2))
-			// else if (keys.right && offsetX > (-16 + parseInt(mapSetting.nbPlayer) - 2))
-			
-			thisUser = (mapSetting.listOfPlayer[thisUser]).user;
-			if (playerKeys[thisUser].left && offsetX[thisUser] < (16 - parseInt(mapSetting.nbPlayer) + 2))
-			{
+			thisUser = (mapSetting.listOfPlayer[elem.name]).user;
+			if (playerKeys[thisUser].ArrowLeft && offsetX[thisUser] < (16 - parseInt(mapSetting.nbPlayer) + 2))
 				offsetX[thisUser] += 3 / radius;
-				console.log(playerKeys);
-			}
-			else if (playerKeys[thisUser].right && offsetX[thisUser] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
-			{
+			else if (playerKeys[thisUser].ArrowRight && offsetX[thisUser] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
 				offsetX[thisUser] -= 3 / radius;
-				console.log(playerKeys);
-			}
 			elem.position.x = Math.cos((positionX + offsetX[thisUser]) * Math.PI / 180) * radius;
 			elem.position.z = Math.sin((positionX + offsetX[thisUser]) * Math.PI / 180) * radius;
 			elem.lookAt(new THREE.Vector3(0, 0, 0));
-			// actualiser la position du joueur concerné
 		});
 	// }
 	// else
