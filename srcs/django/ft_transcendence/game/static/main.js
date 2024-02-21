@@ -66,7 +66,7 @@ function handleKeyDown(event) {
         // 'session_id': document.getElementById('session_id').value,
         // 'player_id': document.getElementById('player_id').value,
     };
-    // socket.send(JSON.stringify(data));
+    socket.send(JSON.stringify(data));
 }
 
 function handleKeyUp(event) {
@@ -77,7 +77,7 @@ function handleKeyUp(event) {
         // 'session_id': document.getElementById('session_id').value,
         // 'player_id': document.getElementById('player_id').value,
     };
-    // socket.send(JSON.stringify(data));
+    socket.send(JSON.stringify(data));
 }
 
 // Keys interractions //
@@ -350,7 +350,7 @@ directionalLight.position.set(1, 2, 3);
 
 camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-let offsetX = 0;
+let offsetX = new Array(mapSetting.nbPlayer).fill(0);
 
 function g_start()
 {
@@ -371,19 +371,19 @@ const animate = () => {
 			// if (keys.left && offsetX < (16 - parseInt(mapSetting.nbPlayer) + 2))
 			// else if (keys.right && offsetX > (-16 + parseInt(mapSetting.nbPlayer) - 2))
 			
-			thisUser = (mapSetting.listOfPlayer[elem.name]).user;
-			if (playerKeys[thisUser].left && offsetX[elem.name] < (16 - parseInt(mapSetting.nbPlayer) + 2))
+			thisUser = (mapSetting.listOfPlayer[thisUser]).user;
+			if (playerKeys[thisUser].left && offsetX[thisUser] < (16 - parseInt(mapSetting.nbPlayer) + 2))
 			{
-				offsetX += 3 / radius;
+				offsetX[thisUser] += 3 / radius;
 				console.log(playerKeys);
 			}
-			else if (playerKeys[thisUser].right && offsetX[elem.name] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
+			else if (playerKeys[thisUser].right && offsetX[thisUser] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
 			{
-				offsetX -= 3 / radius;
+				offsetX[thisUser] -= 3 / radius;
 				console.log(playerKeys);
 			}
-			elem.position.x = Math.cos((positionX + offsetX) * Math.PI / 180) * radius;
-			elem.position.z = Math.sin((positionX + offsetX) * Math.PI / 180) * radius;
+			elem.position.x = Math.cos((positionX + offsetX[thisUser]) * Math.PI / 180) * radius;
+			elem.position.z = Math.sin((positionX + offsetX[thisUser]) * Math.PI / 180) * radius;
 			elem.lookAt(new THREE.Vector3(0, 0, 0));
 			// actualiser la position du joueur concerné
 		});
