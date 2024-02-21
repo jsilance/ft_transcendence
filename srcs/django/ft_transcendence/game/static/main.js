@@ -177,6 +177,7 @@ for (const el of mapSetting.listOfPlayer)
 	addPlayer(el.user);
 	console.log(el.user);
 }
+console.log(playerKeys);
 console.log(userPartyId);
 let angle = (360 / mapSetting.nbPlayer) * userPartyId + (360 / mapSetting.nbPlayer) / 2;
 
@@ -364,34 +365,41 @@ const animate = () => {
 	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.0 + 10 / (mapSetting.nbPlayer ** 2);
 	
 	// console.log(mapSetting.nbPlayer, nbPlayerCount);
-	if (mapSetting.nbPlayer == nbPlayerCount)
-	{
+	// if (mapSetting.nbPlayer == nbPlayerCount)
+	// {
 		UsersGroup.children.forEach((elem) => {
-			// if (playerKeys[elem.name].left && offsetX[elem.name] < (16 - parseInt(mapSetting.nbPlayer) + 2))
-			// else if (plaerKeys[elem.name].right && offsetX[elem.name] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
-
-			if (keys.left && offsetX < (16 - parseInt(mapSetting.nbPlayer) + 2))
+			// if (keys.left && offsetX < (16 - parseInt(mapSetting.nbPlayer) + 2))
+			// else if (keys.right && offsetX > (-16 + parseInt(mapSetting.nbPlayer) - 2))
+			
+			thisUser = (mapSetting.listOfPlayer[elem.name]).user;
+			if (playerKeys[thisUser].left && offsetX[elem.name] < (16 - parseInt(mapSetting.nbPlayer) + 2))
+			{
 				offsetX += 3 / radius;
-			else if (keys.right && offsetX > (-16 + parseInt(mapSetting.nbPlayer) - 2))
+				console.log(playerKeys);
+			}
+			else if (playerKeys[thisUser].right && offsetX[elem.name] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
+			{
 				offsetX -= 3 / radius;
+				console.log(playerKeys);
+			}
 			elem.position.x = Math.cos((positionX + offsetX) * Math.PI / 180) * radius;
 			elem.position.z = Math.sin((positionX + offsetX) * Math.PI / 180) * radius;
 			elem.lookAt(new THREE.Vector3(0, 0, 0));
 			// actualiser la position du joueur concerné
 		});
-	}
-	else
-	{
+	// }
+	// else
+	// {
 		// vue du lobby en mode attente
 		// if (ready < nb.player)
 		// {
-		radius = 30;
-		camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
-		camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
-		camera.position.y = 5;
-		angle += 0.1;
+		// radius = 30;
+		// camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
+		// camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
+		// camera.position.y = 5;
+		// angle += 0.1;
 		// }
-	}
+	// }
 
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
 
