@@ -10,15 +10,8 @@ let borderSize = 5;
 let userPartyId = 0;
 let thisUser;
 
-// ---------------------------------------------------------------------------------- //
 
-
-// Keys interractions //
-
-const keys = {
-	ArrowLeft: false,
-	ArrowRight: false
-};
+// Keys interraction //
 
 let i = 0;
 const playerKeys = {};
@@ -45,7 +38,10 @@ function addPlayer(playerId) {
 
 function updatePlayerKey(playerId, key, value) {
     if (playerKeys[playerId]) {
-        playerKeys[playerId][key] = value;
+		if (value == "keydown")
+        	playerKeys[playerId][key] = true;
+		if (value == "keyup")
+			playerKeys[playerId][key] = false;
     }
 }
 
@@ -54,35 +50,41 @@ document.addEventListener('keyup', handleKeyUp);
 
 function handleKeyDown(event) {
     const data = {
-        'type': 'paddle',
+        'type': 'playerPaddleUpdate',
         'event': 'keydown',
         'key': event.key
         // 'session_id': document.getElementById('session_id').value,
         // 'player_id': document.getElementById('player_id').value,
     };
-	updatePlayerKey(thisUser, event.key, true);
+	// updatePlayerKey("hgeissle", event.key, true);
+	// socket.send("keydown");
+	// console.log("jsilance", event.key, true);
     socket.send(JSON.stringify(data));
 }
 
 function handleKeyUp(event) {
-	const data = {
-		'type': 'paddle',
+    const data = {
+        'type': 'playerPaddleUpdate',
         'event': 'keyup',
         'key': event.key
         // 'session_id': document.getElementById('session_id').value,
         // 'player_id': document.getElementById('player_id').value,
     };
-	updatePlayerKey(thisUser, event.key, false);
+	// updatePlayerKey("hgeissle", event.key, false);
+	// console.log("jsilance", event.key, false);
+	// socket.send("keyup");
     socket.send(JSON.stringify(data));
 }
 
 socket.onmessage = function(event) {
+	console.log(event.data);
     const data = JSON.parse(event.data);
-    if (data.type == 'playerPadddleUpdate')
+    if (data.type == 'playerPaddleUpdate')
     {
-		const playerId = data.playerId;
+		const playerId = data.player;
 		const key = data.key;
-		const value = data.value;
+		const value = data.event;
+		console.log(playerId, key, value);
 		updatePlayerKey(playerId, key, value);
     }
     if (data.type == 'ball')
@@ -107,6 +109,11 @@ socket.onopen = function(e) {
 	console.log("Connection etablished!");
 };
 
+socket.onerror = function(e) {
+	console.error('Socket encountered error: ', e.message, 'Closing socket');
+	socket.close();
+};
+
 socket.onclose = function(e) {
     console.error('Socket closed unexpectedly. Attempting to reconnect...');
     setTimeout(function() {
@@ -125,18 +132,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 
 
 let radius = (mapSetting.nbPlayer > 2) ? borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 + 3 : 5;
-// let i = 0;
 
-// for (const el of mapSetting.listOfPlayer)
-// {
-// 	i++;
-// 	if (user == el.user)
-// 	{
-// 		userPartyId = i;
-// 	}
-// 	addPlayer(el.user);
-// 	console.log(el.user);
-// }
 let angle = (360 / mapSetting.nbPlayer) * userPartyId + (360 / mapSetting.nbPlayer) / 2;
 
 camera.position.x = Math.cos(angle * Math.PI / 180) * radius;
@@ -274,7 +270,7 @@ for (const el of shapes) {
 	rradius += (type == 2) ? 1 : 0;
 	shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
 	shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
-	shape.lookAt(new THREE.Vector3(0, 0, 0));		
+	shape.lookAt(new THREE.Vector3(0, 0, 0));
 	
 	if (type == 1)
 		BordersGroup.add(shape);
@@ -282,7 +278,6 @@ for (const el of shapes) {
 	{
 		shape.name = item_id;
 		UsersGroup.add(shape);
-		
 	}
 	else
 	{

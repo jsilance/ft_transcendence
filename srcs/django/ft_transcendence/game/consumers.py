@@ -6,7 +6,7 @@ import json
 class MyGameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         # Add the user to a specific group
-        await self.channel_layer.group_add("game_room", self.channel_name)
+        await self.channel_layer.group_add("chat_room", self.channel_name)
         self.username = self.scope["user"].username if self.scope["user"].is_authenticated else "Anonymous"
         await self.accept()
 
@@ -20,7 +20,7 @@ class MyGameConsumer(AsyncWebsocketConsumer):
 
         # Broadcast the message to the group
         await self.channel_layer.group_send(
-            "game_room",
+            "chat_room",
             {
                 'type': 'chat_message',
                 'message': message,
@@ -52,7 +52,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard("game_room", self.channel_name)
 
     async def receive(self, text_data):
-
+        
         text_data_json = json.loads(text_data)
     
         # Determine the type of message received.
@@ -65,7 +65,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         
         # Prepare a message to broadcast to the group.
             group_message = {
-            'type': 'playerPaddleUpdate',
+            'type': 'player_paddle_update',
             'player': self.username,  # Include the username of the sender.
             'event': event,
             'key' : key
@@ -73,18 +73,18 @@ class PongConsumer(AsyncWebsocketConsumer):
         
             # Send the message to the 'threejs_group'.
             # All connected clients in this group will receive it.
-            await self.channel_layer.group_send("threejs_group", group_message)
+            await self.channel_layer.group_send("game_room", group_message)
 
-async def playerPaddleUpdate(self, event):
-    # Extract the key pressed (direction) and username from the event.
-    eventkey = event['event']
-    key = event['key']
-    username = event['username']
+    async def player_paddle_update(self, event):
+        # Extract the key pressed (direction) and username from the event.
+        eventkey = event['event']
+        key = event['key']
+        username = event['player']
 
-    # Send a message directly back to the WebSocket client.
-    await self.send(text_data=json.dumps({
-        'type': 'playerPaddleUpdate',
-        'player': username,  # Include the username of the sender.
-        'event': eventkey,
-        'key': key
-    }))
+        # Send a message directly back to the WebSocket client.
+        await self.send(text_data=json.dumps({
+            'type': 'playerPaddleUpdate',
+            'player': username,  # Include the username of the sender.
+            'event': eventkey,
+            'key': key
+        }))
