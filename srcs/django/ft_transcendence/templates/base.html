@@ -13,7 +13,7 @@
 	</head>
 	<body>
 		{% include './navbar.html' %}
-		<section style="max-width: 756px; margin: auto; padding-top: 25px;">
+		<main>
 			{% if messages %}
 				{% for message in messages %}
 					<div class="alert alert-{{message.tags}}">
@@ -22,7 +22,7 @@
 				{% endfor %}
 			{% endif %}
 			{% block body %}{% endblock %}
-		</section>
+		</main>
 		{% block script_body %}{% endblock %}
 		<script type="text/javascript" src="{% static 'js/main.js' %}"></script>
 		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>

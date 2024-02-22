@@ -2,16 +2,11 @@
 {% load static %}
 
 {% block title %}
-	home
+	{{ display_user.username | capfirst}} (Profile)
 {% endblock %}
 
 {% block styles %}
 	<link rel="stylesheet" href="{% static 'home/styles.css' %}">
-	<style>
-		body {
-			background-color: var(--secondary-bg-color);
-		}
-	</style>
 {% endblock %}
 
 {% block body %}
@@ -42,6 +37,3 @@
 		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque quidem voluptatum quisquam officiis numquam, perferendis tempore rem nostrum ut libero asperiores optio voluptate quaerat? Minima.</p>
 	</section>
 {% endblock %}
-
-
-	

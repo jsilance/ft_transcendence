@@ -153,9 +153,10 @@ input:focus, textarea:focus {
                         CONTAINERS & LAYOUT TAGS
 *******************************************************************************/
 
-.global_container_ {
+main {
     max-width: 756px;
     margin: auto;
+    padding-top: 25px;
 }
 
 .row_custom {
