@@ -9,13 +9,14 @@ let positionX = 0;
 let borderSize = 5;
 let userPartyId = 0;
 let thisUser;
-let shapes = [];
+let shapesObj = [];
 
 // Keys interraction //
 
 let i = 0;
 const playerKeys = {};
 
+// add player and define id of player
 for (const el of mapSetting.listOfPlayer)
 {
 	i++;
@@ -27,7 +28,6 @@ for (const el of mapSetting.listOfPlayer)
 	console.log(el.user);
 }
 
-
 // Function to initialize keys for a new player
 function addPlayer(playerId) {
     playerKeys[playerId] = {
@@ -35,6 +35,8 @@ function addPlayer(playerId) {
         ArrowRight: false
     };
 }
+
+// ----------Gestion socket et communication--------------------------------------------------------------------- //
 
 function updatePlayerKey(playerId, key, value) {
     if (playerKeys[playerId]) {
@@ -58,7 +60,6 @@ function handleKeyDown(event) {
     };
 	// updatePlayerKey("hgeissle", event.key, true);
 	// socket.send("keydown");
-	// console.log("jsilance", event.key, true);
     socket.send(JSON.stringify(data));
 }
 
@@ -71,7 +72,6 @@ function handleKeyUp(event) {
         // 'player_id': document.getElementById('player_id').value,
     };
 	// updatePlayerKey("hgeissle", event.key, false);
-	// console.log("jsilance", event.key, false);
 	// socket.send("keyup");
     socket.send(JSON.stringify(data));
 }
@@ -81,7 +81,8 @@ socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
 	if (data.type == 'initObject')
 	{
-		shapes = data.object;
+		shapesObj = data.object;
+		loadShapes(shapesObj);
 	}
     if (data.type == 'playerPaddleUpdate')
     {
@@ -124,68 +125,57 @@ socket.onclose = function(e) {
         // Implement reconnection logic here
     }, 1000); // Adjust delay and implement exponential backoff
 };
-
-// ---------------------------------------------------------------------------------- //
+// -------------------------------------------------------------------------------------------------------------- //
 
 // Mise en place three.js
 
 const scene = new THREE.Scene();
 
+
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-
-
 let radius = (mapSetting.nbPlayer > 2) ? borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 + 3 : 5;
-
 let angle = (360 / mapSetting.nbPlayer) * userPartyId + (360 / mapSetting.nbPlayer) / 2;
 
 camera.position.x = Math.cos(angle * Math.PI / 180) * radius;
 camera.position.z = Math.sin(angle * Math.PI / 180) * radius;
 camera.position.y = 3;
+camera.lookAt(new THREE.Vector3(0, 0, 0));
 // console.log(camera.position);
 // ---------------------------------------------------------------------------------- //
 
-// Utilisation de webgl
-// const renderer = new THREE.WebGLRenderer();
 const renderer = new THREE.WebGLRenderer({antialias: true});
-// const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-
-// 
-// window size
 renderer.setSize(window.innerWidth, window.innerHeight - 80);
-// const controls = new OrbitControls(camera, renderer.domElement);
-// renderer.setSize(window.innerWidth - 15, window.innerHeight - 16);
-// renderer.setSize(window.innerWidth - 80, window.innerHeight - 60);
-
-// let controls = new THREE.OrbitControls(camera);
-// controls.addEventListener('change', renderer);
 
 // ---------------------------------------------------------------------------------- //
 
 // --------------- Load skybox ------------------------------------------------------ //
 
-let skyboxMaterial = [];
-// load static image/img...
-let texture_ft = new THREE.TextureLoader().load('/static/game/object/mystic_ft.jpg');
-let texture_bk = new THREE.TextureLoader().load('/static/game/object/mystic_bk.jpg');
-let texture_up = new THREE.TextureLoader().load('/static/game/object/mystic_up.jpg');
-let texture_dn = new THREE.TextureLoader().load('/static/game/object/mystic_dn.jpg');
-let texture_rt = new THREE.TextureLoader().load('/static/game/object/mystic_rt.jpg');
-let texture_lf = new THREE.TextureLoader().load('/static/game/object/mystic_lf.jpg');
+function loadSkybox()
+{
 
-skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_ft}));
-skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_bk}));
-skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_up}));
-skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_dn}));
-skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_rt}));
-skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_lf}));
+	let skyboxMaterial = [];
 
-for (let i = 0; i < 6; i++)
-skyboxMaterial[i].side = THREE.BackSide;
-
-let skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
-let skybox = new THREE.Mesh(skyboxGeo, skyboxMaterial);
-scene.add(skybox);
+	let texture_ft = new THREE.TextureLoader().load('/static/game/object/mystic_ft.jpg');
+	let texture_bk = new THREE.TextureLoader().load('/static/game/object/mystic_bk.jpg');
+	let texture_up = new THREE.TextureLoader().load('/static/game/object/mystic_up.jpg');
+	let texture_dn = new THREE.TextureLoader().load('/static/game/object/mystic_dn.jpg');
+	let texture_rt = new THREE.TextureLoader().load('/static/game/object/mystic_rt.jpg');
+	let texture_lf = new THREE.TextureLoader().load('/static/game/object/mystic_lf.jpg');
+	
+	skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_ft}));
+	skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_bk}));
+	skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_up}));
+	skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_dn}));
+	skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_rt}));
+	skyboxMaterial.push(new THREE.MeshBasicMaterial({map: texture_lf}));
+	
+	for (let i = 0; i < 6; i++)
+	skyboxMaterial[i].side = THREE.BackSide;
+	
+	let skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
+	let skybox = new THREE.Mesh(skyboxGeo, skyboxMaterial);
+	scene.add(skybox);
+}
 
 // ---------------------------------------------------------------------------------- //
 
@@ -203,13 +193,9 @@ const sceneBox = document.getElementById('scene-box');
 sceneBox.appendChild(renderer.domElement);
 
 
-// creation du plane qui sert de sol
-// const planeGeometry = new THREE.PlaneGeometry(40, 40);
 const planeGeometry = new THREE.CylinderGeometry(radius, radius, 0.1, mapSetting.nbPlayer * 2);
 
-// planeGeometry.rotateX(Math.PI / 180 * -90);
 const planeMaterial = new THREE.MeshPhongMaterial({color: 0x5f5f5f});
-// const planeMaterial = new THREE.MeshBasicMaterial({color: 0x4f4f4f});
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.position.y = -0.3;
 scene.add(plane);
@@ -236,60 +222,64 @@ const BordersGroup = new THREE.Group();
 scene.add(UsersGroup);
 scene.add(BordersGroup);
 
-for (const el of shapes) {
-	const {pparty_id, item_id, type, color, posx, posy} = el;
-	let geometry;
+function loadShapes(shapes)
+{
 
-	switch (type) {
-		case 1:
-			geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
-			borderAngle = (360 / mapSetting.nbPlayer) * item_id;
-			angle = borderAngle;
-			break;
-		case 2:
-			geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-			playerAngle = (360 / mapSetting.nbPlayer) * item_id + (360 / mapSetting.nbPlayer) / 2;
-			angle = playerAngle;
-			break;
-		case 3:
-			geometry = new THREE.SphereGeometry(0.2);
-			break;
+	for (const el of shapes) {
+		const {pparty_id, item_id, type, color, posx, posy} = el;
+		let geometry;
+		
+		switch (type) {
+			case 1:
+				geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
+				borderAngle = (360 / mapSetting.nbPlayer) * item_id;
+				angle = borderAngle;
+				break;
+			case 2:
+				geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+				playerAngle = (360 / mapSetting.nbPlayer) * item_id + (360 / mapSetting.nbPlayer) / 2;
+				angle = playerAngle;
+				break;
+			case 3:
+				geometry = new THREE.SphereGeometry(0.2);
+				break;
 		}
-	
-	// choix du shader
-
-	let material;
-
-	if (type == 2 && item_id == userPartyId)
-	{
-		material = new THREE.MeshPhongMaterial({color: "#ff0000"});
-		positionX = angle;
-	}
-	else
+					
+		// choix du shader
+		
+		let material;
+		
+		if (type == 2 && item_id == userPartyId)
+		{
+			material = new THREE.MeshPhongMaterial({color: "#ff0000"});
+			positionX = angle;
+		}
+		else
 		material = new THREE.MeshPhongMaterial({color: color});
-	
-
-	const shape = new THREE.Mesh(geometry, material);
-	let rradius = (mapSetting.nbPlayer > 2) ? borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 : 2.5;
-	rradius += (type == 2) ? 1 : 0;
-	shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
-	shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
-	shape.lookAt(new THREE.Vector3(0, 0, 0));
-	
-	if (type == 1)
+		
+		
+		const shape = new THREE.Mesh(geometry, material);
+		let rradius = (mapSetting.nbPlayer > 2) ? borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 : 2.5;
+		rradius += (type == 2) ? 1 : 0;
+		shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
+		shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
+		shape.lookAt(new THREE.Vector3(0, 0, 0));
+			
+		if (type == 1)
 		BordersGroup.add(shape);
-	else if (type == 2)
-	{
-		shape.name = item_id;
-		UsersGroup.add(shape);
+		else if (type == 2)
+		{
+			shape.name = item_id;
+			UsersGroup.add(shape);
+		}
+		else
+		{
+			shape.position.x = 0;
+			shape.position.z = 0;
+			scene.add(shape);
+		}
+		// threeJsShape.push(shape);
 	}
-	else
-	{
-		shape.position.x = 0;
-		shape.position.z = 0;
-		scene.add(shape);
-	}
-	// threeJsShape.push(shape);
 }
 // ---------------------------------------------------------------------------------- //
 
@@ -305,14 +295,19 @@ directionalLight.position.set(1, 2, 3);
 
 // ---------------------------------------------------------------------------------- //
 
-camera.lookAt(new THREE.Vector3(0, 0, 0));
-
 let offsetX = [];
 
 function g_start()
 {
 	console.log("message");
 }
+
+// ---------------------------------------------------------------------------------- //
+loadSkybox();
+loadShapes([]);
+
+// ---------------------------------------------------------------------------------- //
+
 
 let nbPlayerCount = 0;
 mapSetting.listOfPlayer.forEach((usr) => {nbPlayerCount++});
