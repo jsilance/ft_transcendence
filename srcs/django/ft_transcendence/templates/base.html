@@ -13,7 +13,8 @@
 	</head>
 	<body>
 		{% include './navbar.html' %}
-		<section style="max-width: 756px; margin: auto; padding-top: 25px;">
+		<section>
+		<!-- <section style="max-width: 756px; margin: auto; padding-top: 25px;"> -->
 			{% if messages %}
 				{% for message in messages %}
 					<div class="alert alert-{{message.tags}}">

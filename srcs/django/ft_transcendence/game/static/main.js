@@ -60,21 +60,19 @@ function handleKeyDown(event) {
         // 'session_id': document.getElementById('session_id').value,
         // 'player_id': document.getElementById('player_id').value,
     };
-	updatePlayerKey("jsilance", event.key, true);
-	// console.log("jsilance", event.key, true);
+	updatePlayerKey(thisUser, event.key, true);
     socket.send(JSON.stringify(data));
 }
 
 function handleKeyUp(event) {
-    const data = {
-        'type': 'paddle',
+	const data = {
+		'type': 'paddle',
         'event': 'keyup',
         'key': event.key
         // 'session_id': document.getElementById('session_id').value,
         // 'player_id': document.getElementById('player_id').value,
     };
-	updatePlayerKey("jsilance", event.key, false);
-	// console.log("jsilance", event.key, false);
+	updatePlayerKey(thisUser, event.key, false);
     socket.send(JSON.stringify(data));
 }
 
@@ -154,7 +152,7 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 
 // 
 // window size
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight - 80);
 // const controls = new OrbitControls(camera, renderer.domElement);
 // renderer.setSize(window.innerWidth - 15, window.innerHeight - 16);
 // renderer.setSize(window.innerWidth - 80, window.innerHeight - 60);
@@ -273,12 +271,10 @@ for (const el of shapes) {
 
 	const shape = new THREE.Mesh(geometry, material);
 	let rradius = (mapSetting.nbPlayer > 2) ? borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 : 2.5;
-	if (type == 2)
-		console.log(angle);
 	rradius += (type == 2) ? 1 : 0;
 	shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
 	shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
-	shape.lookAt(new THREE.Vector3(0, 0, 0));
+	shape.lookAt(new THREE.Vector3(0, 0, 0));		
 	
 	if (type == 1)
 		BordersGroup.add(shape);
@@ -286,7 +282,7 @@ for (const el of shapes) {
 	{
 		shape.name = item_id;
 		UsersGroup.add(shape);
-		// console.log(shape.position);
+		
 	}
 	else
 	{
@@ -340,17 +336,22 @@ const animate = () => {
 	let it = 0;
 	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.0 + 10 / (mapSetting.nbPlayer ** 2);
 	
-	// console.log(mapSetting.nbPlayer, nbPlayerCount);
-	// if (mapSetting.nbPlayer == nbPlayerCount)
-	// {
+	if (mapSetting.nbPlayer == nbPlayerCount)
+	{
 		try {
 			UsersGroup.children.forEach((elem) => {
-				console.log(mapSetting.listOfPlayer.filter(x => x==2).length);
+				// console.log(mapSetting.listOfPlayer.filter(x => x==2).length);
 				thisUser = (mapSetting.listOfPlayer[elem.name]).user;
 				if (playerKeys[thisUser].ArrowLeft && offsetX[thisUser] < (16 - parseInt(mapSetting.nbPlayer) + 2))
-				offsetX[thisUser] += 3 / radius;
+				{
+					offsetX[thisUser] += 3 / radius;
+					console.log("Left");
+				}
 				else if (playerKeys[thisUser].ArrowRight && offsetX[thisUser] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
-				offsetX[thisUser] -= 3 / radius;
+				{
+					offsetX[thisUser] -= 3 / radius;
+					console.log("Right");
+				}
 				elem.position.x = Math.cos((positionX + offsetX[thisUser]) * Math.PI / 180) * radius;
 				elem.position.z = Math.sin((positionX + offsetX[thisUser]) * Math.PI / 180) * radius;
 				elem.lookAt(new THREE.Vector3(0, 0, 0));
@@ -360,19 +361,19 @@ const animate = () => {
 		{
 			console.error(e);
 		}
-	// }
-	// else
-	// {
+	}
+	else
+	{
 		// vue du lobby en mode attente
-		// if (ready < nb.player)
-		// {
-		// radius = 30;
-		// camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
-		// camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
-		// camera.position.y = 5;
-		// angle += 0.1;
-		// }
-	// }
+		if (ready < nb.player)
+		{
+			radius = 30;
+			camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
+			camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
+			camera.position.y = 5;
+			angle += 0.1;
+		}
+	}
 
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
 
