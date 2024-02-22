@@ -9,7 +9,7 @@ let positionX = 0;
 let borderSize = 5;
 let userPartyId = 0;
 let thisUser;
-
+let shapes = [];
 
 // Keys interraction //
 
@@ -79,6 +79,10 @@ function handleKeyUp(event) {
 socket.onmessage = function(event) {
 	console.log(event.data);
     const data = JSON.parse(event.data);
+	if (data.type == 'initObject')
+	{
+		shapes = data.object;
+	}
     if (data.type == 'playerPaddleUpdate')
     {
 		const playerId = data.player;
@@ -319,7 +323,7 @@ try {
 		if (!mapSetting.listOfPlayer[elem.name])
 			throw ("empty");
 		thisUser = (mapSetting.listOfPlayer[elem.name]).user;
-		offsetX[thisUser] = 0;
+		offsetX[thisUser] = parseInt(elem.name) * (360 / nbPlayerCount);
 	})
 }
 catch (e)
@@ -360,14 +364,14 @@ const animate = () => {
 	else
 	{
 		// vue du lobby en mode attente
-		if (ready < nb.player)
-		{
+		// if (ready < nb.player)
+		// {
 			radius = 30;
 			camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
 			camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
 			camera.position.y = 5;
 			angle += 0.1;
-		}
+		// }
 	}
 
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
