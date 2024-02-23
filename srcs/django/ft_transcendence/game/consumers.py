@@ -1,5 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
-# from asgiref.sync import sync_to_async
+from .models import Shape
+from asgiref.sync import sync_to_async
 # from .models import ChatMessage, Shape
 import json
 
@@ -47,9 +48,15 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.username = self.scope["user"].username if self.scope["user"].is_authenticated else "Anonymous"
         await self.accept()
 
-    async def disconnect(self):
+    async def disconnect(self): 
         # Remove the user from the group
         await self.channel_layer.group_discard("game_room", self.channel_name)
+
+    @staticmethod
+    @sync_to_async
+    def get_shapes_async(party_id):
+        # Fetch shapes in a way that is compatible with async
+        return [{"item_id": int(x.item_id), "type": int(x.type), "color": x.color, "posx": int(x.posx), "posy": int(x.posy)} for x in Shape.objects.filter(party_id=party_id)]
 
     async def receive(self, text_data):
         
@@ -74,6 +81,18 @@ class PongConsumer(AsyncWebsocketConsumer):
             # Send the message to the 'threejs_group'.
             # All connected clients in this group will receive it.
             await self.channel_layer.group_send("game_room", group_message)
+        
+        if message_type == 'initObject':
+                
+            party_id = text_data_json['id']
+            # Handle the object update event.
+            shapes = await self.get_shapes_async(party_id)
+            shape_json = json.dumps(shapes)
+            await self.send(text_data=json.dumps({
+                'type': 'initObject',
+                'shapes': shape_json
+            }))
+
 
     async def player_paddle_update(self, event):
         # Extract the key pressed (direction) and username from the event.

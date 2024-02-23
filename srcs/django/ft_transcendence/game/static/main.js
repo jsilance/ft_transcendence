@@ -10,6 +10,7 @@ let borderSize = 5;
 let userPartyId = 0;
 let thisUser;
 let shapesObj = [];
+let shapes = [];
 
 // Keys interraction //
 
@@ -81,8 +82,10 @@ socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
 	if (data.type == 'initObject')
 	{
-		shapesObj = data.object;
-		loadShapes(shapesObj);
+		shapesObj = data.shapes;
+		shapes = JSON.parse(shapesObj);
+		console.log(shapesObj);
+		loadShapes(shapes);
 	}
     if (data.type == 'playerPaddleUpdate')
     {
@@ -112,6 +115,10 @@ socket.onmessage = function(event) {
 
 socket.onopen = function(e) {
 	console.log("Connection etablished!");
+	socket.send(JSON.stringify({
+		'type': 'initObject',
+		'id': party_id
+	}));
 };
 
 socket.onerror = function(e) {
@@ -224,11 +231,11 @@ scene.add(BordersGroup);
 
 function loadShapes(shapes)
 {
-
 	for (const el of shapes) {
 		const {pparty_id, item_id, type, color, posx, posy} = el;
 		let geometry;
 		
+		console.log(type);
 		switch (type) {
 			case 1:
 				geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
