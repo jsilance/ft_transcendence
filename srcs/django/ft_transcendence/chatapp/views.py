@@ -7,11 +7,13 @@ from accounts.models import Profile
 # Create your views here.
 @login_required
 def chat_page(request):
+    profile = Profile.objects.all()
     rooms = Room.objects.all()
     users = User.objects.all()
     return render(request, "chat.html", {
         "rooms": rooms,
-        "users" : users
+        "users" : users,
+        "profiles": profile
         })
 
 def room(request, slug):
