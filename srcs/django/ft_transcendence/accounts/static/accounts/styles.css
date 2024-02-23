@@ -117,3 +117,31 @@
     border: 1px solid var(--secondary-bg-color);
     background-color: var(--alert);
 }
+
+.header {
+    padding: 16px;
+}
+
+.header_img {
+    margin-right: 20px;
+    border-radius: 200px;
+}
+
+.header_info {
+}
+
+.header_score {
+}
+
+.bs_v, .bs_l {
+    margin-right: 10px;
+}
+
+.header_option {
+    padding:4px 12px;
+    border-radius: 8px;
+}
+
+.btn_requests {
+    margin-left: 10px;
+}

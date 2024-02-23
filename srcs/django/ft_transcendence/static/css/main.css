@@ -89,22 +89,25 @@ a:hover {
 }
 
 button:not(.btn_discrete) {
-    padding: 9px 25px;
-    /* background-color: var(--accent); */
-    background: linear-gradient(#8F13FD, #7011F4);
+    padding: 4px 8px;
+    /* background: linear-gradient(#8F13FD, #7011F4); */
+    background: linear-gradient(#8F13FD, #8F13FD);
+    /* background-color: #8F13FD; */
     border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease 0s;
+    border-radius: 5px;
+    font-size: .9rem;
+    /* cursor: pointer; */
+    color: white;
+    transition: all 0.4s ease 0s;
 }
 
 button:not(.btn_discrete):hover {
-    background: linear-gradient(#fd139f, #9211f4);
+    background: linear-gradient(#ca13fd, #9211f4);
 }
 
 .btn_discrete {
     background-color: transparent;
-    border: none;
+    /* border: none; */
     margin: 0;
     padding: 0;
     height: auto;

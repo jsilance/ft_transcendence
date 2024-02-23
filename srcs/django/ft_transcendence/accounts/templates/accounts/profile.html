@@ -6,26 +6,56 @@
 {% endblock %}
 
 {% block styles %}
-	<link rel="stylesheet" href="{% static 'home/styles.css' %}">
+	<link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 {% endblock %}
 
 {% block body %}
-	<div class="banner d-flex">
-		<img class="banner_img" src="{{ profile_img }}" width="125px" height="125px" alt="profile picture">
-		<div class="banner_info">
+	<div class="header d-flex">
+		<img class="header_img" src="{{ profile_img }}" width="125px" height="125px" alt="profile picture">
+		<div class="header_info">
 			<div class="d-flex align-items-center">
 				<h1 class="">@{{ username }}</h1>
 				{% if username == user.username %}
-					<a class="banner_option edit" href="{% url 'accounts:profile_edit' %}">
+					<a class="header_option edit" href="{% url 'accounts:profile_edit' %}">
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
 							<path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
 							</svg>
 					</a>
 				{% endif %}
-				<i class="bi bi-pen"></i>
+
+				{% if request.user.is_authenticated %}
+
+					<!-- How many friend requests do YOU have -->
+					<!-- {% if friend_requests %}
+						<h2>Friend request: ({{ friend_requests | length }})</h2>
+					{% endif %} -->
+
+					<!-- THEM to YOU -->
+					{% if request_sent == 0 %}
+						<button class="btn_requests">Accept</button>
+						<button class="btn_requests">Ignore</button>
+					{% endif %}
+
+					<!-- Cancel Friend Request / Send Friend Request / Remove Friend -->
+					{% if is_friend == False and is_self == False %}
+						<!-- You sent them a request -->
+						{% if request_sent == 1 %}
+							<button styles="background_color: red;" class="btn_requests">Invitation sent</button>
+						{% endif %}
+						<!-- No requests have been sent -->
+						{% if request_sent == -1 %}
+							<button class="btn_requests" id="id_send_friend_request_btn">Add Friend</button>
+						{% endif %}
+					{% endif %}
+					{% if is_friend == True and is_self == False %}
+						<button class="btn_requests">Unfriend</button>
+						<button class="btn_requests">Message</button>
+					{% endif %}
+
+				{% endif %}
 			</div>
 			<p>Eccentric warrior, adorned and armed, storms into battle with flair.</p>
-			<div class="d-flex banner_score">
+			<div class="d-flex header_score">
 				<p class="mr-5 bs_v">wins: {{ wins }}</p>
 				<p class="bs_l">losses: {{ losses }}</p>
 			</div>
@@ -34,5 +64,27 @@
 	<section class="feed">
 		<h3>Latest Matches</h3>
 		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque quidem voluptatum quisquam officiis numquam, perferendis tempore rem nostrum ut libero asperiores optio voluptate quaerat? Minima.</p>
+		<h2>Friends ({{ friends | length }})</h2>
 	</section>
+
+{% endblock %}
+
+{% block script_body %}
+
+	{% include 'accounts/snippets/send_friend_request.html' %}
+
+	<script>
+
+		function onFriendRequestSent() {
+			location.reload();
+		}
+
+		var sendFriendRequestBtn = document.getElementById("id_send_friend_request_btn")
+		if (sendFriendRequestBtn != null) {
+			sendFriendRequestBtn.addEventListener("click", function(){
+				sendFriendRequest("{{id}}", onFriendRequestSent);
+			})
+		}
+	</script>
+
 {% endblock %}

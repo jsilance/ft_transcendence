@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
-from .models import FriendList
-
+from .models import FriendList, FriendRequest
+from .utils import get_friend_request_or_false
+from .friend_request_status import FriendRequestStatus
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -12,6 +13,7 @@ import requests
 from dotenv import load_dotenv
 import os
 from django.conf import settings
+import json
 
 # get acces to environment variables
 load_dotenv()
@@ -163,22 +165,60 @@ def profile(request, username):
         })
     if displayed_user:
         context['username'] = displayed_user.username
+        context['id'] = displayed_user.id
         context['email'] = displayed_user.email
         context['profile_img'] = displayed_user.profile.image.url
         context['wins'] = displayed_user.profile.wins
         context['losses'] = displayed_user.profile.losses
 
+        try:
+            friend_list = FriendList.objects.get(user=displayed_user)
+        except FriendList.DoesNotExist:
+            friend_list = FriendList(user=displayed_user)
+            friend_list.save()
+        friends = friend_list.friends.all()
+        context['friends'] = friends
+
         # Define template variables
         is_self = True
         is_friend = False
+        request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
+        friend_request = None
         user = request.user
+        # Logged in but NOT looking at your own profile
         if user.is_authenticated and user != displayed_user:
             is_self = False
+            if friends.filter(pk=user.id):
+                is_friend = True
+            else:
+                is_friend = False
+                # CASE1: Request has been sent from THEM to YOU: THEM_TO_YOU
+                if get_friend_request_or_false(sender=displayed_user, receiver=user) != False:
+                    request_sent = FriendRequestStatus.THEM_SENT_TO_YOU.value
+                    context['pending_friend_request_id'] = get_friend_request_or_false(
+                        sender=displayed_user,
+                        receiver=user
+                    ).id
+                # CASE2: Request has been sent from YOU to THEM: YOU_SENT_TO_THEM
+                elif get_friend_request_or_false(sender=user, receiver=displayed_user) != False:
+                    request_sent = FriendRequestStatus.YOU_SENT_TO_THEM.value
+                # CASE3: No request has been sent: NO_REQUEST_SENT
+                else:
+                    request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
+        # NOT logged in
         elif not user.is_authenticated:
             is_self = False
+        # Logged in and looking at your profile
+        else:
+            try:
+                friend_request = FriendRequest.objects.filter(receiver=user, is_active=True)
+            except:
+                pass
         
         context["is_self"] = is_self
         context["is_friend"] = is_friend
+        context['request_sent'] = request_sent
+        context['friend_requests'] = friend_request
 
     context['show_alerts'] = True
 
@@ -225,3 +265,41 @@ def editprofile(request):
         'p_form': p_form
     }
     return render(request, 'accounts/editprofile.html', context)
+
+def send_friend_request(request):
+    user = request.user
+    payload = {}
+    if request.method == 'POST' and user.is_authenticated:
+        user_id = request.POST.get('receiver_user_id')
+        if user_id:
+            receiver = User.objects.get(pk=user_id)
+            try:
+                # Get any friend requests (active and not-active)
+                friend_requests = FriendRequest.objects.filter(
+                    sender=user,
+                    receiver=receiver
+                )
+                # find if any of them are active
+                try:
+                    for request in friend_requests:
+                        if request.is_active:
+                            raise Exception("You already sent them a friend request.")
+                    # if none are active, then create a new friend request
+                    friend_request = FriendRequest(sender=user, receiver=receiver)
+                    friend_request.save()
+                    payload['response'] = "Friend request sent."
+                except Exception as e:
+                    payload['response'] = str(e)
+            except FriendRequest.DoesNotExist:
+                # There are no friend requests so create one
+                friend_request = FriendRequest(sender=user, receiver=receiver)
+                friend_request.save()
+                payload['response'] = "Friend request sent."
+
+            if payload['response'] == None:
+                payload['response'] = "Something went wrong."
+        else:
+            payload['response'] = "Unable to send a friend request."
+    else:
+        payload['response'] = "You must be authenticated to send a friend request."
+    return HttpResponse(json.dumps(payload), content_type="application/json")
