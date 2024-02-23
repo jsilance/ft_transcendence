@@ -3,7 +3,7 @@
 *******************************************************************************/
 
 .login_box {
-    /* min-height: 520px; */
+    padding-top: 0; /* cancel main.css settings */
     margin: auto;
     display: grid;
     grid-template-columns: 50% 50%;

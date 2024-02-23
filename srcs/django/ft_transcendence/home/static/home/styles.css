@@ -3,6 +3,7 @@
 *******************************************************************************/
 
 .table {
+    padding-top: 0;
     margin: 40px 0;
     background-color: var(--bg-layer1);
     border-radius: 20px;

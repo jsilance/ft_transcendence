@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
+from .models import FriendList
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -9,6 +11,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 import requests
 from dotenv import load_dotenv
 import os
+from django.conf import settings
 
 # get acces to environment variables
 load_dotenv()
@@ -25,20 +28,26 @@ FROMLOGIN = 'd56b699830e77ba53855679cb1d252da'
 FROMSIGNUP = '7d2abf2d0fa7c3a0c13236910f30bc43'
 
 def signup_v(req):
+    context = {
+        'authorize_uri': authorize_uri+FROMSIGNUP,
+        'show_alerts': True,
+    }
     if req.method == 'POST':
         form = UserRegisterForm(req.POST)
         if form.is_valid():
-            user = form.save()
+            form.save()
             messages.success(req, f'Your account has been created! You are now able to log in.')
             return redirect('accounts:login')
     else:
         form = UserRegisterForm()
-    return render(req, 'accounts/signup.html', {
-        'form': form,
-        'authorize_uri': authorize_uri+FROMSIGNUP
-    })
+    context['form'] = form
+    return render(req, 'accounts/signup.html', context)
 
 def login_v(req):
+    context = {
+        'authorize_uri': authorize_uri+FROMLOGIN,
+        'show_alerts': True,
+    }
     if req.method == 'POST':
         form = AuthenticationForm(data=req.POST)
         if form.is_valid():
@@ -50,10 +59,8 @@ def login_v(req):
                 return redirect('home:welcome')
     else:
         form = AuthenticationForm()
-    return render(req, 'accounts/login.html', {
-        'form': form,
-        'authorize_uri': authorize_uri+FROMLOGIN,
-    })
+    context['form'] = form
+    return render(req, 'accounts/login.html', context)
 
 """
 Callback for Oauth2 logic
@@ -68,7 +75,7 @@ def callback(req):
         return HttpResponseBadRequest("Bad Request: Missing 'code' parameter")
     
     # exchange authorization code for access token
-    o42 = oauth42()
+    o42 = Oauth42()
     token = o42.get_token(authorization_code)
 
     # use token to request user data
@@ -103,7 +110,7 @@ def callback(req):
         messages.success(req, f'Your account has been created! You are now able to log in.')
         return redirect('accounts:login')
 
-class oauth42:
+class Oauth42:
     # exchange temporary code for access token
     def get_token(self, code):
         url = 'https://api.intra.42.fr/oauth/token'
@@ -141,14 +148,45 @@ def logout_v(req):
 
 ################################################################################
 
+"""
+Profile view of current user or another one
+"""
 @login_required(login_url='/accounts/login/')
 def profile(request, username):
+    context = {}
     try:
-        display_user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return render(request, '404.html', {'message': 'User not found'})
-    return render(request, 'accounts/profile.html', {'display_user': display_user})
+        displayed_user = User.objects.get(username=username)
+    except:
+        return render(request, '404.html', {
+            'message': 'User not found',
+            "show_alerts": True
+        })
+    if displayed_user:
+        context['username'] = displayed_user.username
+        context['email'] = displayed_user.email
+        context['profile_img'] = displayed_user.profile.image.url
+        context['wins'] = displayed_user.profile.wins
+        context['losses'] = displayed_user.profile.losses
 
+        # Define template variables
+        is_self = True
+        is_friend = False
+        user = request.user
+        if user.is_authenticated and user != displayed_user:
+            is_self = False
+        elif not user.is_authenticated:
+            is_self = False
+        
+        context["is_self"] = is_self
+        context["is_friend"] = is_friend
+
+    context['show_alerts'] = True
+
+    return render(request, 'accounts/profile.html', context)
+
+"""
+Logic for deleting a user > profile > friendlist
+"""
 @login_required(login_url='/accounts/login/')
 def deleteprofile(request, username):
     # Ensure the user is deleting their own profile or is a superuser
@@ -165,6 +203,9 @@ def deleteprofile(request, username):
     user_to_delete.delete()
     return redirect('accounts:login')
 
+"""
+Settings page for editing user info
+"""
 @login_required(login_url='/accounts/login/')
 def editprofile(request):
     if request.method == 'POST':

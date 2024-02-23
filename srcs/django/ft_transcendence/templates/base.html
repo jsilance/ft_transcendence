@@ -13,13 +13,15 @@
 	</head>
 	<body>
 		{% include './navbar.html' %}
-		<main>
-			{% if messages %}
-				{% for message in messages %}
-					<div class="alert alert-{{message.tags}}">
-						{{ message | safe }}
-					</div>
-				{% endfor %}
+		<main class="container_global">
+			{% if show_alerts %}
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-{{message.tags}}">
+							{{ message | safe }}
+						</div>
+					{% endfor %}
+				{% endif %}
 			{% endif %}
 			{% block body %}{% endblock %}
 		</main>
