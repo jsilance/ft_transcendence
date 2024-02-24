@@ -12,4 +12,5 @@ urlpatterns = [
 	path('profile/edit/', views.editprofile, name='profile_edit'),
     path('profile/<str:username>/delete/', views.deleteprofile, name='profile_delete'),
     path('friend_request/', views.send_friend_request, name='friend_request'),
+    path('accept_friend_request/<str:friend_request_id>', views.accept_friend_request, name='friend_request_accept'),
 ]

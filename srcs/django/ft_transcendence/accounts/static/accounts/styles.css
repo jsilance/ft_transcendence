@@ -120,6 +120,9 @@
 
 .header {
     padding: 16px;
+    background-color: var(--secondary-bg-color);
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
 .header_img {
@@ -144,4 +147,22 @@
 
 .btn_requests {
     margin-left: 10px;
+}
+
+/* ///////////////// */
+
+.request_card {
+    display: flex;
+    border: 1px solid var(--main-bg-color);
+    padding: 8px;
+    border-radius: 4px;
+}
+.request_card:hover {
+    background-color: #2d2b34;
+}
+.request_card > a > img {
+    margin-right: 5px;
+}
+.request_card > div > p {
+    margin-bottom: 5px;
 }

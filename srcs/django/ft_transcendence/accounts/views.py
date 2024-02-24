@@ -170,6 +170,7 @@ def profile(request, username):
         context['profile_img'] = displayed_user.profile.image.url
         context['wins'] = displayed_user.profile.wins
         context['losses'] = displayed_user.profile.losses
+        context['all_users'] = User.objects.all()
 
         try:
             friend_list = FriendList.objects.get(user=displayed_user)
@@ -183,7 +184,7 @@ def profile(request, username):
         is_self = True
         is_friend = False
         request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
-        friend_request = None
+        friend_requests = None
         user = request.user
         # Logged in but NOT looking at your own profile
         if user.is_authenticated and user != displayed_user:
@@ -211,14 +212,14 @@ def profile(request, username):
         # Logged in and looking at your profile
         else:
             try:
-                friend_request = FriendRequest.objects.filter(receiver=user, is_active=True)
+                friend_requests = FriendRequest.objects.filter(receiver=user, is_active=True)
             except:
                 pass
         
         context["is_self"] = is_self
         context["is_friend"] = is_friend
         context['request_sent'] = request_sent
-        context['friend_requests'] = friend_request
+        context['friend_requests'] = friend_requests
 
     context['show_alerts'] = True
 
@@ -302,4 +303,27 @@ def send_friend_request(request):
             payload['response'] = "Unable to send a friend request."
     else:
         payload['response'] = "You must be authenticated to send a friend request."
+    return HttpResponse(json.dumps(payload), content_type="application/json")
+
+def accept_friend_request(request, *args, **kwargs):
+    user = request.user
+    payload = {}
+    if request.method == "GET" and user.is_authenticated:
+        friend_request_id = kwargs.get("friend_request_id")
+        if friend_request_id:
+            friend_request = FriendRequest.objects.get(pk=friend_request_id)
+            # confirm that is the correct request
+            if friend_request.receiver == user:
+                if friend_request:
+                    # found the request. Now accept it
+                    friend_request.accept()
+                    payload['response'] = 'Friend request accepted'
+                else:
+                    payload['response'] = 'Something went wrong'
+            else:
+                payload['response'] = 'That is not your request to accept'
+        else:
+            payload['response'] = 'Unable to accept that friend request'
+    else:
+        payload['response'] = 'You must be authenticated to accept a friend request'
     return HttpResponse(json.dumps(payload), content_type="application/json")

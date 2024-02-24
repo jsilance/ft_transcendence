@@ -24,35 +24,31 @@
 				{% endif %}
 
 				{% if request.user.is_authenticated %}
-
-					<!-- How many friend requests do YOU have -->
-					<!-- {% if friend_requests %}
-						<h2>Friend request: ({{ friend_requests | length }})</h2>
-					{% endif %} -->
-
-					<!-- THEM to YOU -->
-					{% if request_sent == 0 %}
-						<button class="btn_requests">Accept</button>
-						<button class="btn_requests">Ignore</button>
-					{% endif %}
-
-					<!-- Cancel Friend Request / Send Friend Request / Remove Friend -->
-					{% if is_friend == False and is_self == False %}
-						<!-- You sent them a request -->
-						{% if request_sent == 1 %}
-							<button styles="background_color: red;" class="btn_requests">Invitation sent</button>
+					{% if is_self == False %}
+						<!-- Cancel Friend Request / Send Friend Request / Remove Friend -->
+						{% if is_friend == False%}
+							<!-- THEM to YOU -->
+							{% if request_sent == 0 %}
+								<button onclick='triggerAcceptFriendRequest("{{pending_friend_request_id}}")' class="btn_requests">Accept</button>
+								<button class="btn_requests">Ignore</button>
+							{% endif %}
+							<!-- You sent them a request -->
+							{% if request_sent == 1 %}
+								<button styles="background_color: red;" class="btn_requests">Invitation sent</button>
+							{% endif %}
+							<!-- No requests have been sent -->
+							{% if request_sent == -1 %}
+								<button class="btn_requests" id="id_send_friend_request_btn">Add Friend</button>
+							{% endif %}
 						{% endif %}
-						<!-- No requests have been sent -->
-						{% if request_sent == -1 %}
-							<button class="btn_requests" id="id_send_friend_request_btn">Add Friend</button>
+						{% if is_friend == True %}
+							<button class="btn_requests">Unfriend</button>
+							<button class="btn_requests">Message</button>
 						{% endif %}
-					{% endif %}
-					{% if is_friend == True and is_self == False %}
-						<button class="btn_requests">Unfriend</button>
-						<button class="btn_requests">Message</button>
 					{% endif %}
 
 				{% endif %}
+
 			</div>
 			<p>Eccentric warrior, adorned and armed, storms into battle with flair.</p>
 			<div class="d-flex header_score">
@@ -61,28 +57,69 @@
 			</div>
 		</div>
 	</div>
-	<section class="feed">
-		<h3>Latest Matches</h3>
-		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque quidem voluptatum quisquam officiis numquam, perferendis tempore rem nostrum ut libero asperiores optio voluptate quaerat? Minima.</p>
-		<h2>Friends ({{ friends | length }})</h2>
-	</section>
+	<div class="d-flex">
+		<section class="feed">
+			<h3>Latest Matches</h3>
+			<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque quidem voluptatum quisquam officiis numquam, perferendis tempore rem nostrum ut libero asperiores optio voluptate quaerat? Minima.</p>
+		</section>
+		{% if user.is_authenticated and is_self == True %}
+		<aside class="sidebar">
+			<h5>Friends ({{ friends | length }})</h5>
+			<h5>Friend Requests</h5>
+			{% if request.user.is_authenticated and is_self == True%}
+				{% for request in friend_requests %}
+				<div class="request_card">
+					<a href="/accounts/profile/{{ request.sender.username}}">
+						<img src="{{ request.sender.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+					</a>
+					<div>
+						<p><b>{{ request.sender | capfirst }}</b></p>
+						<div>
+							<button onclick='triggerAcceptFriendRequest("{{request.id}}")'>Confirm</button>
+							<button class="btn_discrete btn_passive">Delete</button>
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+			{% endif %}
+			<h5>All users</h5>
+			{% for usr in all_users %}
+				<p>{{ usr }}</p>
+			{% endfor %}
+		</aside>
+		{% endif%}
+	</div>
 
 {% endblock %}
 
 {% block script_body %}
 
 	{% include 'accounts/snippets/send_friend_request.html' %}
+	{% include 'accounts/snippets/accept_friend_request.html' %}
 
 	<script>
-
 		function onFriendRequestSent() {
 			location.reload();
+		}
+		function onFriendRequestAccepted() {
+			location.reload();
+		}
+
+		function triggerAcceptFriendRequest(friend_request_id) {
+			acceptFriendRequest(friend_request_id, onFriendRequestAccepted)
 		}
 
 		var sendFriendRequestBtn = document.getElementById("id_send_friend_request_btn")
 		if (sendFriendRequestBtn != null) {
 			sendFriendRequestBtn.addEventListener("click", function(){
 				sendFriendRequest("{{id}}", onFriendRequestSent);
+			})
+		}
+
+		var acceptFriendRequestBtn = document.getElementById("id_accept_request_btn")
+		if (acceptFriendRequestBtn != null) {
+			acceptFriendRequestBtn.addEventListener("click", function(){
+				acceptFriendRequest("{{user.id}}", onFriendRequestAccepted);
 			})
 		}
 	</script>
