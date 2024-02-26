@@ -1,22 +1,30 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Room, Message
 from django.contrib.auth.models import User
+from accounts.models import Profile
 
 # Create your views here.
 @login_required
 def chat_page(request):
+    profile = Profile.objects.all()
     rooms = Room.objects.all()
     users = User.objects.all()
     return render(request, "chat.html", {
         "rooms": rooms,
-        "users" : users
+        "users" : users,
+        "profiles": profile
         })
 
 def room(request, slug):
     room_name=Room.objects.get(slug=slug).name
     messages=Message.objects.filter(room=Room.objects.get(slug=slug))
-    context = {"slug":slug, "room_name":room_name, 'messages':messages, 'user_id':request.user.id}
+
+    username1, username2 = slug.split('_')
+    other_username = username2 if request.user.username == username1 else username1
+    other_user = get_object_or_404(User, username=other_username)
+    profile = get_object_or_404(Profile, user=other_user)
+    context = {"slug":slug, "room_name":room_name, 'messages':messages, 'user_id':request.user.id, 'profile':profile}
     return render(request, "room.html", context)
 
 def create_room(request):
