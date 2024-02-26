@@ -327,3 +327,27 @@ def accept_friend_request(request, *args, **kwargs):
     else:
         payload['response'] = 'You must be authenticated to accept a friend request'
     return HttpResponse(json.dumps(payload), content_type="application/json")
+
+def decline_friend_request(request, *args, **kwargs):
+    user = request.user
+    payload = {}
+    if request.method == "GET" and user.is_authenticated:
+        friend_request_id = kwargs.get("friend_request_id")
+        if friend_request_id:
+            friend_request = FriendRequest.objects.get(pk=friend_request_id)
+            # confirm that it is the correct request
+            if friend_request.receiver == user:
+                if friend_request:
+                    # foudn the request. Now decline it
+                    friend_request.decline()
+                    payload['response'] = "Friend request declined"
+                else:
+                    payload['response'] = "Somethind went wrong"
+            else:
+                payload['response'] = "That is not your request to decline"
+        else:
+            payload['response'] = "Unable to decline that friend request"
+    else:
+        payload['response'] = "You must be authenticated to decline a friend request"
+    
+    return HttpResponse(json.dumps(payload), content_type="application/json")

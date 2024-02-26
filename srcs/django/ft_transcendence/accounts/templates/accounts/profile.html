@@ -30,7 +30,7 @@
 							<!-- THEM to YOU -->
 							{% if request_sent == 0 %}
 								<button onclick='triggerAcceptFriendRequest("{{pending_friend_request_id}}")' class="btn_requests">Accept</button>
-								<button class="btn_requests">Ignore</button>
+								<button onclick='triggerDeclineFriendRequest("{{pending_friend_request_id}}")' class="btn_requests">Ignore</button>
 							{% endif %}
 							<!-- You sent them a request -->
 							{% if request_sent == 1 %}
@@ -76,7 +76,7 @@
 						<p><b>{{ request.sender | capfirst }}</b></p>
 						<div>
 							<button onclick='triggerAcceptFriendRequest("{{request.id}}")'>Confirm</button>
-							<button class="btn_discrete btn_passive">Delete</button>
+							<button onclick='triggerDeclineFriendRequest("{{request.id}}")' class="btn_discrete btn_passive">Delete</button>
 						</div>
 					</div>
 				</div>
@@ -96,6 +96,7 @@
 
 	{% include 'accounts/snippets/send_friend_request.html' %}
 	{% include 'accounts/snippets/accept_friend_request.html' %}
+	{% include 'accounts/snippets/decline_friend_request.html' %}
 
 	<script>
 		function onFriendRequestSent() {
@@ -104,9 +105,16 @@
 		function onFriendRequestAccepted() {
 			location.reload();
 		}
+		function onFriendRequestDeclined() {
+			location.reload();
+		}
 
 		function triggerAcceptFriendRequest(friend_request_id) {
 			acceptFriendRequest(friend_request_id, onFriendRequestAccepted)
+		}
+
+		function triggerDeclineFriendRequest(friend_request_id) {
+			declineFriendRequest(friend_request_id, onFriendRequestDeclined)
 		}
 
 		var sendFriendRequestBtn = document.getElementById("id_send_friend_request_btn")
