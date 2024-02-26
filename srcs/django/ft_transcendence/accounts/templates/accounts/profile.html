@@ -34,7 +34,7 @@
 							{% endif %}
 							<!-- You sent them a request -->
 							{% if request_sent == 1 %}
-								<button styles="background_color: red;" class="btn_requests">Invitation sent</button>
+								<button id="id_cancel_request_btn" styles="background_color: red;" class="btn_requests">Invitation sent</button>
 							{% endif %}
 							<!-- No requests have been sent -->
 							{% if request_sent == -1 %}
@@ -97,6 +97,7 @@
 	{% include 'accounts/snippets/send_friend_request.html' %}
 	{% include 'accounts/snippets/accept_friend_request.html' %}
 	{% include 'accounts/snippets/decline_friend_request.html' %}
+	{% include 'accounts/snippets/cancel_friend_request.html' %}
 
 	<script>
 		function onFriendRequestSent() {
@@ -108,6 +109,9 @@
 		function onFriendRequestDeclined() {
 			location.reload();
 		}
+		function onFriendRequestCanceled() {
+			location.reload();
+		}
 
 		function triggerAcceptFriendRequest(friend_request_id) {
 			acceptFriendRequest(friend_request_id, onFriendRequestAccepted)
@@ -116,6 +120,10 @@
 		function triggerDeclineFriendRequest(friend_request_id) {
 			declineFriendRequest(friend_request_id, onFriendRequestDeclined)
 		}
+
+		// function triggerCancelFriendRequest(friend_request_id) {
+		// 	cancelFriendRequest(friend_request_id, onFriendRequestCanceled)
+		// }
 
 		var sendFriendRequestBtn = document.getElementById("id_send_friend_request_btn")
 		if (sendFriendRequestBtn != null) {
@@ -128,6 +136,13 @@
 		if (acceptFriendRequestBtn != null) {
 			acceptFriendRequestBtn.addEventListener("click", function(){
 				acceptFriendRequest("{{user.id}}", onFriendRequestAccepted);
+			})
+		}
+
+		var cancelFriendRequestBtn = document.getElementById("id_cancel_request_btn")
+		if (cancelFriendRequestBtn != null) {
+			cancelFriendRequestBtn.addEventListener("click", function(){
+				cancelFriendRequest("{{id}}", onFriendRequestCanceled);
 			})
 		}
 	</script>
