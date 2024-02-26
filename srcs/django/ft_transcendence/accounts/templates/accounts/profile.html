@@ -42,7 +42,7 @@
 							{% endif %}
 						{% endif %}
 						{% if is_friend == True %}
-							<button class="btn_requests">Unfriend</button>
+							<button id="id_unfriend_btn" class="btn_requests">Unfriend</button>
 							<button class="btn_requests">Message</button>
 						{% endif %}
 					{% endif %}
@@ -65,6 +65,14 @@
 		{% if user.is_authenticated and is_self == True %}
 		<aside class="sidebar">
 			<h5>Friends ({{ friends | length }})</h5>
+			{% for f in friends %}
+				<div class="user_card">
+					<a href="/accounts/profile/{{ f.username }}">
+						<img src="{{ f.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+					</a>
+					<p>{{ f.username }}</p>
+				</div>
+			{% endfor %}
 			<h5>Friend Requests</h5>
 			{% if request.user.is_authenticated and is_self == True%}
 				{% for request in friend_requests %}
@@ -83,9 +91,20 @@
 				{% endfor %}
 			{% endif %}
 			<h5>All users</h5>
-			{% for usr in all_users %}
-				<p>{{ usr }}</p>
-			{% endfor %}
+			<div class="users_list">
+
+				{% for usr in all_users %}
+					{% if usr != user and usr not in friends %}
+						<div class="user_card">
+							<a href="/accounts/profile/{{ usr.username }}">
+								<img src="{{ usr.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+							</a>
+							<p>{{ usr.username }}</p>
+						</div>
+					{% endif %}
+				{% endfor %}
+	
+			</div>
 		</aside>
 		{% endif%}
 	</div>
@@ -98,12 +117,16 @@
 	{% include 'accounts/snippets/accept_friend_request.html' %}
 	{% include 'accounts/snippets/decline_friend_request.html' %}
 	{% include 'accounts/snippets/cancel_friend_request.html' %}
+	{% include 'accounts/snippets/remove_friend.html' %}
 
 	<script>
 		function onFriendRequestSent() {
 			location.reload();
 		}
 		function onFriendRequestAccepted() {
+			location.reload();
+		}
+		function onFriendRemoved() {
 			location.reload();
 		}
 		function onFriendRequestDeclined() {
@@ -121,14 +144,17 @@
 			declineFriendRequest(friend_request_id, onFriendRequestDeclined)
 		}
 
-		// function triggerCancelFriendRequest(friend_request_id) {
-		// 	cancelFriendRequest(friend_request_id, onFriendRequestCanceled)
-		// }
-
 		var sendFriendRequestBtn = document.getElementById("id_send_friend_request_btn")
 		if (sendFriendRequestBtn != null) {
 			sendFriendRequestBtn.addEventListener("click", function(){
 				sendFriendRequest("{{id}}", onFriendRequestSent);
+			})
+		}
+
+		var removeFriendBtn = document.getElementById("id_unfriend_btn")
+		if (removeFriendBtn != null) {
+			removeFriendBtn.addEventListener("click", function(){
+				removeFriend("{{id}}", onFriendRemoved);
 			})
 		}
 
