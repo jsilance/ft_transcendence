@@ -1,0 +1,31 @@
+<script type="text/javascript">
+
+    function cancelFriendRequest(id, uiUpdateFunction) {
+
+        payload = {
+            "csrfmiddlewaretoken": "{{csrf_token}}",
+            "receiver_user_id": id,
+        }
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: "{% url 'accounts:friend_request_cancel' %}",
+            data: payload,
+            timaout: 5000,
+            success: function(data) {
+                if (data['response'] == "Friend request cancelled") {
+                }
+                else if (data.response != null) {
+                    alert(data.response)
+                }
+            },
+            error: function(data) {
+                alert("Something went wrong: " + data)
+            },
+            complete: function(data) {
+                uiUpdateFunction()
+            },
+        })
+    }
+
+</script>

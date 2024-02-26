@@ -6,8 +6,13 @@ from .models import Score
 
 @login_required(login_url='/accounts/login/')
 def welcome(request):
-	return render(request, 'welcome.html')
+	context = {
+		"show_alert": True,
+	}
+	return render(request, 'welcome.html', context)
 
 def leaderboard(request):
-	users = Score.objects.all()
-	return render(request, 'leaderboard.html', {'users': users})
+	context = {
+		'all_users': User.objects.all(),
+	}
+	return render(request, 'leaderboard.html', context)

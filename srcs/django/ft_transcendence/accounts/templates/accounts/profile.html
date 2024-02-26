@@ -2,46 +2,177 @@
 {% load static %}
 
 {% block title %}
-	home
+	{{ username | capfirst}} (Profile)
 {% endblock %}
 
 {% block styles %}
-	<link rel="stylesheet" href="{% static 'home/styles.css' %}">
-	<style>
-		body {
-			background-color: var(--secondary-bg-color);
-		}
-	</style>
+	<link rel="stylesheet" href="{% static 'accounts/styles.css' %}">
 {% endblock %}
 
 {% block body %}
-	<div class="banner d-flex">
-		<img class="banner_img" src="{{ display_user.profile.image.url }}" width="125px" height="125px" alt="profile picture">
-		<div class="banner_info">
+	<div class="header d-flex">
+		<img class="header_img" src="{{ profile_img }}" width="125px" height="125px" alt="profile picture">
+		<div class="header_info">
 			<div class="d-flex align-items-center">
-				<!-- <h1 class="">@{{ user.username }}</h1> -->
-				<h1 class="">@{{ display_user.username }}</h1>
-				{% if display_user.username == user.username %}
-					<a class="banner_option edit" href="{% url 'accounts:profile_edit' %}">
+				<h1 class="">@{{ username }}</h1>
+				{% if username == user.username %}
+					<a class="header_option edit" href="{% url 'accounts:profile_edit' %}">
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
 							<path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
 							</svg>
 					</a>
 				{% endif %}
-				<i class="bi bi-pen"></i>
+
+				{% if request.user.is_authenticated %}
+					{% if is_self == False %}
+						<!-- Cancel Friend Request / Send Friend Request / Remove Friend -->
+						{% if is_friend == False%}
+							<!-- THEM to YOU -->
+							{% if request_sent == 0 %}
+								<button onclick='triggerAcceptFriendRequest("{{pending_friend_request_id}}")' class="btn_requests">Accept</button>
+								<button onclick='triggerDeclineFriendRequest("{{pending_friend_request_id}}")' class="btn_requests">Ignore</button>
+							{% endif %}
+							<!-- You sent them a request -->
+							{% if request_sent == 1 %}
+								<button id="id_cancel_request_btn" styles="background_color: red;" class="btn_requests">Invitation sent</button>
+							{% endif %}
+							<!-- No requests have been sent -->
+							{% if request_sent == -1 %}
+								<button class="btn_requests" id="id_send_friend_request_btn">Add Friend</button>
+							{% endif %}
+						{% endif %}
+						{% if is_friend == True %}
+							<button id="id_unfriend_btn" class="btn_requests">Unfriend</button>
+							<button class="btn_requests">Message</button>
+						{% endif %}
+					{% endif %}
+
+				{% endif %}
+
 			</div>
 			<p>Eccentric warrior, adorned and armed, storms into battle with flair.</p>
-			<div class="d-flex banner_score">
-				<p class="mr-5 bs_v">wins: {{ display_user.profile.wins }}</p>
-				<p class="bs_l">losses: {{ display_user.profile.losses }}</p>
+			<div class="d-flex header_score">
+				<p class="mr-5 bs_v">wins: {{ wins }}</p>
+				<p class="bs_l">losses: {{ losses }}</p>
 			</div>
 		</div>
 	</div>
-	<section class="feed">
-		<h3>Latest Matches</h3>
-		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque quidem voluptatum quisquam officiis numquam, perferendis tempore rem nostrum ut libero asperiores optio voluptate quaerat? Minima.</p>
-	</section>
+	<div class="d-flex">
+		<section class="feed">
+			<h3>Latest Matches</h3>
+			<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque quidem voluptatum quisquam officiis numquam, perferendis tempore rem nostrum ut libero asperiores optio voluptate quaerat? Minima.</p>
+		</section>
+		{% if user.is_authenticated and is_self == True %}
+		<aside class="sidebar">
+			<h5>Friends ({{ friends | length }})</h5>
+			<div class="users_list">
+				{% for f in friends %}
+				<div class="user_card">
+					<a href="/accounts/profile/{{ f.username }}">
+						<img src="{{ f.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+					</a>
+					<p>{{ f.username }}</p>
+				</div>
+				{% endfor %}
+			</div>
+			<h5>Friend Requests</h5>
+			{% if request.user.is_authenticated and is_self == True%}
+				{% for request in friend_requests %}
+				<div class="request_card">
+					<a href="/accounts/profile/{{ request.sender.username}}">
+						<img src="{{ request.sender.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+					</a>
+					<div>
+						<p><b>{{ request.sender | capfirst }}</b></p>
+						<div>
+							<button onclick='triggerAcceptFriendRequest("{{request.id}}")'>Confirm</button>
+							<button onclick='triggerDeclineFriendRequest("{{request.id}}")' class="btn_discrete btn_passive">Ignore</button>
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+			{% endif %}
+			<h5>All Users</h5>
+			<div class="users_list">
+
+				{% for usr in all_users %}
+					{% if usr != user and usr not in friends %}
+						<div class="user_card">
+							<a href="/accounts/profile/{{ usr.username }}">
+								<img src="{{ usr.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+							</a>
+							<p>{{ usr.username }}</p>
+						</div>
+					{% endif %}
+				{% endfor %}
+	
+			</div>
+		</aside>
+		{% endif%}
+	</div>
+
 {% endblock %}
 
+{% block script_body %}
 
-	
+	{% include 'accounts/snippets/send_friend_request.html' %}
+	{% include 'accounts/snippets/accept_friend_request.html' %}
+	{% include 'accounts/snippets/decline_friend_request.html' %}
+	{% include 'accounts/snippets/cancel_friend_request.html' %}
+	{% include 'accounts/snippets/remove_friend.html' %}
+
+	<script>
+		function onFriendRequestSent() {
+			location.reload();
+		}
+		function onFriendRequestAccepted() {
+			location.reload();
+		}
+		function onFriendRemoved() {
+			location.reload();
+		}
+		function onFriendRequestDeclined() {
+			location.reload();
+		}
+		function onFriendRequestCanceled() {
+			location.reload();
+		}
+
+		function triggerAcceptFriendRequest(friend_request_id) {
+			acceptFriendRequest(friend_request_id, onFriendRequestAccepted)
+		}
+
+		function triggerDeclineFriendRequest(friend_request_id) {
+			declineFriendRequest(friend_request_id, onFriendRequestDeclined)
+		}
+
+		var sendFriendRequestBtn = document.getElementById("id_send_friend_request_btn")
+		if (sendFriendRequestBtn != null) {
+			sendFriendRequestBtn.addEventListener("click", function(){
+				sendFriendRequest("{{id}}", onFriendRequestSent);
+			})
+		}
+
+		var removeFriendBtn = document.getElementById("id_unfriend_btn")
+		if (removeFriendBtn != null) {
+			removeFriendBtn.addEventListener("click", function(){
+				removeFriend("{{id}}", onFriendRemoved);
+			})
+		}
+
+		var acceptFriendRequestBtn = document.getElementById("id_accept_request_btn")
+		if (acceptFriendRequestBtn != null) {
+			acceptFriendRequestBtn.addEventListener("click", function(){
+				acceptFriendRequest("{{user.id}}", onFriendRequestAccepted);
+			})
+		}
+
+		var cancelFriendRequestBtn = document.getElementById("id_cancel_request_btn")
+		if (cancelFriendRequestBtn != null) {
+			cancelFriendRequestBtn.addEventListener("click", function(){
+				cancelFriendRequest("{{id}}", onFriendRequestCanceled);
+			})
+		}
+	</script>
+
+{% endblock %}

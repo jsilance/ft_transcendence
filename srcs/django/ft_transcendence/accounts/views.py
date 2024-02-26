@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
+from .models import FriendList, FriendRequest
+from .utils import get_friend_request_or_false
+from .friend_request_status import FriendRequestStatus
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -9,6 +12,8 @@ from django.http import HttpResponse, HttpResponseBadRequest
 import requests
 from dotenv import load_dotenv
 import os
+from django.conf import settings
+import json
 
 # get acces to environment variables
 load_dotenv()
@@ -25,20 +30,26 @@ FROMLOGIN = 'd56b699830e77ba53855679cb1d252da'
 FROMSIGNUP = '7d2abf2d0fa7c3a0c13236910f30bc43'
 
 def signup_v(req):
+    context = {
+        'authorize_uri': authorize_uri+FROMSIGNUP,
+        'show_alerts': True,
+    }
     if req.method == 'POST':
         form = UserRegisterForm(req.POST)
         if form.is_valid():
-            user = form.save()
+            form.save()
             messages.success(req, f'Your account has been created! You are now able to log in.')
             return redirect('accounts:login')
     else:
         form = UserRegisterForm()
-    return render(req, 'accounts/signup.html', {
-        'form': form,
-        'authorize_uri': authorize_uri+FROMSIGNUP
-    })
+    context['form'] = form
+    return render(req, 'accounts/signup.html', context)
 
 def login_v(req):
+    context = {
+        'authorize_uri': authorize_uri+FROMLOGIN,
+        'show_alerts': True,
+    }
     if req.method == 'POST':
         form = AuthenticationForm(data=req.POST)
         if form.is_valid():
@@ -50,10 +61,8 @@ def login_v(req):
                 return redirect('home:welcome')
     else:
         form = AuthenticationForm()
-    return render(req, 'accounts/login.html', {
-        'form': form,
-        'authorize_uri': authorize_uri+FROMLOGIN,
-    })
+    context['form'] = form
+    return render(req, 'accounts/login.html', context)
 
 """
 Callback for Oauth2 logic
@@ -68,7 +77,7 @@ def callback(req):
         return HttpResponseBadRequest("Bad Request: Missing 'code' parameter")
     
     # exchange authorization code for access token
-    o42 = oauth42()
+    o42 = Oauth42()
     token = o42.get_token(authorization_code)
 
     # use token to request user data
@@ -103,7 +112,7 @@ def callback(req):
         messages.success(req, f'Your account has been created! You are now able to log in.')
         return redirect('accounts:login')
 
-class oauth42:
+class Oauth42:
     # exchange temporary code for access token
     def get_token(self, code):
         url = 'https://api.intra.42.fr/oauth/token'
@@ -141,14 +150,84 @@ def logout_v(req):
 
 ################################################################################
 
+"""
+Profile view of current user or another one
+"""
 @login_required(login_url='/accounts/login/')
 def profile(request, username):
+    context = {}
     try:
-        display_user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return render(request, '404.html', {'message': 'User not found'})
-    return render(request, 'accounts/profile.html', {'display_user': display_user})
+        displayed_user = User.objects.get(username=username)
+    except:
+        return render(request, '404.html', {
+            'message': 'User not found',
+            "show_alerts": True
+        })
+    if displayed_user:
+        context['username'] = displayed_user.username
+        context['id'] = displayed_user.id
+        context['email'] = displayed_user.email
+        context['profile_img'] = displayed_user.profile.image.url
+        context['wins'] = displayed_user.profile.wins
+        context['losses'] = displayed_user.profile.losses
+        context['all_users'] = User.objects.all()
 
+        try:
+            friend_list = FriendList.objects.get(user=displayed_user)
+        except FriendList.DoesNotExist:
+            friend_list = FriendList(user=displayed_user)
+            friend_list.save()
+        friends = friend_list.friends.all()
+        context['friends'] = friends
+
+        # Define template variables
+        is_self = True
+        is_friend = False
+        request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
+        friend_requests = None
+        user = request.user
+        # Logged in but NOT looking at your own profile
+        if user.is_authenticated and user != displayed_user:
+            is_self = False
+            if friends.filter(pk=user.id):
+                is_friend = True
+            else:
+                is_friend = False
+                # CASE1: Request has been sent from THEM to YOU: THEM_TO_YOU
+                if get_friend_request_or_false(sender=displayed_user, receiver=user) != False:
+                    request_sent = FriendRequestStatus.THEM_SENT_TO_YOU.value
+                    context['pending_friend_request_id'] = get_friend_request_or_false(
+                        sender=displayed_user,
+                        receiver=user
+                    ).id
+                # CASE2: Request has been sent from YOU to THEM: YOU_SENT_TO_THEM
+                elif get_friend_request_or_false(sender=user, receiver=displayed_user) != False:
+                    request_sent = FriendRequestStatus.YOU_SENT_TO_THEM.value
+                # CASE3: No request has been sent: NO_REQUEST_SENT
+                else:
+                    request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
+        # NOT logged in
+        elif not user.is_authenticated:
+            is_self = False
+        # Logged in and looking at your profile
+        else:
+            try:
+                friend_requests = FriendRequest.objects.filter(receiver=user, is_active=True)
+            except:
+                pass
+        
+        context["is_self"] = is_self
+        context["is_friend"] = is_friend
+        context['request_sent'] = request_sent
+        context['friend_requests'] = friend_requests
+
+    context['show_alerts'] = True
+
+    return render(request, 'accounts/profile.html', context)
+
+"""
+Logic for deleting a user > profile > friendlist
+"""
 @login_required(login_url='/accounts/login/')
 def deleteprofile(request, username):
     # Ensure the user is deleting their own profile or is a superuser
@@ -165,6 +244,9 @@ def deleteprofile(request, username):
     user_to_delete.delete()
     return redirect('accounts:login')
 
+"""
+Settings page for editing user info
+"""
 @login_required(login_url='/accounts/login/')
 def editprofile(request):
     if request.method == 'POST':
@@ -184,3 +266,137 @@ def editprofile(request):
         'p_form': p_form
     }
     return render(request, 'accounts/editprofile.html', context)
+
+def send_friend_request(request):
+    user = request.user
+    payload = {}
+    if request.method == 'POST' and user.is_authenticated:
+        user_id = request.POST.get('receiver_user_id')
+        if user_id:
+            receiver = User.objects.get(pk=user_id)
+            try:
+                # Get any friend requests (active and not-active)
+                friend_requests = FriendRequest.objects.filter(
+                    sender=user,
+                    receiver=receiver
+                )
+                # find if any of them are active
+                try:
+                    for request in friend_requests:
+                        if request.is_active:
+                            raise Exception("You already sent them a friend request.")
+                    # if none are active, then create a new friend request
+                    friend_request = FriendRequest(sender=user, receiver=receiver)
+                    friend_request.save()
+                    payload['response'] = "Friend request sent."
+                except Exception as e:
+                    payload['response'] = str(e)
+            except FriendRequest.DoesNotExist:
+                # There are no friend requests so create one
+                friend_request = FriendRequest(sender=user, receiver=receiver)
+                friend_request.save()
+                payload['response'] = "Friend request sent."
+
+            if payload['response'] == None:
+                payload['response'] = "Something went wrong."
+        else:
+            payload['response'] = "Unable to send a friend request."
+    else:
+        payload['response'] = "You must be authenticated to send a friend request."
+    return HttpResponse(json.dumps(payload), content_type="application/json")
+
+def accept_friend_request(request, *args, **kwargs):
+    user = request.user
+    payload = {}
+    if request.method == "GET" and user.is_authenticated:
+        friend_request_id = kwargs.get("friend_request_id")
+        if friend_request_id:
+            friend_request = FriendRequest.objects.get(pk=friend_request_id)
+            # confirm that it is addressed to logged in user
+            if friend_request.receiver == user:
+                if friend_request:
+                    # found the request. Now accept it
+                    friend_request.accept()
+                    payload['response'] = 'Friend request accepted'
+                else:
+                    payload['response'] = 'Something went wrong'
+            else:
+                payload['response'] = 'That is not your request to accept'
+        else:
+            payload['response'] = 'Unable to accept that friend request'
+    else:
+        payload['response'] = 'You must be authenticated to accept a friend request'
+    return HttpResponse(json.dumps(payload), content_type="application/json")
+
+def decline_friend_request(request, *args, **kwargs):
+    user = request.user
+    payload = {}
+    if request.method == "GET" and user.is_authenticated:
+        friend_request_id = kwargs.get("friend_request_id")
+        if friend_request_id:
+            friend_request = FriendRequest.objects.get(pk=friend_request_id)
+            # confirm that it is addressed to logged in user
+            if friend_request.receiver == user:
+                if friend_request:
+                    # foudn the request. Now decline it
+                    friend_request.decline()
+                    payload['response'] = "Friend request declined"
+                else:
+                    payload['response'] = "Somethind went wrong"
+            else:
+                payload['response'] = "That is not your request to decline"
+        else:
+            payload['response'] = "Unable to decline that friend request"
+    else:
+        payload['response'] = "You must be authenticated to decline a friend request"
+    
+    return HttpResponse(json.dumps(payload), content_type="application/json")
+
+def cancel_friend_request(request):
+    user = request.user
+    payload = {}
+    if request.method == "POST" and user.is_authenticated:
+        user_id = request.POST.get("receiver_user_id")
+        if user_id:
+            receiver = User.objects.get(pk=user_id)
+            try:
+                friend_requests = FriendRequest.objects.filter(sender=user, receiver=receiver, is_active=True)
+
+            except Exception as e:
+                payload['response'] = "Nothing to cancel. Friend request does not exist"
+            # There should only every be a single active friend request at any given time.
+            # Cancel them all just in case.
+            if len(friend_requests) > 1:
+                for req in friend_requests:
+                    request.cancel()
+                payload['response'] = "Friend request cancelled"
+            else:
+                # found the request. Now cancel it
+                friend_requests.first().cancel()
+                payload['response'] = "Friend request cancelled"
+        else:
+            payload['response'] = "Unable to cancel that friend request"
+    else:
+            payload['response'] = "You must be authenticated to cancel a friend requests"
+    
+    return HttpResponse(json.dumps(payload), content_type="application/json")
+
+def remove_friend(request):
+    user = request.user
+    payload = {}
+    if request.method == "POST" and user.is_authenticated:
+        user_id = request.POST.get("receiver_user_id")
+        if user_id:
+            try:
+                removee = User.objects.get(pk=user_id)
+                friend_list = FriendList.objects.get(user=user)
+                friend_list.unfriend(removee)
+                payload['response'] = "Successfully removed that friend"
+            except Exception as e:
+                payload['response'] = f"Something went wrong: {str(e)}"
+        else:
+            payload['response'] = "There was an error. Unable to remove that friend"
+    else:
+        payload['response'] = "You must be authenticated to remove a friend"
+    
+    return HttpResponse(json.dumps(payload), content_type="application/json")

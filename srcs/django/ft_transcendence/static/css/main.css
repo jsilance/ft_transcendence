@@ -88,26 +88,31 @@ a:hover {
     color: var(--text-color);
 }
 
-button:not(.btn_discrete) {
-    padding: 9px 25px;
-    /* background-color: var(--accent); */
-    background: linear-gradient(#8F13FD, #7011F4);
+button {
+    padding: 4px 8px;
     border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease 0s;
+    border-radius: 5px;
+    font-size: .9rem;
+    color: white;
+    transition: all 0.4s ease 0s;
+}
+button:not(.btn_discrete) {
+    background: linear-gradient(#8F13FD, #8F13FD);
+    color: white;
 }
 
 button:not(.btn_discrete):hover {
-    background: linear-gradient(#fd139f, #9211f4);
+    background: linear-gradient(#ca13fd, #9211f4);
 }
 
 .btn_discrete {
     background-color: transparent;
-    border: none;
-    margin: 0;
-    padding: 0;
     height: auto;
+}
+
+.btn_passive {
+    background-color: gray;
+    color: black;
 }
 
 hr {
@@ -149,13 +154,18 @@ input:focus, textarea:focus {
     background-color: gray;
 }
 
+p {
+    margin-bottom: 0;
+}
+
 /*******************************************************************************
                         CONTAINERS & LAYOUT TAGS
 *******************************************************************************/
 
-.global_container_ {
+main {
     max-width: 756px;
     margin: auto;
+    padding-top: 25px;
 }
 
 .row_custom {
@@ -300,4 +310,20 @@ header {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
+}
+
+.sidebar {
+    background-color: var(--secondary-bg-color);
+    padding: 15px 8px;
+    margin-left: 10px;
+    min-width: 240px;
+    border-radius: 10px;
+}
+
+.feed {
+    min-height: 50vh;
+    background-color: var(--secondary-bg-color);
+    padding: 20px;
+    border-radius: 10px;
+    margin-right: 10px;
 }
