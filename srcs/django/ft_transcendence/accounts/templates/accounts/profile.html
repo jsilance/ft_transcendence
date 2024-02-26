@@ -65,14 +65,16 @@
 		{% if user.is_authenticated and is_self == True %}
 		<aside class="sidebar">
 			<h5>Friends ({{ friends | length }})</h5>
-			{% for f in friends %}
+			<div class="users_list">
+				{% for f in friends %}
 				<div class="user_card">
 					<a href="/accounts/profile/{{ f.username }}">
 						<img src="{{ f.profile.image.url }}" width="48px" height="48px" alt="profile picture">
 					</a>
 					<p>{{ f.username }}</p>
 				</div>
-			{% endfor %}
+				{% endfor %}
+			</div>
 			<h5>Friend Requests</h5>
 			{% if request.user.is_authenticated and is_self == True%}
 				{% for request in friend_requests %}
@@ -84,13 +86,13 @@
 						<p><b>{{ request.sender | capfirst }}</b></p>
 						<div>
 							<button onclick='triggerAcceptFriendRequest("{{request.id}}")'>Confirm</button>
-							<button onclick='triggerDeclineFriendRequest("{{request.id}}")' class="btn_discrete btn_passive">Delete</button>
+							<button onclick='triggerDeclineFriendRequest("{{request.id}}")' class="btn_discrete btn_passive">Ignore</button>
 						</div>
 					</div>
 				</div>
 				{% endfor %}
 			{% endif %}
-			<h5>All users</h5>
+			<h5>All Users</h5>
 			<div class="users_list">
 
 				{% for usr in all_users %}
