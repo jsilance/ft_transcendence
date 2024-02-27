@@ -12,6 +12,7 @@ class Profile(models.Model):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     creation_date = models.DateTimeField(default=timezone.now)
+    active = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.username} Profile'
