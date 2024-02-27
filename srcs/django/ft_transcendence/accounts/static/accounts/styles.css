@@ -179,3 +179,18 @@
     padding: 12px 4px;
     background-color: #2d2b34;
 }
+
+.status_online {
+    margin-left: 10px;
+    height: 10px;
+    width: 10px;
+    border-radius: 20px;
+    background-color: greenyellow;
+}
+.status_offline {
+    margin-left: 10px;
+    height: 10px;
+    width: 10px;
+    border-radius: 20px;
+    background-color: tomato;
+}

@@ -54,6 +54,7 @@ def login_v(req):
         form = AuthenticationForm(data=req.POST)
         if form.is_valid():
             user = form.get_user()
+            user.profile.active = True
             login(req, user)
             if 'next' in req.POST:
                 return redirect(req.POST.get('next'))
@@ -144,6 +145,9 @@ class Oauth42:
 
 def logout_v(req):
     if req.method == 'POST':
+        user = req.user
+        user.profile.active = False
+        user.profile.save()
         logout(req)
         messages.info(req, f'You have been logged out.')
         return redirect('home:welcome')
@@ -170,6 +174,7 @@ def profile(request, username):
         context['profile_img'] = displayed_user.profile.image.url
         context['wins'] = displayed_user.profile.wins
         context['losses'] = displayed_user.profile.losses
+        context['active'] = displayed_user.profile.active
         context['all_users'] = User.objects.all()
 
         try:
