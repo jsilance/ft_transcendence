@@ -78,13 +78,13 @@ function handleKeyUp(event) {
 }
 
 socket.onmessage = function(event) {
-	console.log(event.data);
+	// console.log(event.data);
     const data = JSON.parse(event.data);
 	if (data.type == 'initObject')
 	{
 		shapesObj = data.shapes;
 		shapes = JSON.parse(shapesObj);
-		console.log(shapesObj);
+		// console.log(shapesObj);
 		loadShapes(shapes);
 	}
     if (data.type == 'playerPaddleUpdate')
@@ -235,7 +235,7 @@ function loadShapes(shapes)
 		const {pparty_id, item_id, type, color, posx, posy} = el;
 		let geometry;
 		
-		console.log(type);
+		// console.log(type);
 		switch (type) {
 			case 1:
 				geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
@@ -285,9 +285,23 @@ function loadShapes(shapes)
 			shape.position.z = 0;
 			scene.add(shape);
 		}
+		console.log(shape.position);
 		// threeJsShape.push(shape);
 	}
 }
+// ---------------------------------------------------------------------------------- //
+
+// ---------------------------------------------------------------------------------- //
+
+function loadNames(gusers)
+{
+	gusers.forEach(guser => {
+		var div = document.createElement('div');
+		
+	});
+
+}
+
 // ---------------------------------------------------------------------------------- //
 
 
@@ -310,6 +324,7 @@ function g_start()
 }
 
 // ---------------------------------------------------------------------------------- //
+
 loadSkybox();
 loadShapes([]);
 
@@ -320,17 +335,19 @@ let nbPlayerCount = 0;
 mapSetting.listOfPlayer.forEach((usr) => {nbPlayerCount++});
 
 try {
-
+	console.log(UsersGroup.children);
 	UsersGroup.children.forEach((elem) => {
 		if (!mapSetting.listOfPlayer[elem.name])
 			throw ("empty");
 		thisUser = (mapSetting.listOfPlayer[elem.name]).user;
 		offsetX[thisUser] = parseInt(elem.name) * (360 / nbPlayerCount);
+		console.log("Offset for", thisUser, "is", offsetX[thisUser]);
 	})
 }
 catch (e)
 {
 	console.error(e);
+	console.log("ERROR");
 }
 
 const animate = () => {
@@ -341,8 +358,10 @@ const animate = () => {
 	{
 		try {
 			UsersGroup.children.forEach((elem) => {
+				// console.log(elem.position);
 				// console.log(mapSetting.listOfPlayer.filter(x => x==2).length);
 				thisUser = (mapSetting.listOfPlayer[elem.name]).user;
+				// console.log("this user:", thisUser, "offset:", offsetX[thisUser]);
 				if (playerKeys[thisUser].ArrowLeft && offsetX[thisUser] < (16 - parseInt(mapSetting.nbPlayer) + 2))
 				{
 					offsetX[thisUser] += 3 / radius;
@@ -353,8 +372,13 @@ const animate = () => {
 					offsetX[thisUser] -= 3 / radius;
 					console.log("Right");
 				}
-				elem.position.x = Math.cos((positionX + offsetX[thisUser]) * Math.PI / 180) * radius;
-				elem.position.z = Math.sin((positionX + offsetX[thisUser]) * Math.PI / 180) * radius;
+				// elem.position.x = 0;
+				elem.position.x = Math.cos((parseInt(positionX) + parseInt(offsetX[thisUser])) * Math.PI / 180) * radius;
+				console.log(elem.position.x);
+				// elem.position.z = 0;
+				console.log(offsetX[thisUser]);
+				elem.position.z = Math.sin((parseInt(positionX) + parseInt(offsetX[thisUser])) * Math.PI / 180) * radius;
+				console.log(elem.position.z);
 				elem.lookAt(new THREE.Vector3(0, 0, 0));
 			});
 		}
