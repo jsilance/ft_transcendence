@@ -175,6 +175,7 @@ def profile(request, username):
         context['wins'] = displayed_user.profile.wins
         context['losses'] = displayed_user.profile.losses
         context['active'] = displayed_user.profile.active
+        context['description'] = displayed_user.profile.description
         context['all_users'] = User.objects.all()
 
         try:
