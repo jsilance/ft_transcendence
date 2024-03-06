@@ -11,6 +11,7 @@ let userPartyId = 0;
 let thisUser;
 let shapesObj = [];
 let shapes = [];
+let x,z = {x: 0, z: 0};
 
 // Keys interraction //
 
@@ -78,22 +79,30 @@ function handleKeyUp(event) {
 }
 
 socket.onmessage = function(event) {
-	// console.log(event.data);
+	console.log(event.data);
     const data = JSON.parse(event.data);
 	if (data.type == 'initObject')
 	{
 		shapesObj = data.shapes;
 		shapes = JSON.parse(shapesObj);
-		// console.log(shapesObj);
+		console.log(shapesObj);
+		radius = data.radius;
+		angle = data.angle;
+		x = data.x;
+		z = data.z;
 		loadShapes(shapes);
 	}
-    if (data.type == 'playerPaddleUpdate')
+    if (data.type == 'player_paddle_update')
     {
-		const playerId = data.player;
-		const key = data.key;
-		const value = data.event;
-		console.log(playerId, key, value);
-		updatePlayerKey(playerId, key, value);
+		// const playerId = data.player;
+		// const key = data.key;
+		// const value = data.event;
+		// console.log(playerId, key, value);
+		// updatePlayerKey(playerId, key, value);
+		// positionX
+		x[data.player] = data.x;
+		z[data.player] = data.z;
+		console.log("x: ", x[data.player], "z: ", z[data.player]);
     }
     if (data.type == 'ball')
     {
@@ -235,7 +244,7 @@ function loadShapes(shapes)
 		const {pparty_id, item_id, type, color, posx, posy} = el;
 		let geometry;
 		
-		// console.log(type);
+		console.log(type);
 		switch (type) {
 			case 1:
 				geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
@@ -291,19 +300,14 @@ function loadShapes(shapes)
 }
 // ---------------------------------------------------------------------------------- //
 
-// ---------------------------------------------------------------------------------- //
-
 function loadNames(gusers)
 {
 	gusers.forEach(guser => {
 		var div = document.createElement('div');
-		
+
 	});
 
 }
-
-// ---------------------------------------------------------------------------------- //
-
 
 // Lumieres
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
@@ -324,7 +328,6 @@ function g_start()
 }
 
 // ---------------------------------------------------------------------------------- //
-
 loadSkybox();
 loadShapes([]);
 
@@ -354,32 +357,35 @@ const animate = () => {
 	let it = 0;
 	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.0 + 10 / (mapSetting.nbPlayer ** 2);
 	
+	console.log(mapSetting.nbPlayer, nbPlayerCount);
 	if (mapSetting.nbPlayer == nbPlayerCount)
 	{
 		try {
 			UsersGroup.children.forEach((elem) => {
-				// console.log(elem.position);
 				// console.log(mapSetting.listOfPlayer.filter(x => x==2).length);
+				console.log("hey" + x[thisUser]);
 				thisUser = (mapSetting.listOfPlayer[elem.name]).user;
-				// console.log("this user:", thisUser, "offset:", offsetX[thisUser]);
-				if (playerKeys[thisUser].ArrowLeft && offsetX[thisUser] < (16 - parseInt(mapSetting.nbPlayer) + 2))
-				{
-					offsetX[thisUser] += 3 / radius;
-					console.log("Left");
-				}
-				else if (playerKeys[thisUser].ArrowRight && offsetX[thisUser] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
-				{
-					offsetX[thisUser] -= 3 / radius;
-					console.log("Right");
-				}
-				// elem.position.x = 0;
-				elem.position.x = Math.cos((parseInt(positionX) + parseInt(offsetX[thisUser])) * Math.PI / 180) * radius;
-				console.log(elem.position.x);
-				// elem.position.z = 0;
-				console.log(offsetX[thisUser]);
-				elem.position.z = Math.sin((parseInt(positionX) + parseInt(offsetX[thisUser])) * Math.PI / 180) * radius;
-				console.log(elem.position.z);
+				// if (playerKeys[thisUser].ArrowLeft && offsetX[thisUser] < (16 - parseInt(mapSetting.nbPlayer) + 2))
+				// {
+				// 	offsetX[thisUser] += 3 / radius;
+				// 	console.log("Left");
+				// }
+				// else if (playerKeys[thisUser].ArrowRight && offsetX[thisUser] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
+				// {
+				// 	offsetX[thisUser] -= 3 / radius;
+				// 	console.log("Right");
+				// }
+				elem.position.x = x[thisUser];
+				elem.position.z = z[thisUser];
 				elem.lookAt(new THREE.Vector3(0, 0, 0));
+
+				// // elem.position.x = 0;
+				// elem.position.x = Math.cos((parseInt(positionX) + parseInt(offsetX[thisUser])) * Math.PI / 180) * radius;
+				// console.log(elem.position.x);
+				// // elem.position.z = 0;
+				// console.log(offsetX[thisUser]);
+				// elem.position.z = Math.sin((parseInt(positionX) + parseInt(offsetX[thisUser])) * Math.PI / 180) * radius;
+				// console.log(elem.position.z);
 			});
 		}
 		catch (e)
