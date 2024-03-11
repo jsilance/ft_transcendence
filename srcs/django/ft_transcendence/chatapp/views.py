@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Room, Message
+from accounts.models import FriendList
+from django.http import JsonResponse
 from django.contrib.auth.models import User
 from accounts.models import Profile
 
@@ -10,10 +12,19 @@ def chat_page(request):
     profile = Profile.objects.all()
     rooms = Room.objects.all()
     users = User.objects.all()
+    current_user = request.user
+    if current_user.is_authenticated:
+        try:
+            friend_list = FriendList.objects.get(user=current_user)
+            friends = friend_list.friends.all()
+        except FriendList.DoesNotExist:
+            friends = None
+
     return render(request, "chat.html", {
         "rooms": rooms,
         "users" : users,
-        "profiles": profile
+        "profiles": profile,
+        "friends" : friends,
         })
 
 def room(request, slug):
