@@ -9,7 +9,6 @@ Chat
         align-items: center;
         gap: 10px;
         margin-bottom: 10px; /* Add some space below each user */
-        border-bottom: 1px solid #ccc; /* Light grey line under each user */
     }
 
     .user-form {
@@ -22,27 +21,53 @@ Chat
         height: 30px; /* Adjust based on your preference */
         object-fit: cover; /* Ensures the image covers the area, useful for non-square images */
     }
+    .status_online {
+        margin-left: 10px;
+        height: 10px;
+        width: 10px;
+        border-radius: 20px;
+        background-color: greenyellow;
+    }
+    .status_offline {
+        margin-left: 10px;
+        height: 10px;
+        width: 10px;
+        border-radius: 20px;
+        background-color: tomato;
+    }
 </style>
 {% endblock %}
 {% block body %}
     <h1>Friends</h1>
-    {% for i in profiles %}
-        {% if i.user != request.user %}
-            <div class="user-container">
-                <img src="{{ i.image.url }}" alt="User Image" class="user-image">
-                <span>{{ i.user.username }}</span>
-                <form id="create-room-form-{{ i.user.id }}" action="{% url 'create_room' %}" method="post" class="user-form">
-                    {% csrf_token %}
-                    <input type="hidden" name="name" value="">
-                    <input type="hidden" name="slug" value="">
-                    <input type="hidden" name="user2_id" value="{{ i.user.id }}">
-                    <button type="button" onclick="generateRoom('{{ i.user.id }}')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-fill" viewBox="0 0 16 16">
-                        <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6-.097 1.016-.417 2.13-.771 2.966-.079.186.074.394.273.362 2.256-.37 3.597-.938 4.18-1.234A9 9 0 0 0 8 15"/>
-                      </svg></button>
-                </form>
-            </div>
-        {% endif %}
-    {% endfor %}
+    {% if friends %}
+        {% for i in friends %}
+            {% if i.profile.user != request.user %}
+                <div class="user-container">
+                    {% if i.profile.active == True %}
+                        <div class="status_online"></div>
+                    {% else %}
+                        <div class="status_offline"></div>
+                    {% endif %}
+                    <img src="{{ i.profile.image.url }}" alt="User Image" class="user-image">
+                    <span>{{ i.profile.user.username }}</span>
+                    <form id="create-room-form-{{ i.profile.user.id }}" action="{% url 'create_room' %}" method="post" class="user-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="name" value="">
+                        <input type="hidden" name="slug" value="">
+                        <input type="hidden" name="user2_id" value="{{ i.profile.user.id }}">
+                        <button type="button" onclick="generateRoom('{{ i.profile.user.id }}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-fill" viewBox="0 0 16 16">
+                                <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6-.097 1.016-.417 2.13-.771 2.966-.079.186.074.394.273.362 2.256-.37 3.597-.938 4.18-1.234A9 9 0 0 0 8 15"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p>You have no friends yet.</p>
+    {% endif %}
+
 {% endblock %}
 {% block script_body %}
     <script>
