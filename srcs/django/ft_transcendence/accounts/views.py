@@ -56,6 +56,7 @@ def login_v(req):
             user = form.get_user()
             user.profile.active = True
             login(req, user)
+            req.user.profile.blocklist.add(user)
             if 'next' in req.POST:
                 return redirect(req.POST.get('next'))
             else:
@@ -124,7 +125,7 @@ class Oauth42:
             'code': code,
             'redirect_uri': 'http://localhost:8000/accounts/callback/' # YOU..AAARG!
         }
-        response = requests.post(url, data=data)
+        response = requests.post(url, data/data)
         if response.status_code == 200:
             token_data = response.json()
             return token_data.get('access_token')
@@ -177,6 +178,7 @@ def profile(request, username):
         context['active'] = displayed_user.profile.active
         context['description'] = displayed_user.profile.description
         context['all_users'] = User.objects.all()
+        context['blocklist'] = displayed_user.profile.blocklist.all()
 
         try:
             friend_list = FriendList.objects.get(user=displayed_user)
@@ -406,3 +408,53 @@ def remove_friend(request):
         payload['response'] = "You must be authenticated to remove a friend"
     
     return HttpResponse(json.dumps(payload), content_type="application/json")
+
+def blocking(request):
+    current_user = request.user
+    blocklist = current_user.profile.blocklist
+    action = request.GET.get("action")
+    payload = {}
+
+    if current_user.is_authenticated:
+        user_id = request.GET.get("user_id")
+        if user_id:
+            target_user = User.objects.get(pk=user_id)
+
+            # add/remove from blocklist
+            if action == "block" and target_user not in blocklist.all():
+                blocklist.add(target_user)
+                data = {
+                    "receiver_user_id": user_id,
+                }
+                data = requests.post("accounts/remove_friend", data=data)
+                payload['response'] = data['response']
+            elif action == "unblock" and target_user in blocklist.all():
+                blocklist.remove(target_user)
+                payload['response'] = f'unblocked user: {target_user.username}'
+            else:
+                payload['response'] = 'No user to block or unblock'
+        else:
+            payload['response'] = 'No user ID in the request'
+    else:
+        payload['response'] = 'User is not authenticated'
+    return HttpResponse(json.dumps(payload), content_type="application/json")
+
+"""
+function block_user(target_id, uiUpdateFunction) {
+        var url = "{% url 'accounts:block_unblock' target_id=65464762465764 action=block %}".replace(65464762465764, target_id)
+        $.ajax({
+            type: "GET",
+            dataType: "json",
+            url: url,
+            timaout: 5000,
+            success: function(data) {
+            },
+            error: function(data) {
+                alert("Something went wrong: " + data)
+            },
+            complete: function(data) {
+                uiUpdateFunction()
+            },
+        })
+    }
+"""
