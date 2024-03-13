@@ -53,6 +53,8 @@
 						{% if is_friend == True %}
 							<button id="id_unfriend_btn" class="btn_requests">Unfriend</button>
 							<button class="btn_requests">Message</button>
+							<button onclick='blockUnblock("{{ id }}", "block")' class="btn_requests" id="id_block_btn">Block</button>
+							<button onclick='blockUnblock("{{ id }}", "unblock")' class="btn_requests" id="id_block_btn">Unblock</button>
 						{% endif %}
 					{% endif %}
 

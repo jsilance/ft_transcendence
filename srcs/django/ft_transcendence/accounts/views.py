@@ -394,11 +394,11 @@ def cancel_friend_request(request):
     
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
-def remove_friend(request):
+def remove_friend(request, *args, **kwargs):
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
-        user_id = request.POST.get("receiver_user_id")
+        user_id = kwargs.get("receiver_user_id")
         if user_id:
             try:
                 removee = User.objects.get(pk=user_id)
@@ -411,7 +411,6 @@ def remove_friend(request):
             payload['response'] = "There was an error. Unable to remove that friend"
     else:
         payload['response'] = "You must be authenticated to remove a friend"
-    
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
 def blocking(request):
@@ -428,11 +427,13 @@ def blocking(request):
             # add/remove from blocklist
             if action == "block" and target_user not in blocklist.all():
                 blocklist.add(target_user)
-                data = {
-                    "receiver_user_id": user_id,
-                }
-                data = requests.post("accounts/remove_friend", data=data)
-                payload['response'] = data['response']
+                if user_id:
+                    try:
+                        friend_list = FriendList.objects.get(user=current_user)
+                        friend_list.unfriend(target_user)
+                        payload['response'] = "Successfully removed that friend"
+                    except Exception as e:
+                        payload['response'] = f"Something went wrong: {str(e)}"
             elif action == "unblock" and target_user in blocklist.all():
                 blocklist.remove(target_user)
                 payload['response'] = f'unblocked user: {target_user.username}'
@@ -443,23 +444,3 @@ def blocking(request):
     else:
         payload['response'] = 'User is not authenticated'
     return HttpResponse(json.dumps(payload), content_type="application/json")
-
-"""
-function block_user(target_id, uiUpdateFunction) {
-        var url = "{% url 'accounts:block_unblock' target_id=65464762465764 action=block %}".replace(65464762465764, target_id)
-        $.ajax({
-            type: "GET",
-            dataType: "json",
-            url: url,
-            timaout: 5000,
-            success: function(data) {
-            },
-            error: function(data) {
-                alert("Something went wrong: " + data)
-            },
-            complete: function(data) {
-                uiUpdateFunction()
-            },
-        })
-    }
-"""
