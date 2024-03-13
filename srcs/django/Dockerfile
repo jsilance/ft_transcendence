@@ -18,8 +18,7 @@ RUN pip install --no-cache-dir psycopg2-binary \
 				django-crispy-forms \
 				crispy-bootstrap5 \
 				# for ImageField in models
-				Pillow \
-				openai
+				Pillow
 
 COPY ./ft_transcendence /home/django/ft_transcendence
 

@@ -56,7 +56,6 @@ def login_v(req):
             user = form.get_user()
             user.profile.active = True
             login(req, user)
-            req.user.profile.blocklist.add(user)
             if 'next' in req.POST:
                 return redirect(req.POST.get('next'))
             else:
@@ -81,9 +80,15 @@ def callback(req):
     # exchange authorization code for access token
     o42 = Oauth42()
     token = o42.get_token(authorization_code)
+    if token == None:
+        messages.warning(req, f"Couldn't exchange code for access token.")
+        return redirect('accounts:signup')
 
     # use token to request user data
     user_data = o42.get_user_data(token)
+    if user_data == None:
+        messages.warning(req, f'Error: Unable to login. Try signing-up. Probably 401 "Unauthorized"')
+        return redirect('accounts:signup')
     username_42 = user_data.get('login')
     email_42 = user_data.get('email')
 
@@ -91,6 +96,7 @@ def callback(req):
     if username_42 in str(User.objects.all()):
         known_user = User.objects.get(username=username_42)
         if known_user.profile.isstudent:
+            known_user.profile.active = True
             login(req, known_user)
             if 'next' in req.POST:
                 return redirect(req.POST.get('next'))
@@ -125,13 +131,12 @@ class Oauth42:
             'code': code,
             'redirect_uri': 'http://localhost:8000/accounts/callback/' # YOU..AAARG!
         }
-        response = requests.post(url, data/data)
+        response = requests.post(url, data=data)
         if response.status_code == 200:
             token_data = response.json()
             return token_data.get('access_token')
         else:
-            # Handle error
-            return response
+            return None
     # use access token to access user data
     def get_user_data(self, access_token):
         # Make a request to the provider's API to get user information
