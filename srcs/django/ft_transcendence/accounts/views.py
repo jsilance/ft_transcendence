@@ -80,9 +80,15 @@ def callback(req):
     # exchange authorization code for access token
     o42 = Oauth42()
     token = o42.get_token(authorization_code)
+    if token == None:
+        messages.warning(req, f"Couldn't exchange code for access token.")
+        return redirect('accounts:signup')
 
     # use token to request user data
     user_data = o42.get_user_data(token)
+    if user_data == None:
+        messages.warning(req, f'Error: Unable to login. Try signing-up. Probably 401 "Unauthorized"')
+        return redirect('accounts:signup')
     username_42 = user_data.get('login')
     email_42 = user_data.get('email')
 
@@ -90,6 +96,7 @@ def callback(req):
     if username_42 in str(User.objects.all()):
         known_user = User.objects.get(username=username_42)
         if known_user.profile.isstudent:
+            known_user.profile.active = True
             login(req, known_user)
             if 'next' in req.POST:
                 return redirect(req.POST.get('next'))
@@ -129,8 +136,7 @@ class Oauth42:
             token_data = response.json()
             return token_data.get('access_token')
         else:
-            # Handle error
-            return response
+            return None
     # use access token to access user data
     def get_user_data(self, access_token):
         # Make a request to the provider's API to get user information
@@ -175,7 +181,9 @@ def profile(request, username):
         context['wins'] = displayed_user.profile.wins
         context['losses'] = displayed_user.profile.losses
         context['active'] = displayed_user.profile.active
+        context['description'] = displayed_user.profile.description
         context['all_users'] = User.objects.all()
+        context['blocklist'] = displayed_user.profile.blocklist.all()
 
         try:
             friend_list = FriendList.objects.get(user=displayed_user)
@@ -386,11 +394,11 @@ def cancel_friend_request(request):
     
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
-def remove_friend(request):
+def remove_friend(request, *args, **kwargs):
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
-        user_id = request.POST.get("receiver_user_id")
+        user_id = kwargs.get("receiver_user_id")
         if user_id:
             try:
                 removee = User.objects.get(pk=user_id)
@@ -403,5 +411,36 @@ def remove_friend(request):
             payload['response'] = "There was an error. Unable to remove that friend"
     else:
         payload['response'] = "You must be authenticated to remove a friend"
-    
+    return HttpResponse(json.dumps(payload), content_type="application/json")
+
+def blocking(request):
+    current_user = request.user
+    blocklist = current_user.profile.blocklist
+    action = request.GET.get("action")
+    payload = {}
+
+    if current_user.is_authenticated:
+        user_id = request.GET.get("user_id")
+        if user_id:
+            target_user = User.objects.get(pk=user_id)
+
+            # add/remove from blocklist
+            if action == "block" and target_user not in blocklist.all():
+                blocklist.add(target_user)
+                if user_id:
+                    try:
+                        friend_list = FriendList.objects.get(user=current_user)
+                        friend_list.unfriend(target_user)
+                        payload['response'] = "Successfully removed that friend"
+                    except Exception as e:
+                        payload['response'] = f"Something went wrong: {str(e)}"
+            elif action == "unblock" and target_user in blocklist.all():
+                blocklist.remove(target_user)
+                payload['response'] = f'unblocked user: {target_user.username}'
+            else:
+                payload['response'] = 'No user to block or unblock'
+        else:
+            payload['response'] = 'No user ID in the request'
+    else:
+        payload['response'] = 'User is not authenticated'
     return HttpResponse(json.dumps(payload), content_type="application/json")

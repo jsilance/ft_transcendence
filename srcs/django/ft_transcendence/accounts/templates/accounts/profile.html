@@ -46,18 +46,22 @@
 							<!-- No requests have been sent -->
 							{% if request_sent == -1 %}
 								<button class="btn_requests" id="id_send_friend_request_btn">Add Friend</button>
+								<button onclick='blockUnblock("{{ id }}", "block")' class="btn_requests" id="id_block_btn">Block</button>
+								<button onclick='blockUnblock("{{ id }}", "unblock")' class="btn_requests" id="id_block_btn">Unblock</button>
 							{% endif %}
 						{% endif %}
 						{% if is_friend == True %}
 							<button id="id_unfriend_btn" class="btn_requests">Unfriend</button>
 							<button class="btn_requests">Message</button>
+							<button onclick='blockUnblock("{{ id }}", "block")' class="btn_requests" id="id_block_btn">Block</button>
+							<button onclick='blockUnblock("{{ id }}", "unblock")' class="btn_requests" id="id_block_btn">Unblock</button>
 						{% endif %}
 					{% endif %}
 
 				{% endif %}
 
 			</div>
-			<p>Eccentric warrior, adorned and armed, storms into battle with flair.</p>
+			<p>{{description}}</p>
 			<div class="d-flex header_score">
 				<p class="mr-5 bs_v">wins: {{ wins }}</p>
 				<p class="bs_l">losses: {{ losses }}</p>
@@ -103,7 +107,7 @@
 			<div class="users_list">
 
 				{% for usr in all_users %}
-					{% if usr != user and usr not in friends %}
+					{% if usr != user and usr not in friends and usr not in blocklist %}
 						<div class="user_card">
 							<a href="/accounts/profile/{{ usr.username }}">
 								<img src="{{ usr.profile.image.url }}" width="48px" height="48px" alt="profile picture">
@@ -114,6 +118,27 @@
 				{% endfor %}
 	
 			</div>
+			<h5>Blocked</h5>
+			<div class="users_list">
+
+			{% if request.user.is_authenticated and is_self == True %}
+
+				{% if blocklist|length > 0 %}
+
+					{% for blocked_user in blocklist %}
+					<div class="user_card">
+						<a href="/accounts/profile/{{ blocked_user.username }}">
+							<img src="{{ blocked_user.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+						</a>
+						<p>{{ blocked_user.username }}</p>
+					</div>
+					{% endfor %}
+
+				{% endif %}
+			
+			{% endif %}
+			</div>
+
 		</aside>
 		{% endif%}
 	</div>

@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir psycopg2-binary \
 				python-dotenv \
 				# forms styling + bootstrap
 				django-crispy-forms \
-				crispy-bootstrap4 \
+				crispy-bootstrap5 \
 				# for ImageField in models
 				Pillow
 
