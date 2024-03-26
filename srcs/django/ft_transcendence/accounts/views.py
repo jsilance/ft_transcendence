@@ -8,12 +8,17 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse, HttpResponseBadRequest
 import requests
 from dotenv import load_dotenv
 import os
 from django.conf import settings
 import json
+from django.template.loader import render_to_string
+import re
+from render_block import render_block_to_string
 
 # get acces to environment variables
 load_dotenv()
@@ -29,6 +34,7 @@ authorize_uri = "https://api.intra.42.fr/oauth/authorize?\
 FROMLOGIN = 'd56b699830e77ba53855679cb1d252da'
 FROMSIGNUP = '7d2abf2d0fa7c3a0c13236910f30bc43'
 
+@require_http_methods(['GET', 'POST'])
 def signup_v(req):
     context = {
         'authorize_uri': authorize_uri+FROMSIGNUP,
@@ -39,12 +45,20 @@ def signup_v(req):
         if form.is_valid():
             form.save()
             messages.success(req, f'Your account has been created! You are now able to log in.')
-            return redirect('accounts:login')
+            if 'next' in req.POST:
+                return redirect(req.POST.get('next'))
+            else:
+                return redirect('accounts:login')
     else:
         form = UserRegisterForm()
     context['form'] = form
+
+    if 'HTTP_HX_REQUEST' in req.META:
+        html = render_block_to_string('accounts/signup.html', 'body', context)
+        return HttpResponse(html)
     return render(req, 'accounts/signup.html', context)
 
+@require_http_methods(['GET', 'POST'])
 def login_v(req):
     context = {
         'authorize_uri': authorize_uri+FROMLOGIN,
@@ -56,13 +70,14 @@ def login_v(req):
             user = form.get_user()
             user.profile.active = True
             login(req, user)
-            if 'next' in req.POST:
-                return redirect(req.POST.get('next'))
-            else:
-                return redirect('home:welcome')
-    else:
+            return redirect('home:welcome')
+    else: # GET request
         form = AuthenticationForm()
+    # GET but not HTMX or POST with invalid form
     context['form'] = form
+    if 'HTTP_HX_REQUEST' in req.META:
+            html = render_block_to_string('accounts/login.html', 'body', context)
+            return HttpResponse(html)
     return render(req, 'accounts/login.html', context)
 
 """
@@ -71,6 +86,7 @@ Callback for Oauth2 logic
 catches tmp_code, exchanges it for an access token, use that
 token to get user informations
 """
+@require_GET
 def callback(req):
     page_origin = req.GET.get('state')
     authorization_code = req.GET.get('code')
@@ -149,6 +165,7 @@ class Oauth42:
         else:
             return None
 
+@require_POST
 def logout_v(req):
     if req.method == 'POST':
         user = req.user

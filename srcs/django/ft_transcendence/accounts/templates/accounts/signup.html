@@ -17,7 +17,7 @@
 			<p>Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
 			<hr>
 			<div>
-				<form method="post">
+				<form hx-post="{% url 'accounts:signup' %}" hx-trigger="submit">
 					<div class="signin_form_inputs">
 						{% csrf_token %}
 						
