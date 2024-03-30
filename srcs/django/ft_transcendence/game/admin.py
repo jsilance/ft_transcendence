@@ -1,5 +1,4 @@
 from django.contrib import admin
-from .models import Shape, MapSettings
+from .models import MapSettings
 
-admin.site.register(Shape)
 admin.site.register(MapSettings)

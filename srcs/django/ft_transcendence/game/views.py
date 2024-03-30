@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Shape, MapSettings
+from .models import MapSettings
 from django.contrib.auth.decorators import login_required
-from .generatemap import generatemap
 from django.http import HttpResponse
 import json
 from .forms import PartyForm
@@ -9,9 +8,6 @@ from .forms import PartyForm
 def game(request, party_id):
 	user = request.user.username
 
-	# shapes = [{"item_id": int(x.item_id), "type":int(x.type), "color":x.color, "posx":int(x.posx), "posy":int(x.posy)} for x in Shape.objects.filter(party_id=party_id)]
-	# shape_json = json.dumps(shapes)
-	
 	mapSetting = MapSettings.objects.get(id=party_id)
 	
 	# chope la partie sinon la cree
@@ -34,9 +30,7 @@ def game(request, party_id):
 	map_data = json.loads(json.dumps(mapSetting.to_json()))
 	map_data["listOfPlayer"] = user_infos
 	map_data = json.dumps(map_data)
-	generatemap(party_id)
 
-	# context = {'shapes': shape_json, 'mapSetting': map_data, 'user': user, 'party_id': party_id}
 	context = {'mapSetting': map_data, 'user': user, 'party_id': party_id}
 	return render(request, 'game.html', context)
 
