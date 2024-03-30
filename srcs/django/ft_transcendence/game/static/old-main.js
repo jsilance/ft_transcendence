@@ -56,7 +56,11 @@ function handleKeyDown(event) {
         'type': 'playerPaddleUpdate',
         'event': 'keydown',
         'key': event.key
+        // 'session_id': document.getElementById('session_id').value,
+        // 'player_id': document.getElementById('player_id').value,
     };
+	// updatePlayerKey("hgeissle", event.key, true);
+	// socket.send("keydown");
     socket.send(JSON.stringify(data));
 }
 
@@ -65,16 +69,22 @@ function handleKeyUp(event) {
         'type': 'playerPaddleUpdate',
         'event': 'keyup',
         'key': event.key
+        // 'session_id': document.getElementById('session_id').value,
+        // 'player_id': document.getElementById('player_id').value,
     };
+	// updatePlayerKey("hgeissle", event.key, false);
+	// socket.send("keyup");
     socket.send(JSON.stringify(data));
 }
 
 socket.onmessage = function(event) {
+	// console.log(event.data);
     const data = JSON.parse(event.data);
 	if (data.type == 'initObject')
 	{
 		shapesObj = data.shapes;
 		shapes = JSON.parse(shapesObj);
+		// console.log(shapesObj);
 		loadShapes(shapes);
 	}
     if (data.type == 'playerPaddleUpdate')
@@ -82,6 +92,7 @@ socket.onmessage = function(event) {
 		const playerId = data.player;
 		const key = data.key;
 		const value = data.event;
+		console.log(playerId, key, value);
 		updatePlayerKey(playerId, key, value);
     }
     if (data.type == 'ball')
@@ -129,11 +140,14 @@ const scene = new THREE.Scene();
 
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+let radius = (mapSetting.nbPlayer > 2) ? borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 + 3 : 5;
+let angle = (360 / mapSetting.nbPlayer) * userPartyId + (360 / mapSetting.nbPlayer) / 2;
 
-camera.position.x = 0;
-camera.position.z = 0;
-camera.position.y = 10;
+camera.position.x = Math.cos(angle * Math.PI / 180) * radius;
+camera.position.z = Math.sin(angle * Math.PI / 180) * radius;
+camera.position.y = 3;
 camera.lookAt(new THREE.Vector3(0, 0, 0));
+// console.log(camera.position);
 // ---------------------------------------------------------------------------------- //
 
 const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -172,97 +186,120 @@ function loadSkybox()
 
 // ---------------------------------------------------------------------------------- //
 
+// --------------- Load GLB Ball ---------------------------------------------------- //
+/*
+// let loader = new THREE.GLTFLoader();
+const loader = new threeGltfLoader();
+loader.load('/static/game/object/torus.glb', (gltf) => {
+	scene.add(glhf.scene);
+});*/
+// ---------------------------------------------------------------------------------- //
+
+
 const sceneBox = document.getElementById('scene-box');
 sceneBox.appendChild(renderer.domElement);
 
-const plane = new THREE.Mesh(
-	new THREE.BoxGeometry(20, 0, 15),
-	new THREE.MeshPhongMaterial({
-		color: 0x5f5f5f,
-		side: THREE.DoubleSide
-	})
-);
+
+const planeGeometry = new THREE.CylinderGeometry(radius, radius, 0.1, mapSetting.nbPlayer * 2);
+
+const planeMaterial = new THREE.MeshPhongMaterial({color: 0x5f5f5f});
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.position.y = -0.3;
 scene.add(plane);
 // ---------------------------------------------------------------------------------- //
 
-// initialisation des borders, users et ball
+// creation du brouillard
+// const fogColor = "#505050";
+// const fogNear = 20;
+// const fogFar = 2000;
+// scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
+// ---------------------------------------------------------------------------------- //
 
-function loadShapes()
+
+// initialisation des borders, users et ball
+const threeJsShape = []
+
+angle = 0; // -> 3 pl
+let borderAngle = 0;
+// let playerAngle = 45;
+let playerAngle = 360 / (mapSetting.nbPlayer * 2);
+
+const UsersGroup = new THREE.Group();
+const BordersGroup = new THREE.Group();
+scene.add(UsersGroup);
+scene.add(BordersGroup);
+
+function loadShapes(shapes)
 {
-	// Players --------------------------------
-	let player1 = new THREE.Mesh(
-		new THREE.BoxGeometry(0.2, 0.5, 3),
-		new THREE.MeshPhongMaterial({
-			color: 0x5f005f,
-			side: THREE.DoubleSide
-		})
-	);
-	player1.name = "player1";
-	player1.position.x = -9;
-	player1.position.y = 0.5;
-	player1.position.z = 0; //playerpos
-	scene.add(player1);
-	
-	
-	let player2 = new THREE.Mesh(
-		new THREE.BoxGeometry(0.2, 0.5, 3),
-		new THREE.MeshPhongMaterial({
-			color: 0x5f005f,
-			side: THREE.DoubleSide
-		})
-	);
-	player2.name = "player2";
-	player2.position.x = 9;
-	player2.position.y = 0.5;
-	player2.position.z = 0; //playerpos
-	scene.add(player2);
-	// ---------------------------------------
-	
-	// Borders --------------------------------
-	let bordeurUp = new THREE.Mesh(
-		new THREE.BoxGeometry(20, 0.5, 0.1),
-		new THREE.MeshPhongMaterial({
-			color: 0x9f9f9f,
-			side: THREE.DoubleSide
-		})
-		);
-		bordeurUp.name = "borderUp";
-		bordeurUp.position.x = 0;
-		bordeurUp.position.y = 0;
-		bordeurUp.position.z = 7.2;
-		scene.add(bordeurUp);
+	for (const el of shapes) {
+		const {pparty_id, item_id, type, color, posx, posy} = el;
+		let geometry;
+		
+		// console.log(type);
+		switch (type) {
+			case 1:
+				geometry = new THREE.BoxGeometry(borderSize, 1, 0.1);
+				borderAngle = (360 / mapSetting.nbPlayer) * item_id;
+				angle = borderAngle;
+				break;
+			case 2:
+				geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+				playerAngle = (360 / mapSetting.nbPlayer) * item_id + (360 / mapSetting.nbPlayer) / 2;
+				angle = playerAngle;
+				break;
+			case 3:
+				geometry = new THREE.SphereGeometry(0.2);
+				break;
+		}
+					
+		// choix du shader
+		
+		let material;
+		
+		if (type == 2 && item_id == userPartyId)
+		{
+			material = new THREE.MeshPhongMaterial({color: "#ff0000"});
+			positionX = angle;
+		}
+		else
+		material = new THREE.MeshPhongMaterial({color: color});
 		
 		
-		let borderDown = new THREE.Mesh(
-			new THREE.BoxGeometry(20, 0.5, 0.1),
-			new THREE.MeshPhongMaterial({
-				color: 0x9f9f9f,
-				side: THREE.DoubleSide
-			})
-		);
-		borderDown.name = "borderDown";
-		borderDown.position.x = 0;
-		borderDown.position.y = 0;
-		borderDown.position.z = -7.2;
-		scene.add(borderDown);
-		// ---------------------------------------
+		const shape = new THREE.Mesh(geometry, material);
+		let rradius = (mapSetting.nbPlayer > 2) ? borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2 : 2.5;
+		rradius += (type == 2) ? 1 : 0;
+		shape.position.x = Math.cos(angle * Math.PI / 180) * rradius;
+		shape.position.z = Math.sin(angle * Math.PI / 180) * rradius;
+		shape.lookAt(new THREE.Vector3(0, 0, 0));
+			
+		if (type == 1)
+		BordersGroup.add(shape);
+		else if (type == 2)
+		{
+			shape.name = item_id;
+			UsersGroup.add(shape);
+		}
+		else
+		{
+			shape.position.x = 0;
+			shape.position.z = 0;
+			scene.add(shape);
+		}
+		console.log(shape.position);
+		// threeJsShape.push(shape);
+	}
+}
+// ---------------------------------------------------------------------------------- //
+
+// ---------------------------------------------------------------------------------- //
+
+function loadNames(gusers)
+{
+	gusers.forEach(guser => {
+		var div = document.createElement('div');
 		
-		// Ball
-		
-		let ball = new THREE.Mesh(
-			new THREE.SphereGeometry(0.2),
-			new THREE.MeshPhongMaterial({
-				color: 0x9f9f00,
-				side: THREE.DoubleSide
-			})
-		);
-		ball.name = "ball";
-		ball.position.x = 0; //ballpos
-		ball.position.y = 0.5;
-		ball.position.z = 0; //ballpos
-		scene.add(ball);
-		// ---------------------------------------
+	});
+
 }
 
 // ---------------------------------------------------------------------------------- //
@@ -281,10 +318,15 @@ directionalLight.position.set(1, 2, 3);
 
 let offsetX = [];
 
+function g_start()
+{
+	console.log("message");
+}
+
 // ---------------------------------------------------------------------------------- //
 
 loadSkybox();
-loadShapes();
+loadShapes([]);
 
 // ---------------------------------------------------------------------------------- //
 
@@ -292,20 +334,71 @@ loadShapes();
 let nbPlayerCount = 0;
 mapSetting.listOfPlayer.forEach((usr) => {nbPlayerCount++});
 
+try {
+	console.log(UsersGroup.children);
+	UsersGroup.children.forEach((elem) => {
+		if (!mapSetting.listOfPlayer[elem.name])
+			throw ("empty");
+		thisUser = (mapSetting.listOfPlayer[elem.name]).user;
+		offsetX[thisUser] = parseInt(elem.name) * (360 / nbPlayerCount);
+		console.log("Offset for", thisUser, "is", offsetX[thisUser]);
+	})
+}
+catch (e)
+{
+	console.error(e);
+	console.log("ERROR");
+}
+
 const animate = () => {
 	let it = 0;
 	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.0 + 10 / (mapSetting.nbPlayer ** 2);
 	
-	// if (mapSetting.nbPlayer == nbPlayerCount)
-	// {
+	if (mapSetting.nbPlayer == nbPlayerCount)
+	{
 		try {
-			
+			UsersGroup.children.forEach((elem) => {
+				// console.log(elem.position);
+				// console.log(mapSetting.listOfPlayer.filter(x => x==2).length);
+				thisUser = (mapSetting.listOfPlayer[elem.name]).user;
+				// console.log("this user:", thisUser, "offset:", offsetX[thisUser]);
+				if (playerKeys[thisUser].ArrowLeft && offsetX[thisUser] < (16 - parseInt(mapSetting.nbPlayer) + 2))
+				{
+					offsetX[thisUser] += 3 / radius;
+					console.log("Left");
+				}
+				else if (playerKeys[thisUser].ArrowRight && offsetX[thisUser] > (-16 + parseInt(mapSetting.nbPlayer) - 2))
+				{
+					offsetX[thisUser] -= 3 / radius;
+					console.log("Right");
+				}
+				// elem.position.x = 0;
+				elem.position.x = Math.cos((parseInt(positionX) + parseInt(offsetX[thisUser])) * Math.PI / 180) * radius;
+				console.log(elem.position.x);
+				// elem.position.z = 0;
+				console.log(offsetX[thisUser]);
+				elem.position.z = Math.sin((parseInt(positionX) + parseInt(offsetX[thisUser])) * Math.PI / 180) * radius;
+				console.log(elem.position.z);
+				elem.lookAt(new THREE.Vector3(0, 0, 0));
+			});
 		}
 		catch (e)
 		{
 			console.error(e);
 		}
-	// }
+	}
+	else
+	{
+		// vue du lobby en mode attente
+		// if (ready < nb.player)
+		// {
+			radius = 30;
+			camera.position.x = Math.sin(angle * Math.PI / 180) * radius;
+			camera.position.z = Math.cos(angle * Math.PI / 180) * radius;
+			camera.position.y = 5;
+			angle += 0.1;
+		// }
+	}
 
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
 
