@@ -11,15 +11,18 @@ let userPartyId = 0;
 let thisUser;
 let shapesObj = [];
 let shapes = [];
-let player1_name;
-let player2_name;
+let player1_name, player2_name;
+
+// Keys interraction //
+console.log(mapSetting.listOfPlayer);
+while (mapSetting.listOfPlayer.length < 2)
+{
+	sleep(1);
+}
 
 player1_name = mapSetting.listOfPlayer[0].user;
 player2_name = mapSetting.listOfPlayer[1].user;
-console.log(player1_name);
-console.log(player2_name);
-
-// Keys interraction //
+console.log(player1_name, player2_name);
 
 let i = 0;
 const playerKeys = {};
@@ -62,7 +65,8 @@ initKeys();
 // ----------Gestion socket et communication--------------------------------------------------------------------- //
 
 function updatePlayerKey(playerId, key, value) {
-    if (playerKeys[playerId]) {
+
+	if (playerKeys[playerId]) {
 		if (value == "keydown")
         	playerKeys[playerId][key] = true;
 		if (value == "keyup")
@@ -243,7 +247,7 @@ function loadShapes()
 			side: THREE.DoubleSide
 		})
 	);
-	player2.name = player2_name;
+	player2.name =  player2_name;
 	player2.position.x = 9.9
 	player2.position.y = 0;
 	player2.position.z = 0; //playerpos
@@ -330,31 +334,28 @@ const animate = () => {
 	// if (mapSetting.nbPlayer == nbPlayerCount)
 	// {
 		try {
-			if (playerKeys[player1_name].ArrowLeft)
+			if (playerKeys[player1_name].ArrowUp)
 			{
 				if (UsersGroup.getObjectByName(player1_name).position.z > -5.6)
 					UsersGroup.getObjectByName(player1_name).position.z -= 0.1;
 			}
 
-			if (playerKeys[player1_name].ArrowRight)
+			if (playerKeys[player1_name].ArrowDown)
 			{
 				if (UsersGroup.getObjectByName(player1_name).position.z < 5.6)
 					UsersGroup.getObjectByName(player1_name).position.z += 0.1;
 			}
 
-			if (playerKeys[player2_name].ArrowLeft)
+			if (playerKeys[player2_name].ArrowUp)
 			{
 				if (UsersGroup.getObjectByName(player2_name).position.z > -5.6)
 					UsersGroup.getObjectByName(player2_name).position.z -= 0.1;
 			}
-
-			if (playerKeys[player2_name].ArrowRight)
+			if (playerKeys[player2_name].ArrowDown)
 			{
 				if (UsersGroup.getObjectByName(player2_name).position.z < 5.6)
 					UsersGroup.getObjectByName(player2_name).position.z += 0.1;
 			}
-
-
 
 		}
 		catch (e)
