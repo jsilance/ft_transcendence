@@ -1,0 +1,15 @@
+<script>
+	var partyId = "{{ party_id }}";
+    function checkPlayers() {
+        fetch('/game/check_players/' + partyId + '/')
+            .then(response => response.json())
+            .then(data => {
+                if(data.player_count >= data.required_players) {
+                    window.location.href = '/game/{{ party_id }}/'; // Redirect to the game page
+                }
+            });
+    }
+
+    // Check every 5 seconds
+    setInterval(checkPlayers, 5000);
+</script>

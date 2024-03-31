@@ -14,15 +14,31 @@ let shapes = [];
 let player1_name, player2_name;
 
 // Keys interraction //
-console.log(mapSetting.listOfPlayer);
-while (mapSetting.listOfPlayer.length < 2)
-{
-	sleep(1);
-}
+// console.log(mapSetting.listOfPlayer);
+// while (mapSetting.listOfPlayer.length < 2)
+// {
+// 	sleep(1);
+// }
 
-player1_name = mapSetting.listOfPlayer[0].user;
-player2_name = mapSetting.listOfPlayer[1].user;
-console.log(player1_name, player2_name);
+// function waitForPlayers() {
+//     return new Promise((resolve, reject) => {
+//         const checkInterval = 500; // Time in milliseconds to wait between checks
+
+//         const intervalId = setInterval(() => {
+//             if (mapSetting.listOfPlayer.length >= 2) {
+//                 clearInterval(intervalId);
+//                 resolve(); // Resolve the promise when the condition is met
+//             }
+//         }, checkInterval);
+//     });
+// }
+
+// await waitForPlayers(); // Wait for the condition to be met
+
+
+// player1_name = mapSetting.listOfPlayer[0].user;
+// player2_name = mapSetting.listOfPlayer[1].user;
+// console.log(player1_name, player2_name);
 
 let i = 0;
 const playerKeys = {};
@@ -60,7 +76,7 @@ function initKeys() {
 	};
 }
 
-initKeys();
+// initKeys();
 
 // ----------Gestion socket et communication--------------------------------------------------------------------- //
 
@@ -370,4 +386,22 @@ const animate = () => {
 	requestAnimationFrame(animate);
 }
 
-animate();
+function waitForPlayersAndStart() {
+    // Check if the required number of players have joined
+    // This could be a loop, interval, or a response to an event (like WebSocket message)
+    if (mapSetting.listOfPlayer.length === 2) {
+        console.log("All players have joined. Starting the game...");
+		player1_name = mapSetting.listOfPlayer[0].user;
+		player2_name = mapSetting.listOfPlayer[1].user;
+		initKeys();
+        animate(); // Start the game loop
+    } else {
+        console.log("Waiting for all players to join...");
+		console.log(mapSetting.listOfPlayer);
+		console.log(mapSetting.listOfPlayer.length);
+        setTimeout(waitForPlayersAndStart, 1000); // Check again after a delay
+    }
+}
+
+// Initial call to start the process
+waitForPlayersAndStart();

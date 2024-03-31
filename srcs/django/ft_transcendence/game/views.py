@@ -31,8 +31,20 @@ def game(request, party_id):
 	map_data["listOfPlayer"] = user_infos
 	map_data = json.dumps(map_data)
 
+	if len(user_infos) < 2:
+		return render(request, 'waiting.html', {'party_id': party_id})
+
 	context = {'mapSetting': map_data, 'user': user, 'party_id': party_id}
 	return render(request, 'game.html', context)
+
+def check_players(request, party_id):
+    mapSetting = MapSettings.objects.get(id=party_id)
+    try:
+        user_infos = json.loads(mapSetting.listOfPlayer)
+    except (json.JSONDecodeError, ValueError):
+        user_infos = []
+    return JsonResponse({'player_count': len(user_infos), 'required_players': 2})
+
 
 @login_required(login_url='/accounts/login/')
 def websocket_test(request, party_id):
