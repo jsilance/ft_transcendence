@@ -13,6 +13,9 @@ let shapesObj = [];
 let shapes = [];
 let player1_name, player2_name;
 
+player1_name = mapSetting.listOfPlayer[0].user;
+player2_name = mapSetting.listOfPlayer[1].user;
+
 // Keys interraction //
 // console.log(mapSetting.listOfPlayer);
 // while (mapSetting.listOfPlayer.length < 2)
@@ -76,7 +79,7 @@ function initKeys() {
 	};
 }
 
-// initKeys();
+initKeys();
 
 // ----------Gestion socket et communication--------------------------------------------------------------------- //
 
@@ -311,7 +314,7 @@ function loadShapes()
 		);
 		ball.name = "ball";
 		ball.position.x = 0; //ballpos
-		ball.position.y = 0.5;
+		ball.position.y = 0;
 		ball.position.z = 0; //ballpos
 		scene.add(ball);
 		// ---------------------------------------
@@ -344,6 +347,13 @@ loadShapes();
 // let nbPlayerCount = 0;
 // mapSetting.listOfPlayer.forEach((usr) => {nbPlayerCount++});
 
+let player1 = scene.getObjectByName(player1_name);
+let player2 = scene.getObjectByName(player2_name);
+let ball = scene.getObjectByName("ball");
+let paddleDepth = 0.5;
+let ballVelocity = { x: 0.02, y: 0, z: 0 };
+
+
 const animate = () => {
 	// let it = 0;
 	
@@ -352,26 +362,54 @@ const animate = () => {
 		try {
 			if (playerKeys[player1_name].ArrowUp)
 			{
-				if (UsersGroup.getObjectByName(player1_name).position.z > -5.6)
-					UsersGroup.getObjectByName(player1_name).position.z -= 0.1;
+				if (player1.position.z > -5.6)
+					player1.position.z -= 0.1;
 			}
 
 			if (playerKeys[player1_name].ArrowDown)
 			{
-				if (UsersGroup.getObjectByName(player1_name).position.z < 5.6)
-					UsersGroup.getObjectByName(player1_name).position.z += 0.1;
+				if (player1.position.z < 5.6)
+					player1.position.z += 0.1;
 			}
 
 			if (playerKeys[player2_name].ArrowUp)
 			{
-				if (UsersGroup.getObjectByName(player2_name).position.z > -5.6)
-					UsersGroup.getObjectByName(player2_name).position.z -= 0.1;
+				if (player2.position.z > -5.6)
+					player2.position.z -= 0.1;
 			}
 			if (playerKeys[player2_name].ArrowDown)
 			{
-				if (UsersGroup.getObjectByName(player2_name).position.z < 5.6)
-					UsersGroup.getObjectByName(player2_name).position.z += 0.1;
+				if (player2.position.z < 5.6)
+					player2.position.z += 0.1;
 			}
+
+			ball.position.x += ballVelocity.x;
+			ball.position.y += ballVelocity.y;
+			ball.position.z += ballVelocity.z;
+	
+						// Check for collision with the game area's top and bottom boundaries
+			if (ball.position.z > 7.1 || ball.position.z < -7.1) {
+				ballVelocity.z *= -1; // Reverse the ball's Z-velocity
+			}
+
+
+			if (ball.position.x < player1.position.x + paddleDepth && ball.position.x > player1.position.x - paddleDepth) {
+				if (ball.position.z < player1.position.z + 1.5 && ball.position.z > player1.position.z - 1.5) {
+				ballVelocity.x *= -1; // Reverse the ball's X-velocity
+				let hitPosZ = ball.position.z - player1.position.z; // Collision point
+				ballVelocity.z += hitPosZ * 0.05; // This factor controls the influence of hit position on velocity
+				}
+			}
+
+			if (ball.position.x < player2.position.x + paddleDepth && ball.position.x > player2.position.x - paddleDepth && ballVelocity.x > 0) {
+				if (ball.position.z < player2.position.z + 1.5 && ball.position.z > player2.position.z - 1.5) {
+				ballVelocity.x *= -1; // Reverse the ball's X-velocity
+				let hitPosZ = ball.position.z - player2.position.z; // Collision point
+				ballVelocity.z += hitPosZ * 0.05; // This factor controls the influence of hit position on velocity
+				}
+			}
+
+
 
 		}
 		catch (e)
@@ -386,22 +424,4 @@ const animate = () => {
 	requestAnimationFrame(animate);
 }
 
-function waitForPlayersAndStart() {
-    // Check if the required number of players have joined
-    // This could be a loop, interval, or a response to an event (like WebSocket message)
-    if (mapSetting.listOfPlayer.length === 2) {
-        console.log("All players have joined. Starting the game...");
-		player1_name = mapSetting.listOfPlayer[0].user;
-		player2_name = mapSetting.listOfPlayer[1].user;
-		initKeys();
-        animate(); // Start the game loop
-    } else {
-        console.log("Waiting for all players to join...");
-		console.log(mapSetting.listOfPlayer);
-		console.log(mapSetting.listOfPlayer.length);
-        setTimeout(waitForPlayersAndStart, 1000); // Check again after a delay
-    }
-}
-
-// Initial call to start the process
-waitForPlayersAndStart();
+animate(); // Start the game loop
