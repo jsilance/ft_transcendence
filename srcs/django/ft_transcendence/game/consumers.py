@@ -75,16 +75,16 @@ class PongConsumer(AsyncWebsocketConsumer):
             # All connected clients in this group will receive it.
             await self.channel_layer.group_send("game_room", group_message)
         
-        if message_type == 'initObject':
+        # if message_type == 'initObject':
                 
-            party_id = text_data_json['id']
-            # Handle the object update event.
-            shapes = await self.get_shapes_async(party_id)
-            shape_json = json.dumps(shapes)
-            await self.send(text_data=json.dumps({
-                'type': 'initObject',
-                'shapes': shape_json
-            }))
+        #     party_id = text_data_json['id']
+        #     # Handle the object update event.
+        #     shapes = await self.get_shapes_async(party_id)
+        #     shape_json = json.dumps(shapes)
+        #     await self.send(text_data=json.dumps({
+        #         'type': 'initObject',
+        #         'shapes': shape_json
+        #     }))
 
 
     async def player_paddle_update(self, event):

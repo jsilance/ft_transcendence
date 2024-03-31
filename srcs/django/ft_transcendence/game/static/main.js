@@ -11,6 +11,13 @@ let userPartyId = 0;
 let thisUser;
 let shapesObj = [];
 let shapes = [];
+let player1_name;
+let player2_name;
+
+player1_name = mapSetting.listOfPlayer[0].user;
+player2_name = mapSetting.listOfPlayer[1].user;
+console.log(player1_name);
+console.log(player2_name);
 
 // Keys interraction //
 
@@ -18,24 +25,39 @@ let i = 0;
 const playerKeys = {};
 
 // add player and define id of player
-for (const el of mapSetting.listOfPlayer)
-{
-	i++;
-	if (user == el.user)
-	{
-		userPartyId = i;
-	}
-	addPlayer(el.user);
-	console.log(el.user);
+// for (const el of mapSetting.listOfPlayer)
+// {
+// 	// i++;
+// 	// if (user == el.user)
+// 	// {
+// 	// 	userPartyId = i;
+// 	// }
+// 	addPlayer(el.user);
+// 	console.log(el.user);
+// }
+
+// // Function to initialize keys for a new player
+// function addPlayer(playerId) {
+//     playerKeys[playerId] = {
+//         ArrowLeft: false,
+//         ArrowRight: false
+//     };
+// }
+
+function initKeys() {
+
+	playerKeys[player1_name] = {
+		ArrowLeft: false,
+		ArrowRight: false
+	};
+
+	playerKeys[player2_name] = {
+		ArrowLeft: false,
+		ArrowRight: false
+	};
 }
 
-// Function to initialize keys for a new player
-function addPlayer(playerId) {
-    playerKeys[playerId] = {
-        ArrowLeft: false,
-        ArrowRight: false
-    };
-}
+initKeys();
 
 // ----------Gestion socket et communication--------------------------------------------------------------------- //
 
@@ -55,7 +77,9 @@ function handleKeyDown(event) {
     const data = {
         'type': 'playerPaddleUpdate',
         'event': 'keydown',
-        'key': event.key
+        'key': event.key,
+		'player1': scene.getObjectByName(player1_name).position.z,
+		'player2': scene.getObjectByName(player2_name).position.z
     };
     socket.send(JSON.stringify(data));
 }
@@ -64,17 +88,22 @@ function handleKeyUp(event) {
     const data = {
         'type': 'playerPaddleUpdate',
         'event': 'keyup',
-        'key': event.key
+        'key': event.key,
+		'player1': scene.getObjectByName(player1_name).position.z,
+		'player2': scene.getObjectByName(player2_name).position.z
     };
     socket.send(JSON.stringify(data));
 }
 
 socket.onmessage = function(event) {
+	console.log(event.data);
     const data = JSON.parse(event.data);
 	if (data.type == 'initObject')
 	{
 		shapesObj = data.shapes;
 		shapes = JSON.parse(shapesObj);
+		// player1 = data.player1;
+		// player2 = data.player2;
 		loadShapes(shapes);
 	}
     if (data.type == 'playerPaddleUpdate')
@@ -186,6 +215,8 @@ plane.position.y = -0.3;
 scene.add(plane);
 // ---------------------------------------------------------------------------------- //
 
+const UsersGroup = new THREE.Group();
+
 // initialisation des borders, users et ball
 
 function loadShapes()
@@ -198,11 +229,11 @@ function loadShapes()
 			side: THREE.DoubleSide
 		})
 	);
-	player1.name = "player1";
-	player1.position.x = -9;
-	player1.position.y = 0.5;
+	player1.name = player1_name;
+	player1.position.x = -9.9;
+	player1.position.y = 0;
 	player1.position.z = 0; //playerpos
-	scene.add(player1);
+	UsersGroup.add(player1);
 	
 	
 	let player2 = new THREE.Mesh(
@@ -212,11 +243,12 @@ function loadShapes()
 			side: THREE.DoubleSide
 		})
 	);
-	player2.name = "player2";
-	player2.position.x = 9;
-	player2.position.y = 0.5;
+	player2.name = player2_name;
+	player2.position.x = 9.9
+	player2.position.y = 0;
 	player2.position.z = 0; //playerpos
-	scene.add(player2);
+	UsersGroup.add(player2);
+	scene.add(UsersGroup);
 	// ---------------------------------------
 	
 	// Borders --------------------------------
@@ -279,7 +311,7 @@ directionalLight.position.set(1, 2, 3);
 
 // ---------------------------------------------------------------------------------- //
 
-let offsetX = [];
+// let offsetX = [];
 
 // ---------------------------------------------------------------------------------- //
 
@@ -289,17 +321,41 @@ loadShapes();
 // ---------------------------------------------------------------------------------- //
 
 
-let nbPlayerCount = 0;
-mapSetting.listOfPlayer.forEach((usr) => {nbPlayerCount++});
+// let nbPlayerCount = 0;
+// mapSetting.listOfPlayer.forEach((usr) => {nbPlayerCount++});
 
 const animate = () => {
-	let it = 0;
-	let radius = (borderSize / (2 * Math.tan(Math.PI / mapSetting.nbPlayer)) * 2) + 0.0 + 10 / (mapSetting.nbPlayer ** 2);
+	// let it = 0;
 	
 	// if (mapSetting.nbPlayer == nbPlayerCount)
 	// {
 		try {
-			
+			if (playerKeys[player1_name].ArrowLeft)
+			{
+				if (UsersGroup.getObjectByName(player1_name).position.z > -5.6)
+					UsersGroup.getObjectByName(player1_name).position.z -= 0.1;
+			}
+
+			if (playerKeys[player1_name].ArrowRight)
+			{
+				if (UsersGroup.getObjectByName(player1_name).position.z < 5.6)
+					UsersGroup.getObjectByName(player1_name).position.z += 0.1;
+			}
+
+			if (playerKeys[player2_name].ArrowLeft)
+			{
+				if (UsersGroup.getObjectByName(player2_name).position.z > -5.6)
+					UsersGroup.getObjectByName(player2_name).position.z -= 0.1;
+			}
+
+			if (playerKeys[player2_name].ArrowRight)
+			{
+				if (UsersGroup.getObjectByName(player2_name).position.z < 5.6)
+					UsersGroup.getObjectByName(player2_name).position.z += 0.1;
+			}
+
+
+
 		}
 		catch (e)
 		{
