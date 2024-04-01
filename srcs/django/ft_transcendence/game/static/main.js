@@ -12,6 +12,8 @@ let thisUser;
 let shapesObj = [];
 let shapes = [];
 let player1_name, player2_name;
+let playerpos1, playerpos2 = 0;
+let ballX, ballY, ballZ = 0;
 
 player1_name = mapSetting.listOfPlayer[0].user;
 player2_name = mapSetting.listOfPlayer[1].user;
@@ -133,8 +135,8 @@ function handleKeyDown(event) {
         'type': 'playerPaddleUpdate',
         'event': 'keydown',
         'key': event.key,
-		'player1': scene.getObjectByName(player1_name).position.z,
-		'player2': scene.getObjectByName(player2_name).position.z
+		// 'player1': scene.getObjectByName(player1_name).position.z,
+		// 'player2': scene.getObjectByName(player2_name).position.z
     };
     socket.send(JSON.stringify(data));
 }
@@ -144,8 +146,8 @@ function handleKeyUp(event) {
         'type': 'playerPaddleUpdate',
         'event': 'keyup',
         'key': event.key,
-		'player1': scene.getObjectByName(player1_name).position.z,
-		'player2': scene.getObjectByName(player2_name).position.z
+		// 'player1': scene.getObjectByName(player1_name).position.z,
+		// 'player2': scene.getObjectByName(player2_name).position.z
     };
     socket.send(JSON.stringify(data));
 }
@@ -357,6 +359,14 @@ socket.onmessage = function(event) {
 		const value = data.event;
 		updatePlayerKey(playerId, key, value);
     }
+	if (data.type == 'syncGame')
+	{
+		ballX = data.ballX;
+		ballY = data.ballY;
+		ballZ = data.ballZ;
+		playerpos1 = data.player1;
+		playerpos2 = data.player2;
+	}
     // if (data.type == 'playerPaddleUpdate')
     // {
 	// 	console.log("Player paddle update received: ", data);
@@ -410,65 +420,82 @@ const animate = () => {
 	// if (mapSetting.nbPlayer == nbPlayerCount)
 	// {
 		try {
-			if (playerKeys[player1_name].ArrowUp)
+			if (user == player1_name)
 			{
-				if (player1.position.z > -5.6)
-					player1.position.z -= 0.1;
-			}
-
-			if (playerKeys[player1_name].ArrowDown)
-			{
-				if (player1.position.z < 5.6)
-					player1.position.z += 0.1;
-			}
-
-			if (playerKeys[player2_name].ArrowUp)
-			{
-				if (player2.position.z > -5.6)
-					player2.position.z -= 0.1;
-			}
-			if (playerKeys[player2_name].ArrowDown)
-			{
-				if (player2.position.z < 5.6)
-					player2.position.z += 0.1;
-			}
-			// if (playerKeys[user].ArrowUp)
-			// {
-			// 	if (player.position.z > -5.6)
-			// 		player.position.z -= 0.1;
-			// }
-			// if (playerKeys[user].ArrowDown)
-			// {
-			// 	if (player.position.z < 5.6)
-			// 		player.position.z += 0.1;
-			// }
-
-			ball.position.x += ballVelocity.x;
-			ball.position.y += ballVelocity.y;
-			ball.position.z += ballVelocity.z;
-	
-						// Check for collision with the game area's top and bottom boundaries
-			if (ball.position.z > 7.1 || ball.position.z < -7.1) {
-				ballVelocity.z *= -1; // Reverse the ball's Z-velocity
-			}
-
-
-			if (ball.position.x < player1.position.x + paddleDepth && ball.position.x > player1.position.x - paddleDepth) {
-				if (ball.position.z < player1.position.z + 1.5 && ball.position.z > player1.position.z - 1.5) {
-				ballVelocity.x *= -1; // Reverse the ball's X-velocity
-				let hitPosZ = ball.position.z - player1.position.z; // Collision point
-				ballVelocity.z += hitPosZ * 0.05; // This factor controls the influence of hit position on velocity
+				if (playerKeys[player1_name].ArrowUp)
+				{
+					if (player1.position.z > -5.6)
+						player1.position.z -= 0.1;
 				}
-			}
 
-			if (ball.position.x < player2.position.x + paddleDepth && ball.position.x > player2.position.x - paddleDepth && ballVelocity.x > 0) {
-				if (ball.position.z < player2.position.z + 1.5 && ball.position.z > player2.position.z - 1.5) {
-				ballVelocity.x *= -1; // Reverse the ball's X-velocity
-				let hitPosZ = ball.position.z - player2.position.z; // Collision point
-				ballVelocity.z += hitPosZ * 0.05; // This factor controls the influence of hit position on velocity
+				if (playerKeys[player1_name].ArrowDown)
+				{
+					if (player1.position.z < 5.6)
+						player1.position.z += 0.1;
 				}
-			}
 
+				if (playerKeys[player2_name].ArrowUp)
+				{
+					if (player2.position.z > -5.6)
+						player2.position.z -= 0.1;
+				}
+				if (playerKeys[player2_name].ArrowDown)
+				{
+					if (player2.position.z < 5.6)
+						player2.position.z += 0.1;
+				}
+				// if (playerKeys[user].ArrowUp)
+				// {
+				// 	if (player.position.z > -5.6)
+				// 		player.position.z -= 0.1;
+				// }
+				// if (playerKeys[user].ArrowDown)
+				// {
+				// 	if (player.position.z < 5.6)
+				// 		player.position.z += 0.1;
+				// }
+
+				ball.position.x += ballVelocity.x;
+				ball.position.y += ballVelocity.y;
+				ball.position.z += ballVelocity.z;
+		
+							// Check for collision with the game area's top and bottom boundaries
+				if (ball.position.z > 7.1 || ball.position.z < -7.1) {
+					ballVelocity.z *= -1; // Reverse the ball's Z-velocity
+				}
+
+
+				if (ball.position.x < player1.position.x + paddleDepth && ball.position.x > player1.position.x - paddleDepth) {
+					if (ball.position.z < player1.position.z + 1.5 && ball.position.z > player1.position.z - 1.5) {
+					ballVelocity.x *= -1; // Reverse the ball's X-velocity
+					let hitPosZ = ball.position.z - player1.position.z; // Collision point
+					ballVelocity.z += hitPosZ * 0.05; // This factor controls the influence of hit position on velocity
+					}
+				}
+
+				if (ball.position.x < player2.position.x + paddleDepth && ball.position.x > player2.position.x - paddleDepth && ballVelocity.x > 0) {
+					if (ball.position.z < player2.position.z + 1.5 && ball.position.z > player2.position.z - 1.5) {
+					ballVelocity.x *= -1; // Reverse the ball's X-velocity
+					let hitPosZ = ball.position.z - player2.position.z; // Collision point
+					ballVelocity.z += hitPosZ * 0.05; // This factor controls the influence of hit position on velocity
+					}
+				}
+				socket.send(JSON.stringify({
+					type: 'syncGame',
+					ballX: ball.position.x,
+					ballY: ball.position.y,
+					ballZ: ball.position.z,
+					player1: player1.position.z,
+					player2: player2.position.z
+				}));
+			}
+			else if (user == player2_name)
+			{
+				player1.position.z = playerpos1;
+				player2.position.z = playerpos2;
+				ball.position.x = ballX;
+				ball.position.y = ballY;
+				ball.position.z = ballZ;
 			// if (player) {
 			// 	console.log('Player position: ' + player.position.z);
 			// 	// Check if the position has changed significantly since last sent
@@ -484,6 +511,7 @@ const animate = () => {
 			// 		lastSentPlayerPositionZ = player.position.z;
 			// 	}
 			// }
+			}
 
 		}
 		catch (e)

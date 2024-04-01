@@ -85,11 +85,14 @@ class PongConsumer(AsyncWebsocketConsumer):
         #         'type': 'initObject',
         #         'shapes': shape_json
         #     }))
-        if message_type == 'syncGameState' :
+        if message_type == 'syncGame' :
             await self.channel_layer.group_send("game_room", {
-                'type': 'paddle_position',
-                'playerName': text_data_json['playerName'],
-                'position': text_data_json['position']
+                'type': 'syncGame',
+                'ballX' : text_data_json['ballX'],
+                'ballY' : text_data_json['ballY'],
+                'ballZ' : text_data_json['ballZ'],
+                'player1' : text_data_json['player1'],
+                'player2' : text_data_json['player2']
             })
 
 
@@ -108,11 +111,12 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
 
     async def syncGame(self, event):
-        playerName = event['playerName']
-        position = event['position']
 
         await self.send(text_data=json.dumps({
         'type': 'syncGame',
-        'opponentName': playerName,
-        'position': position
+        'ballX': event['ballX'],
+        'ballY': event['ballY'],
+        'ballZ': event['ballZ'],
+        'player1': event['player1'],
+        'player2': event['player2']
     }))
