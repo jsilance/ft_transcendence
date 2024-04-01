@@ -60,15 +60,13 @@ class PongConsumer(AsyncWebsocketConsumer):
     
         if message_type == 'playerPaddleUpdate':
         # Handle the key press event.
-            event = text_data_json['event']  # The key that was pressed.
-            key = text_data_json['key']  # The key that was pressed.
+            position = text_data_json['position']
         
         # Prepare a message to broadcast to the group.
             group_message = {
             'type': 'player_paddle_update',
             'player': self.username,  # Include the username of the sender.
-            'event': event,
-            'key' : key
+            'position': position
             }
         
             # Send the message to the 'threejs_group'.
@@ -85,34 +83,27 @@ class PongConsumer(AsyncWebsocketConsumer):
         #         'type': 'initObject',
         #         'shapes': shape_json
         #     }))
-        if message_type == 'syncGameState' :
-            await self.channel_layer.group_send("game_room", {
-                'type': 'paddle_position',
-                'playerName': text_data_json['playerName'],
-                'position': text_data_json['position']
-            })
+
 
 
     async def player_paddle_update(self, event):
         # Extract the key pressed (direction) and username from the event.
-        eventkey = event['event']
-        key = event['key']
         username = event['player']
+        position = event['position']
 
         # Send a message directly back to the WebSocket client.
         await self.send(text_data=json.dumps({
             'type': 'playerPaddleUpdate',
             'player': username,  # Include the username of the sender.
-            'event': eventkey,
-            'key': key
+            'position': position
         }))
 
-    async def syncGame(self, event):
-        playerName = event['playerName']
-        position = event['position']
+    # async def syncGame(self, event):
+    #     playerName = event['playerName']
+    #     position = event['position']
 
-        await self.send(text_data=json.dumps({
-        'type': 'syncGame',
-        'opponentName': playerName,
-        'position': position
-    }))
+    #     await self.send(text_data=json.dumps({
+    #     'type': 'syncGame',
+    #     'opponentName': playerName,
+    #     'position': position
+    # }))

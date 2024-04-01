@@ -68,20 +68,20 @@ const playerKeys = {};
 
 function initKeys() {
 
-	playerKeys[player1_name] = {
-		ArrowLeft: false,
-		ArrowRight: false
-	};
-
-	playerKeys[player2_name] = {
-		ArrowLeft: false,
-		ArrowRight: false
-	};
-
-	// playerKeys[user] = {
+	// playerKeys[player1_name] = {
 	// 	ArrowLeft: false,
 	// 	ArrowRight: false
 	// };
+
+	// playerKeys[player2_name] = {
+	// 	ArrowLeft: false,
+	// 	ArrowRight: false
+	// };
+
+	playerKeys[user] = {
+		ArrowLeft: false,
+		ArrowRight: false
+	};
 }
 
 initKeys();
@@ -101,21 +101,21 @@ function updatePlayerKey(playerId, key, value) {
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 
-// function handleKeyDown(event) {
-// 	var value = event.key;
-// 	if (value == "keydown")
-// 		playerKeys[user][key] = true;
-// 	if (value == "keyup")
-// 		playerKeys[user][key] = false;
-// }
+function handleKeyDown(event) {
+	var value = event.key;
+	if (value == "keydown")
+		playerKeys[user][key] = true;
+	if (value == "keyup")
+		playerKeys[user][key] = false;
+}
 
-// function handleKeyUp(event) {
-// 	var value = event.key;
-// 	if (value == "keydown")
-// 		playerKeys[user][key] = true;
-// 	if (value == "keyup")
-// 		playerKeys[user][key] = false;
-// }
+function handleKeyUp(event) {
+	var value = event.key;
+	if (value == "keydown")
+		playerKeys[user][key] = true;
+	if (value == "keyup")
+		playerKeys[user][key] = false;
+}
 
 // function handleKeyUp(event) {
 //     const data = {
@@ -128,27 +128,27 @@ document.addEventListener('keyup', handleKeyUp);
 //     socket.send(JSON.stringify(data));
 // }
 
-function handleKeyDown(event) {
-    const data = {
-        'type': 'playerPaddleUpdate',
-        'event': 'keydown',
-        'key': event.key,
-		'player1': scene.getObjectByName(player1_name).position.z,
-		'player2': scene.getObjectByName(player2_name).position.z
-    };
-    socket.send(JSON.stringify(data));
-}
+// function handleKeyDown(event) {
+//     const data = {
+//         'type': 'playerPaddleUpdate',
+//         'event': 'keydown',
+//         'key': event.key,
+// 		'player1': scene.getObjectByName(player1_name).position.z,
+// 		'player2': scene.getObjectByName(player2_name).position.z
+//     };
+//     socket.send(JSON.stringify(data));
+// }
 
-function handleKeyUp(event) {
-    const data = {
-        'type': 'playerPaddleUpdate',
-        'event': 'keyup',
-        'key': event.key,
-		'player1': scene.getObjectByName(player1_name).position.z,
-		'player2': scene.getObjectByName(player2_name).position.z
-    };
-    socket.send(JSON.stringify(data));
-}
+// function handleKeyUp(event) {
+//     const data = {
+//         'type': 'playerPaddleUpdate',
+//         'event': 'keyup',
+//         'key': event.key,
+// 		'player1': scene.getObjectByName(player1_name).position.z,
+// 		'player2': scene.getObjectByName(player2_name).position.z
+//     };
+//     socket.send(JSON.stringify(data));
+
 
 socket.onopen = function(e) {
 	console.log("Connection etablished!");
@@ -350,20 +350,20 @@ socket.onmessage = function(event) {
 		// player2 = data.player2;
 		loadShapes(shapes);
 	}
-    if (data.type == 'playerPaddleUpdate')
-    {
-		const playerId = data.player;
-		const key = data.key;
-		const value = data.event;
-		updatePlayerKey(playerId, key, value);
-    }
     // if (data.type == 'playerPaddleUpdate')
     // {
-	// 	console.log("Player paddle update received: ", data);
 	// 	const playerId = data.player;
-	// 	const pos = data.position;
-	// 	UsersGroup.getObjectByName(playerId).position.z = pos;
+	// 	const key = data.key;
+	// 	const value = data.event;
+	// 	updatePlayerKey(playerId, key, value);
     // }
+    if (data.type == 'playerPaddleUpdate')
+    {
+		console.log("Player paddle update received: ", data);
+		const playerId = data.player;
+		const pos = data.position;
+		UsersGroup.getObjectByName(playerId).position.z = pos;
+    }
 	// if (data.type == 'syncGame')
 	// {
 	// 	console.log(data);
@@ -410,38 +410,38 @@ const animate = () => {
 	// if (mapSetting.nbPlayer == nbPlayerCount)
 	// {
 		try {
-			if (playerKeys[player1_name].ArrowUp)
-			{
-				if (player1.position.z > -5.6)
-					player1.position.z -= 0.1;
-			}
-
-			if (playerKeys[player1_name].ArrowDown)
-			{
-				if (player1.position.z < 5.6)
-					player1.position.z += 0.1;
-			}
-
-			if (playerKeys[player2_name].ArrowUp)
-			{
-				if (player2.position.z > -5.6)
-					player2.position.z -= 0.1;
-			}
-			if (playerKeys[player2_name].ArrowDown)
-			{
-				if (player2.position.z < 5.6)
-					player2.position.z += 0.1;
-			}
-			// if (playerKeys[user].ArrowUp)
+			// if (playerKeys[player1_name].ArrowUp)
 			// {
-			// 	if (player.position.z > -5.6)
-			// 		player.position.z -= 0.1;
+			// 	if (player1.position.z > -5.6)
+			// 		player1.position.z -= 0.1;
 			// }
-			// if (playerKeys[user].ArrowDown)
+
+			// if (playerKeys[player1_name].ArrowDown)
 			// {
-			// 	if (player.position.z < 5.6)
-			// 		player.position.z += 0.1;
+			// 	if (player1.position.z < 5.6)
+			// 		player1.position.z += 0.1;
 			// }
+
+			// if (playerKeys[player2_name].ArrowUp)
+			// {
+			// 	if (player2.position.z > -5.6)
+			// 		player2.position.z -= 0.1;
+			// }
+			// if (playerKeys[player2_name].ArrowDown)
+			// {
+			// 	if (player2.position.z < 5.6)
+			// 		player2.position.z += 0.1;
+			// }
+			if (playerKeys[user].ArrowUp)
+			{
+				if (player.position.z > -5.6)
+					player.position.z -= 0.1;
+			}
+			if (playerKeys[user].ArrowDown)
+			{
+				if (player.position.z < 5.6)
+					player.position.z += 0.1;
+			}
 
 			ball.position.x += ballVelocity.x;
 			ball.position.y += ballVelocity.y;
@@ -469,21 +469,21 @@ const animate = () => {
 				}
 			}
 
-			// if (player) {
-			// 	console.log('Player position: ' + player.position.z);
-			// 	// Check if the position has changed significantly since last sent
-			// 	if (lastSentPlayerPositionZ === null || Math.abs(player.position.z - lastSentPlayerPositionZ) > 0.1) {
-			// 		console.log('Sending player position update');
-			// 		console.log(player.position.z);
-			// 		// Send the update via WebSocket
-			// 		socket.send(JSON.stringify({
-			// 			type: 'playerPaddleUpdate',
-			// 			position: player.position.z
-			// 		}));
+			if (player) {
+				console.log('Player position: ' + player.position.z);
+				// Check if the position has changed significantly since last sent
+				if (lastSentPlayerPositionZ === null || Math.abs(player.position.z - lastSentPlayerPositionZ) > 0.1) {
+					console.log('Sending player position update');
+					console.log(player.position.z);
+					// Send the update via WebSocket
+					socket.send(JSON.stringify({
+						type: 'playerPaddleUpdate',
+						position: player.position.z
+					}));
 
-			// 		lastSentPlayerPositionZ = player.position.z;
-			// 	}
-			// }
+					lastSentPlayerPositionZ = player.position.z;
+				}
+			}
 
 		}
 		catch (e)
