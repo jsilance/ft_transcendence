@@ -11,10 +11,6 @@ def welcome(request):
 	context = {
 		"show_alert": True,
 	}
-
-	if request.method == 'GET' and 'HTTP_HX_REQUEST' in request.META:
-		html = render_block_to_string('leaderboard.html', 'body', context)
-		return HttpResponse(html)
 	return render(request, 'welcome.html', context)
 
 def leaderboard(request):

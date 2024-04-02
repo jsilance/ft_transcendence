@@ -34,6 +34,9 @@ authorize_uri = "https://api.intra.42.fr/oauth/authorize?\
 FROMLOGIN = 'd56b699830e77ba53855679cb1d252da'
 FROMSIGNUP = '7d2abf2d0fa7c3a0c13236910f30bc43'
 
+""""
+sign-up: create your account
+"""
 @require_http_methods(['GET', 'POST'])
 def signup_v(req):
     context = {
@@ -58,27 +61,34 @@ def signup_v(req):
         return HttpResponse(html)
     return render(req, 'accounts/signup.html', context)
 
+""""
+login: to your account
+"""
 @require_http_methods(['GET', 'POST'])
-def login_v(req):
+def login_v(request):
     context = {
         'authorize_uri': authorize_uri+FROMLOGIN,
         'show_alerts': True,
     }
-    if req.method == 'POST':
-        form = AuthenticationForm(data=req.POST)
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             user.profile.active = True
-            login(req, user)
-            return redirect('home:welcome')
+            login(request, user)
+            context['request'] = request
+            return render(request, 'welcome.html', context)
+            if 'next' in request.POST:
+                return redirect(request.POST.get('next'))
+            else:
+                return redirect('home:welcome')
     else: # GET request
         form = AuthenticationForm()
-    # GET but not HTMX or POST with invalid form
     context['form'] = form
-    if 'HTTP_HX_REQUEST' in req.META:
-            html = render_block_to_string('accounts/login.html', 'body', context)
-            return HttpResponse(html)
-    return render(req, 'accounts/login.html', context)
+    if 'HTTP_HX_REQUEST' in request.META: 
+        html = render_block_to_string('accounts/login.html', 'body', context)
+        return HttpResponse(html)
+    return render(request, 'accounts/login.html', context)
 
 """
 Callback for Oauth2 logic

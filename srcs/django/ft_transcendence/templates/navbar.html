@@ -14,7 +14,7 @@
                             <li><a hx-get="/admin/" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Admin</a></li>
                         {% endif %}
                         <li><a hx-get="/chatapp/" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Chat</a></li>
-                        <li><a hx-get="{% url 'accounts:profile' %}{{user.username}}" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Profile</a></li>
+                        <li><a href="{% url 'accounts:profile' %}{{request.user.username}}">Profile</a></li>
                     {% endif %}
                 </ul>
             </nav>
