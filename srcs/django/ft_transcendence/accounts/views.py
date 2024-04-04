@@ -48,6 +48,11 @@ def signup_v(req):
         if form.is_valid():
             form.save()
             messages.success(req, f'Your account has been created! You are now able to log in.')
+            context['form'] = AuthenticationForm()
+            return render(req, 'accounts/login.html', context)
+            if 'HTTP_HX_REQUEST' in req.META:
+                html = render_block_to_string('accounts/login.html', 'body', context)
+                return HttpResponse(html)
             if 'next' in req.POST:
                 return redirect(req.POST.get('next'))
             else:

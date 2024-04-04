@@ -18,7 +18,7 @@
                 <h1>Welcome Back</h1>
                 <p>Not registered yet? <a hx-get="{% url 'accounts:signup'%}" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Sign up</a></p>
                 <hr>
-                <form method="post" action="{% url 'accounts:login' %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                <form method="post" action="{% url 'accounts:login' %}">
                     <div class="form_inputs">
                         {% csrf_token %}
                         {{ form | crispy }}
