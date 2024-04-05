@@ -38,33 +38,34 @@ FROMSIGNUP = '7d2abf2d0fa7c3a0c13236910f30bc43'
 sign-up: create your account
 """
 @require_http_methods(['GET', 'POST'])
-def signup_v(req):
+def signup_v(request):
     context = {
         'authorize_uri': authorize_uri+FROMSIGNUP,
         'show_alerts': True,
+        'request': request
     }
-    if req.method == 'POST':
-        form = UserRegisterForm(req.POST)
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(req, f'Your account has been created! You are now able to log in.')
+            messages.success(request, f'Your account has been created! You are now able to log in.')
             context['form'] = AuthenticationForm()
-            return render(req, 'accounts/login.html', context)
-            if 'HTTP_HX_REQUEST' in req.META:
+            return render(request, 'accounts/login.html', context)
+            if 'HTTP_HX_REQUEST' in request.META:
                 html = render_block_to_string('accounts/login.html', 'body', context)
                 return HttpResponse(html)
-            if 'next' in req.POST:
-                return redirect(req.POST.get('next'))
+            if 'next' in request.POST:
+                return redirect(request.POST.get('next'))
             else:
                 return redirect('accounts:login')
     else:
         form = UserRegisterForm()
     context['form'] = form
 
-    if 'HTTP_HX_REQUEST' in req.META:
+    if 'HTTP_HX_REQUEST' in request.META:
         html = render_block_to_string('accounts/signup.html', 'body', context)
         return HttpResponse(html)
-    return render(req, 'accounts/signup.html', context)
+    return render(request, 'accounts/signup.html', context)
 
 """"
 login: to your account
@@ -74,6 +75,7 @@ def login_v(request):
     context = {
         'authorize_uri': authorize_uri+FROMLOGIN,
         'show_alerts': True,
+        'request': request
     }
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
@@ -92,6 +94,8 @@ def login_v(request):
     context['form'] = form
     if 'HTTP_HX_REQUEST' in request.META: 
         html = render_block_to_string('accounts/login.html', 'body', context)
+        html = render_block_to_string('accounts/login.html', 'body', context)
+        html = render_block_to_string('accounts/login.html', 'body', context)
         return HttpResponse(html)
     return render(request, 'accounts/login.html', context)
 
@@ -102,9 +106,9 @@ catches tmp_code, exchanges it for an access token, use that
 token to get user informations
 """
 @require_GET
-def callback(req):
-    page_origin = req.GET.get('state')
-    authorization_code = req.GET.get('code')
+def callback(request):
+    page_origin = request.GET.get('state')
+    authorization_code = request.GET.get('code')
     if authorization_code is None:
         return HttpResponseBadRequest("Bad Request: Missing 'code' parameter")
     
@@ -112,13 +116,13 @@ def callback(req):
     o42 = Oauth42()
     token = o42.get_token(authorization_code)
     if token == None:
-        messages.warning(req, f"Couldn't exchange code for access token.")
+        messages.warning(request, f"Couldn't exchange code for access token.")
         return redirect('accounts:signup')
 
     # use token to request user data
     user_data = o42.get_user_data(token)
     if user_data == None:
-        messages.warning(req, f'Error: Unable to login. Try signing-up. Probably 401 "Unauthorized"')
+        messages.warning(request, f'Error: Unable to login. Try signing-up. Probably 401 "Unauthorized"')
         return redirect('accounts:signup')
     username_42 = user_data.get('login')
     email_42 = user_data.get('email')
@@ -128,27 +132,27 @@ def callback(req):
         known_user = User.objects.get(username=username_42)
         if known_user.profile.isstudent:
             known_user.profile.active = True
-            login(req, known_user)
-            if 'next' in req.POST:
-                return redirect(req.POST.get('next'))
+            login(request, known_user)
+            if 'next' in request.POST:
+                return redirect(request.POST.get('next'))
             else:
                 return redirect('home:welcome')
         else:
             if page_origin == FROMLOGIN:
-                messages.warning(req, "The account you're trying to connect to was created without 42intra. Please enter your credentials to log in.")
+                messages.warning(request, "The account you're trying to connect to was created without 42intra. Please enter your credentials to log in.")
                 return redirect('accounts:login')
             else:
-                messages.warning(req, f'The username <strong>{username_42}</strong> already exists. Pleaser enter another one.')
+                messages.warning(request, f'The username <strong>{username_42}</strong> already exists. Pleaser enter another one.')
                 return redirect('accounts:signup')
     # when user is NOT in database
     if page_origin == FROMLOGIN:
-        messages.info(req, "No corresponding account was found. Please sign-up first.")
+        messages.info(request, "No corresponding account was found. Please sign-up first.")
         return redirect('accounts:signup')
     elif page_origin == FROMSIGNUP:
         newUser = User.objects.create_user(username_42, email_42)
         newUser.profile.isstudent = True
         newUser.profile.save()
-        messages.success(req, f'Your account has been created! You are now able to log in.')
+        messages.success(request, f'Your account has been created! You are now able to log in.')
         return redirect('accounts:login')
 
 class Oauth42:
@@ -181,14 +185,14 @@ class Oauth42:
             return None
 
 @require_POST
-def logout_v(req):
-    if req.method == 'POST':
-        user = req.user
+def logout_v(request):
+    if request.method == 'POST':
+        user = request.user
         user.profile.active = False
         user.profile.save()
-        logout(req)
-        messages.info(req, f'You have been logged out.')
-        return redirect('home:welcome')
+        logout(request)
+        messages.info(request, f'You have been logged out.')
+        return redirect('accounts:login')
 
 ################################################################################
 
@@ -267,6 +271,12 @@ def profile(request, username):
         context['friend_requests'] = friend_requests
 
     context['show_alerts'] = True
+
+    if 'HTTP_HX_REQUEST' in request.META:
+        context['request'] = request
+        b_body = render_block_to_string('accounts/profile.html', 'body', context)
+        b_script = render_block_to_string('accounts/profile.html', 'script_body', context)
+        return HttpResponse(b_body + b_script)
 
     return render(request, 'accounts/profile.html', context)
 

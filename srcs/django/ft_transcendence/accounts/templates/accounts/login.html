@@ -16,9 +16,9 @@
         <div class="form">
             <div>
                 <h1>Welcome Back</h1>
-                <p>Not registered yet? <a hx-get="{% url 'accounts:signup'%}" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Sign up</a></p>
+                <p>Not registered yet? <a href="{% url 'accounts:signup'%}">Sign up</a></p>
                 <hr>
-                <form method="post" action="{% url 'accounts:login' %}">
+                <form hx-boost="false" method="post" action="{% url 'accounts:login' %}">
                     <div class="form_inputs">
                         {% csrf_token %}
                         {{ form | crispy }}
@@ -31,9 +31,6 @@
                         </a>
                     </div>
                 </form>
-                <!-- {% if form.errors %}
-                <p>Your username and password didn't match. Please try again.</p>
-                {% endif %} -->
             </div>
         </div>
     </main>

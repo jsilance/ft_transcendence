@@ -11,6 +11,9 @@ def welcome(request):
 	context = {
 		"show_alert": True,
 	}
+	if 'HTTP_HX_REQUEST' in request.META:
+		html = render_block_to_string('welcome.html', 'body', context)
+		return HttpResponse(html)
 	return render(request, 'welcome.html', context)
 
 def leaderboard(request):

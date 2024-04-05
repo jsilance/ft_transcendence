@@ -1,19 +1,19 @@
 {% load static %}
 
-<header class="navbar">
+<header class="navbar" hx-boost="true"  hx-target="#app-root">
     <div class="container-sm mt-2 mb-2">
         <div class="row_custom">
-            <a class="logo" hx-get="{% url 'home:welcome' %}" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Transcendance</a>
+            <a class="logo" href="{% url 'home:welcome' %}">Transcendance</a>
             <nav>
                 <ul class="nav_links" alt="logo">
-                    <li><a hx-get="{% url 'home:welcome' %}" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Home</a></li>
-                    <li><a hx-get="{% url 'home:leaderboard' %}?key=hello" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Leaderboard</a></li>
-                    <li><a hx-get="/game/" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Game</a></li>
+                    <li><a href="{% url 'home:welcome' %}">Home</a></li>
+                    <li><a href="{% url 'home:leaderboard' %}?key=hello">Leaderboard</a></li>
+                    <li><a href="/game/">Game</a></li>
                     {% if request.user.is_authenticated %}
                         {% if request.user.is_superuser %}
-                            <li><a hx-get="/admin/" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Admin</a></li>
+                            <li><a href="/admin/">Admin</a></li>
                         {% endif %}
-                        <li><a hx-get="/chatapp/" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true">Chat</a></li>
+                        <li><a href="/chatapp/">Chat</a></li>
                         <li><a href="{% url 'accounts:profile' %}{{request.user.username}}">Profile</a></li>
                     {% endif %}
                 </ul>
@@ -21,7 +21,7 @@
         </div>
         <div class="row_custom">
             {% if request.user.is_authenticated %}
-            <form action="{% url 'accounts:logout' %}" class="sub_menu_link" method="post">
+            <form action="{% url 'accounts:logout' %}" method="post" hx-boost="false" class="sub_menu_link">
                 {% csrf_token %}
                 <button type="submit" class="d-flex align-items-center btn_discrete" style="margin-right: 16px;">
                     <svg style="margin-right: 8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-left" viewBox="0 0 16 16">
@@ -35,8 +35,8 @@
             <img class="user_pic" onclick="toggleMenu()" src="{{ request.user.profile.image.url }}" width="48px" height="48px" alt="user image">
     
             {% else %}
-                <a hx-get="{% url 'accounts:login' %}" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true"><button class="cta">Log in</button></a>
-                <a hx-get="{% url 'accounts:signup' %}" hx-target="#app-root" hx-swap="innerHTML" hx-push-url="true"><button class="cta">Sign up</button></a>
+                <a hx-boost="false" href="{% url 'accounts:login' %}"><button class="cta">Log in</button></a>
+                <a hx-boost="false" href="{% url 'accounts:signup' %}"><button class="cta">Sign up</button></a>
             {% endif %}
         </div>
     </div>
