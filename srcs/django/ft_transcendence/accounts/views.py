@@ -227,9 +227,9 @@ def profile(request, username: str) -> HttpResponse:
 
     context['show_alerts'] = True
 
-    if request.GET.get('fromEdit', 'False') == 'True':
-        return render(request, 'accounts/profile.html', context)
     if 'HTTP_HX_REQUEST' in request.META:
+        if request.GET.get('fromEdit', 'False') == 'True':
+            return render(request, 'accounts/profile.html', context)
         context['request'] = request
         b_body = render_block_to_string('accounts/profile.html', 'body', context)
         b_script = render_block_to_string('accounts/profile.html', 'script_body', context)
