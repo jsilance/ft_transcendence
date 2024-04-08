@@ -6,7 +6,7 @@ from .models import Score
 from django.http import HttpResponse
 from render_block import render_block_to_string
 
-@login_required(login_url='/accounts/login/')
+@login_required(login_url='/accounts/login/?redirected=true')
 def welcome(request):
 	context = {
 		"show_alert": True,

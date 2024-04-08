@@ -24,3 +24,9 @@ function blockUnblock(id, action) {
         },
     })
 }
+
+document.body.addEventListener('htmx:configRequest', (event) => {
+    // Add the CSRF token to htmx requests
+    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    event.detail.headers['X-CSRFToken'] = csrfToken;
+});
