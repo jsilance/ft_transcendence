@@ -165,6 +165,7 @@ def profile(request, username: str) -> HttpResponse:
             "show_alerts": True
         })
     if displayed_user:
+        context['displayed_user'] = displayed_user
         context['username'] = displayed_user.username
         context['id'] = displayed_user.id
         context['email'] = displayed_user.email
