@@ -403,11 +403,11 @@ def cancel_friend_request(request) -> HttpResponse:
             payload['response'] = "You must be authenticated to cancel a friend requests"
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
-def remove_friend(request, *args, **kwargs) -> HttpResponse:
+def remove_friend(request) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
-        user_id = kwargs.get("receiver_user_id")
+        user_id = request.POST.get("receiver_user_id")
         if user_id:
             try:
                 removee = User.objects.get(pk=user_id)

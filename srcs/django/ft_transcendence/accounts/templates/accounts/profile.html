@@ -29,39 +29,137 @@
 					<div class="status_offline"></div>
 				{% endif %}
 
+				<!-- /////////////////////////////////////////////////////// -->
+
+				<div
+					data-id="{{ id }}"
+					data-csrf="{{ csrf_token }}"
+					id="header_status_bar"
+				>
+
 				{% if request.user.is_authenticated %}
 					{% if is_self == False %}
 						<!-- Cancel Friend Request / Send Friend Request / Remove Friend -->
 						{% if is_friend == False %}
 							<!-- He/she sent you a request -->
 							{% if request_sent == 0 %}
-								<button onclick='triggerAcceptFriendRequest("{{pending_friend_request_id}}")' class="btn_requests">Accept</button>
-								<button onclick='triggerDeclineFriendRequest("{{pending_friend_request_id}}")' class="btn_requests">Ignore</button>
+								<!--/////////////////////////////////////////-->
+								<!--                  ACCEPT                 -->
+								<!--/////////////////////////////////////////-->
+								<button
+								onclick="acceptFriendRequest(
+									'{{pending_friend_request_id}}',
+									'header_status_bar'
+									)"
+								id="id_accept_request"
+								class="btn_requests">
+								Accept
+								</button>
+								<!--/////////////////////////////////////////-->
+								<!--                 IGNORE                  -->
+								<!--//////////////////////////////////////////-->
+								<button
+								onclick='declineFriendRequest(
+									"{{pending_friend_request_id}}",
+									"header_status_bar",
+								)'
+								id="id_ignore_request"
+								class="btn_requests">
+								Ignore
+								</button>
 							{% endif %}
 							<!-- You sent him/her a request -->
 							{% if request_sent == 1 %}
-								<!-- <button id="id_cancel_request_btn" styles="background_color: red;" class="btn_requests">Invitation sent</button> -->
-								<button  onclick="cancelFriendRequest('{{ id }}', '{% url 'accounts:friend_request_cancel' %}', '{{csrf_token}}')" id="id_cancel_request_btn" class="btn_requests">Invitation sent</button>
+								<!--/////////////////////////////////////////-->
+								<!--                CANCEL                   -->
+								<!--/////////////////////////////////////////-->
+								<button
+									data-next-url="{% url 'accounts:friend_request' %}"
+									onclick="cancelFriendRequest(
+										'{{ id }}',
+										'{{csrf_token}}'
+									)" 
+									id="id_cancel_request_btn"
+									class="btn_requests">
+									Invitation sent
+								</button>
 							{% endif %}
 							<!-- No requests has been sent -->
-							{% if request_sent == -1 %} 
-								<button onclick="sendFriendRequest('{{ id }}', '{% url 'accounts:friend_request' %}', '{{csrf_token}}')" class="btn_requests" id="id_send_friend_request_btn">Add Friend</button>
-								{% if displayed_user in request.user.profile.blocklist.all %}
-									<button onclick='blockUnblock("{{ id }}", "unblock")' class="btn_requests" id="id_block_btn">Unblock</button>
+							{% if request_sent == -1 %}
+								{% if request.user in displayed_user.profile.blocklist.all %}
+									<!-- nothing to do -->
 								{% else %}
-									<button onclick='blockUnblock("{{ id }}", "block")' class="btn_requests" id="id_block_btn">Block</button>
+									{% if displayed_user in request.user.profile.blocklist.all %}
+										<!--/////////////////////////////////////////-->
+										<!--                UNBLOCK                  -->
+										<!--/////////////////////////////////////////-->
+										<button
+											onclick='blockUnblock("{{ id }}", "unblock")' 
+											class="btn_requests">
+											Unblock
+										</button>
+									{% else %}
+										<!--/////////////////////////////////////////////-->
+										<!--                ADD FRIEND                   -->
+										<!--/////////////////////////////////////////////-->
+										<button
+											data-next-url="{% url 'accounts:friend_request_cancel' %}"
+											onclick="sendFriendRequest(
+												'{{ id }}', 
+												'{{csrf_token}}',
+											)"
+											class="btn_requests"
+											id="id_send_friend_request_btn">
+											Add Friend
+										</button>
+										<!--/////////////////////////////////////-->
+										<!--               BLOCK                 -->
+										<!--/////////////////////////////////////-->
+										<button
+											onclick='blockUnblock("{{ id }}", "block")' 
+											class="btn_requests">
+											Block
+										</button>
+									{% endif %}
 								{% endif %}
 							{% endif %}
 						{% endif %}
 						{% if is_friend == True %}
-							<button id="id_unfriend_btn" class="btn_requests">Unfriend</button>
-							<button class="btn_requests">Message</button>
-							<button onclick='blockUnblock("{{ id }}", "block")' class="btn_requests" id="id_block_btn">Block</button>
-							<button onclick='blockUnblock("{{ id }}", "unblock")' class="btn_requests" id="id_block_btn">Unblock</button>
+								<!--/////////////////////////////////////////////-->
+								<!--                  UNFRIEND                   -->
+								<!--/////////////////////////////////////////////-->
+								<button
+									onclick="removeFriend(
+										'{{ id }}',
+										'{{ csrf_token }}',
+									)"
+									id="id_unfriend_btn" 
+									class="btn_requests">
+									Unfriend
+								</button>
+								<!--/////////////////////////////////////////////-->
+								<!--                  MESSAGE                    -->
+								<!--/////////////////////////////////////////////-->
+								<a href="/chatapp/">
+									<button class="btn_requests">
+										Message
+									</button>
+								</a>
+								<!--/////////////////////////////////////////////-->
+								<!--                   BLOCK                     -->
+								<!--/////////////////////////////////////////////-->
+								<button 
+									onclick='blockUnblock("{{ id }}", "block")' 
+									class="btn_requests" 
+									id="id_block_btn">
+									Block
+								</button>
 						{% endif %} <!-- if a friend -->
 					{% endif %} <!-- Not self -->
 
 				{% endif %}
+			
+			</div> <!-- #action_bar -->
 
 			</div>
 			<p>{{description}}</p>
@@ -95,6 +193,11 @@
 
 			<!-- Friend Requests -->
 			<h5>Friend Requests</h5>
+			<div 
+				data-id="{{id}}"
+				data-csrf="{{csrf_token}}"
+				id="widget_status_bar"
+			>
 			{% if request.user.is_authenticated and is_self == True%}
 				{% for request in friend_requests %}
 				<div class="request_card">
@@ -104,13 +207,28 @@
 					<div>
 						<p><b>{{ request.sender | capfirst }}</b></p>
 						<div>
-							<button onclick='triggerAcceptFriendRequest("{{request.id}}")'>Confirm</button>
-							<button onclick='triggerDeclineFriendRequest("{{request.id}}")' class="btn_discrete btn_passive">Ignore</button>
+							<button
+								onclick="acceptFriendRequest(
+									'{{request.id}}',
+									'widget_status_bar',
+								)"
+								class="btn_requests">
+								Confirm
+							</button>
+							<button 
+								onclick='declineFriendRequest(
+									"{{request.id}}",
+									"widget_status_bar",
+								)' 
+								class="btn_discrete btn_passive">
+								Ignore
+							</button>
 						</div>
 					</div>
 				</div>
 				{% endfor %}
 			{% endif %}
+			</div>
 
 			<!-- All Users -->
 			<h5>All Users</h5>
@@ -119,7 +237,7 @@
 				{% for usr in all_users %}
 					{% if usr != request.user and usr not in friends and usr not in blocklist %}
 						<div class="user_card">
-							<a href="/accounts/profile/{{ usr.username }}">
+							<a hx-get="/accounts/profile/{{ usr.username }}" hx-target="#app-root" hx-headers='{"X-CSRFToken": "{% csrf_token %}"}'>
 								<img src="{{ usr.profile.image.url }}" width="48px" height="48px" alt="profile picture">
 							</a>
 							<p>{{ usr.username }}</p>

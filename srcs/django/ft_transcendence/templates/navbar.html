@@ -37,7 +37,9 @@
                 </button>
             </form>
             
-            <img class="user_pic" onclick="toggleMenu()" src="{{ request.user.profile.image.url }}" width="48px" height="48px" alt="user image">
+            <a href="{% url 'accounts:profile' %}{{request.user.username}}" hx-target="#app-root">
+                <img class="user_pic" src="{{ request.user.profile.image.url }}" width="48px" height="48px" alt="profile image">
+            </a>
 
             {% else %}
                 <a href="{% url 'accounts:login' %}" hx-target="#app-body"><button class="cta">Log in</button></a>
