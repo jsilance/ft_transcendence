@@ -17,6 +17,7 @@ import json
 from django.urls import reverse
 from django.template.loader import render_to_string
 from render_block import render_block_to_string
+from django.middleware.csrf import get_token
 
 # get acces to environment variables
 load_dotenv()
@@ -232,6 +233,7 @@ def profile(request, username: str) -> HttpResponse:
         if request.GET.get('fromEdit', 'False') == 'True':
             return render(request, 'accounts/profile.html', context)
         context['request'] = request
+        context['my_csrf'] = get_token(request)
         b_body = render_block_to_string('accounts/profile.html', 'body', context)
         b_script = render_block_to_string('accounts/profile.html', 'script_body', context)
         return HttpResponse(b_body + b_script)

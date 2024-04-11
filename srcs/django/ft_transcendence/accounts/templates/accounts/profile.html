@@ -33,7 +33,7 @@
 
 				<div
 					data-id="{{ id }}"
-					data-csrf="{{ csrf_token }}"
+					{%if csrf_token %} data-csrf="{{ csrf_token }}" {%else%} data-csrf="{{ my_csrf }}" {%endif%}
 					id="header_status_bar"
 				>
 
@@ -47,25 +47,25 @@
 								<!--                  ACCEPT                 -->
 								<!--/////////////////////////////////////////-->
 								<button
-								onclick="acceptFriendRequest(
-									'{{pending_friend_request_id}}',
-									'header_status_bar'
-									)"
-								id="id_accept_request"
-								class="btn_requests">
-								Accept
+									onclick="acceptFriendRequest(
+										'{{pending_friend_request_id}}',
+										'header_status_bar'
+										)"
+									id="id_accept_request"
+									class="btn_requests">
+									Accept
 								</button>
 								<!--/////////////////////////////////////////-->
 								<!--                 IGNORE                  -->
 								<!--//////////////////////////////////////////-->
 								<button
-								onclick='declineFriendRequest(
-									"{{pending_friend_request_id}}",
-									"header_status_bar",
-								)'
-								id="id_ignore_request"
-								class="btn_requests">
-								Ignore
+									onclick='declineFriendRequest(
+										"{{pending_friend_request_id}}",
+										"header_status_bar",
+									)'
+									id="id_ignore_request"
+									class="btn_requests">
+									Ignore
 								</button>
 							{% endif %}
 							<!-- You sent him/her a request -->
@@ -77,7 +77,7 @@
 									data-next-url="{% url 'accounts:friend_request' %}"
 									onclick="cancelFriendRequest(
 										'{{ id }}',
-										'{{csrf_token}}'
+										{% if csrf_token %} '{% csrf_token %}' {% else %} '{{my_csrf}}' {%endif%}
 									)" 
 									id="id_cancel_request_btn"
 									class="btn_requests">
@@ -106,7 +106,7 @@
 											data-next-url="{% url 'accounts:friend_request_cancel' %}"
 											onclick="sendFriendRequest(
 												'{{ id }}', 
-												'{{csrf_token}}',
+												{% if csrf_token %} '{% csrf_token %}' {% else %} '{{my_csrf}}' {%endif%},
 											)"
 											class="btn_requests"
 											id="id_send_friend_request_btn">
@@ -131,7 +131,7 @@
 								<button
 									onclick="removeFriend(
 										'{{ id }}',
-										'{{ csrf_token }}',
+										{% if csrf_token %} '{% csrf_token %}' {% else %} '{{my_csrf}}' {%endif%},
 									)"
 									id="id_unfriend_btn" 
 									class="btn_requests">
@@ -183,8 +183,16 @@
 			<div class="users_list">
 				{% for f in friends %}
 				<div class="user_card">
-					<a href="/accounts/profile/{{ f.username }}">
-						<img src="{{ f.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+					<a 
+						hx-get="/accounts/profile/{{ f.username }}"
+						hx-target="#app-root"
+						hx-push-url="true">
+						<img
+							src="{{ f.profile.image.url }}"
+							width="48px"
+							height="48px"
+							alt="profile picture"
+						>
 					</a>
 					<p>{{ f.username }}</p>
 				</div>
@@ -195,13 +203,16 @@
 			<h5>Friend Requests</h5>
 			<div 
 				data-id="{{id}}"
-				data-csrf="{{csrf_token}}"
+				{%if csrf_token %} data-csrf="{{ csrf_token }}" {%else%} data-csrf="{{ my_csrf }}" {%endif%}
 				id="widget_status_bar"
 			>
 			{% if request.user.is_authenticated and is_self == True%}
 				{% for request in friend_requests %}
 				<div class="request_card">
-					<a href="/accounts/profile/{{ request.sender.username}}">
+					<a 
+						hx-get="/accounts/profile/{{ request.sender.username}}"
+						hx-target="#app-root"
+						hx-push-url="true">
 						<img src="{{ request.sender.profile.image.url }}" width="48px" height="48px" alt="profile picture">
 					</a>
 					<div>
@@ -237,7 +248,10 @@
 				{% for usr in all_users %}
 					{% if usr != request.user and usr not in friends and usr not in blocklist %}
 						<div class="user_card">
-							<a hx-get="/accounts/profile/{{ usr.username }}" hx-target="#app-root" hx-headers='{"X-CSRFToken": "{% csrf_token %}"}'>
+							<a 
+								hx-get="/accounts/profile/{{ usr.username }}"
+								hx-target="#app-root"
+								hx-push-url="true">
 								<img src="{{ usr.profile.image.url }}" width="48px" height="48px" alt="profile picture">
 							</a>
 							<p>{{ usr.username }}</p>
@@ -256,7 +270,10 @@
 
 					{% for blocked_user in blocklist %}
 					<div class="user_card">
-						<a href="/accounts/profile/{{ blocked_user.username }}">
+						<a 
+							hx-get="/accounts/profile/{{ blocked_user.username }}"
+							hx-target="#app-root"
+							hx-push-url="true">
 							<img src="{{ blocked_user.profile.image.url }}" width="48px" height="48px" alt="profile picture">
 						</a>
 						<p>{{ blocked_user.username }}</p>
