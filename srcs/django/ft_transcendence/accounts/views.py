@@ -2,18 +2,22 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from .models import FriendList, FriendRequest
-from .utils import get_friend_request_or_false
+from .utils import Oauth42, get_friend_request_or_false
 from .friend_request_status import FriendRequestStatus
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse, HttpResponseBadRequest
-import requests
 from dotenv import load_dotenv
-import os
 from django.conf import settings
 import json
+from django.urls import reverse
+from django.template.loader import render_to_string
+from render_block import render_block_to_string
+from django.middleware.csrf import get_token
 
 # get acces to environment variables
 load_dotenv()
@@ -29,41 +33,56 @@ authorize_uri = "https://api.intra.42.fr/oauth/authorize?\
 FROMLOGIN = 'd56b699830e77ba53855679cb1d252da'
 FROMSIGNUP = '7d2abf2d0fa7c3a0c13236910f30bc43'
 
-def signup_v(req):
+""""
+sign-up: create your account
+"""
+@require_http_methods(['GET', 'POST'])
+def signup_v(request) -> HttpResponse:
     context = {
         'authorize_uri': authorize_uri+FROMSIGNUP,
         'show_alerts': True,
+        'request': request
     }
-    if req.method == 'POST':
-        form = UserRegisterForm(req.POST)
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(req, f'Your account has been created! You are now able to log in.')
-            return redirect('accounts:login')
+            messages.success(request, f'Your account has been created! You are now able to log in.')
+            context['form'] = AuthenticationForm()
+            # must sent whole page otherwise csrf issue
+            return render(request, 'accounts/login.html', context)
     else:
         form = UserRegisterForm()
     context['form'] = form
-    return render(req, 'accounts/signup.html', context)
 
-def login_v(req):
+    return render(request, 'accounts/signup.html', context)
+
+""""
+login: to your account
+"""
+@require_http_methods(['GET', 'POST'])
+def login_v(request) -> HttpResponse:
     context = {
         'authorize_uri': authorize_uri+FROMLOGIN,
         'show_alerts': True,
+        'request': request
     }
-    if req.method == 'POST':
-        form = AuthenticationForm(data=req.POST)
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             user.profile.active = True
-            login(req, user)
-            if 'next' in req.POST:
-                return redirect(req.POST.get('next'))
+            login(request, user)
+            context['request'] = request
+            return render(request, 'welcome.html', context)
+            if 'next' in request.POST:
+                return redirect(request.POST.get('next'))
             else:
                 return redirect('home:welcome')
-    else:
+    else: # GET request
         form = AuthenticationForm()
     context['form'] = form
-    return render(req, 'accounts/login.html', context)
+    return render(request, 'accounts/login.html', context)
 
 """
 Callback for Oauth2 logic
@@ -71,9 +90,10 @@ Callback for Oauth2 logic
 catches tmp_code, exchanges it for an access token, use that
 token to get user informations
 """
-def callback(req):
-    page_origin = req.GET.get('state')
-    authorization_code = req.GET.get('code')
+@require_GET
+def callback(request) -> None:
+    page_origin = request.GET.get('state')
+    authorization_code = request.GET.get('code')
     if authorization_code is None:
         return HttpResponseBadRequest("Bad Request: Missing 'code' parameter")
     
@@ -81,13 +101,13 @@ def callback(req):
     o42 = Oauth42()
     token = o42.get_token(authorization_code)
     if token == None:
-        messages.warning(req, f"Couldn't exchange code for access token.")
+        messages.warning(request, f"Couldn't exchange code for access token.")
         return redirect('accounts:signup')
 
     # use token to request user data
     user_data = o42.get_user_data(token)
     if user_data == None:
-        messages.warning(req, f'Error: Unable to login. Try signing-up. Probably 401 "Unauthorized"')
+        messages.warning(request, f'Error: Unable to login. Try signing-up. Probably 401 "Unauthorized"')
         return redirect('accounts:signup')
     username_42 = user_data.get('login')
     email_42 = user_data.get('email')
@@ -97,74 +117,46 @@ def callback(req):
         known_user = User.objects.get(username=username_42)
         if known_user.profile.isstudent:
             known_user.profile.active = True
-            login(req, known_user)
-            if 'next' in req.POST:
-                return redirect(req.POST.get('next'))
+            login(request, known_user)
+            if 'next' in request.POST:
+                return redirect(request.POST.get('next'))
             else:
                 return redirect('home:welcome')
         else:
             if page_origin == FROMLOGIN:
-                messages.warning(req, "The account you're trying to connect to was created without 42intra. Please enter your credentials to log in.")
+                messages.warning(request, "The account you're trying to connect to was created without 42intra. Please enter your credentials to log in.")
                 return redirect('accounts:login')
             else:
-                messages.warning(req, f'The username <strong>{username_42}</strong> already exists. Pleaser enter another one.')
+                messages.warning(request, f'The username <strong>{username_42}</strong> already exists. Pleaser enter another one.')
                 return redirect('accounts:signup')
     # when user is NOT in database
     if page_origin == FROMLOGIN:
-        messages.info(req, "No corresponding account was found. Please sign-up first.")
+        messages.info(request, "No corresponding account was found. Please sign-up first.")
         return redirect('accounts:signup')
     elif page_origin == FROMSIGNUP:
         newUser = User.objects.create_user(username_42, email_42)
         newUser.profile.isstudent = True
         newUser.profile.save()
-        messages.success(req, f'Your account has been created! You are now able to log in.')
+        messages.success(request, f'Your account has been created! You are now able to log in.')
         return redirect('accounts:login')
 
-class Oauth42:
-    # exchange temporary code for access token
-    def get_token(self, code):
-        url = 'https://api.intra.42.fr/oauth/token'
-        data = {
-            'grant_type': 'authorization_code',
-            'client_id': os.getenv('CLIENT_ID'),
-            'client_secret': os.getenv('CLIENT_SECRET'),
-            'code': code,
-            'redirect_uri': 'http://localhost:8000/accounts/callback/' # YOU..AAARG!
-        }
-        response = requests.post(url, data=data)
-        if response.status_code == 200:
-            token_data = response.json()
-            return token_data.get('access_token')
-        else:
-            return None
-    # use access token to access user data
-    def get_user_data(self, access_token):
-        # Make a request to the provider's API to get user information
-        headers = {'Authorization': f'Bearer {access_token}'}
-        response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
-
-        if response.status_code == 200:
-            user_data = response.json()
-            return user_data
-        else:
-            return None
-
-def logout_v(req):
-    if req.method == 'POST':
-        user = req.user
+@require_POST
+def logout_v(request) -> None:
+    if request.method == 'POST':
+        user = request.user
         user.profile.active = False
         user.profile.save()
-        logout(req)
-        messages.info(req, f'You have been logged out.')
-        return redirect('home:welcome')
+        logout(request)
+        messages.info(request, f'You have been logged out.')
+        return redirect('accounts:login')
 
 ################################################################################
 
 """
 Profile view of current user or another one
 """
-@login_required(login_url='/accounts/login/')
-def profile(request, username):
+@login_required(login_url='/accounts/login/?redirected=true')
+def profile(request, username: str) -> HttpResponse:
     context = {}
     try:
         displayed_user = User.objects.get(username=username)
@@ -174,6 +166,7 @@ def profile(request, username):
             "show_alerts": True
         })
     if displayed_user:
+        context['displayed_user'] = displayed_user
         context['username'] = displayed_user.username
         context['id'] = displayed_user.id
         context['email'] = displayed_user.email
@@ -236,13 +229,22 @@ def profile(request, username):
 
     context['show_alerts'] = True
 
+    if 'HTTP_HX_REQUEST' in request.META:
+        if request.GET.get('fromEdit', 'False') == 'True':
+            return render(request, 'accounts/profile.html', context)
+        context['request'] = request
+        context['my_csrf'] = get_token(request)
+        b_body = render_block_to_string('accounts/profile.html', 'body', context)
+        b_script = render_block_to_string('accounts/profile.html', 'script_body', context)
+        return HttpResponse(b_body + b_script)
+
     return render(request, 'accounts/profile.html', context)
 
 """
 Logic for deleting a user > profile > friendlist
 """
-@login_required(login_url='/accounts/login/')
-def deleteprofile(request, username):
+@login_required(login_url='/accounts/login/?redirected=true')
+def deleteprofile(request, username: str) -> None:
     # Ensure the user is deleting their own profile or is a superuser
     if request.user.username != username and not request.user.is_superuser:
         return render(request, '404.html')
@@ -260,8 +262,11 @@ def deleteprofile(request, username):
 """
 Settings page for editing user info
 """
-@login_required(login_url='/accounts/login/')
-def editprofile(request):
+@login_required(login_url='/accounts/login/?redirected=true')
+def editprofile(request) -> HttpResponse:
+    context = {
+        'request': request,
+    }
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
@@ -269,18 +274,26 @@ def editprofile(request):
             u_form.save()
             p_form.save()
             messages.success(request, 'Your account has been updated!')
-            return redirect('accounts:profile_edit')
+            context['username'] = request.user.username
+
+            base_url = reverse('accounts:profile', kwargs={'username': request.user.username})
+            return redirect(f'{base_url}?fromEdit=True')
         messages.warning(request, 'NOT VALID')
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
-    context = {
-        'u_form': u_form,
-        'p_form': p_form
-    }
+    context['u_form'] = u_form
+    context['p_form'] = p_form
+    if 'HTTP_HX_REQUEST' in request.META:
+        context['request'] = request
+        b_body = render_block_to_string('accounts/editprofile.html', 'body', context)
+        return HttpResponse(b_body)
     return render(request, 'accounts/editprofile.html', context)
 
-def send_friend_request(request):
+""""
+Friend Request System
+"""
+def send_friend_request(request) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == 'POST' and user.is_authenticated:
@@ -318,7 +331,7 @@ def send_friend_request(request):
         payload['response'] = "You must be authenticated to send a friend request."
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
-def accept_friend_request(request, *args, **kwargs):
+def accept_friend_request(request, *args, **kwargs) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "GET" and user.is_authenticated:
@@ -341,7 +354,7 @@ def accept_friend_request(request, *args, **kwargs):
         payload['response'] = 'You must be authenticated to accept a friend request'
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
-def decline_friend_request(request, *args, **kwargs):
+def decline_friend_request(request, *args, **kwargs) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "GET" and user.is_authenticated:
@@ -362,10 +375,9 @@ def decline_friend_request(request, *args, **kwargs):
             payload['response'] = "Unable to decline that friend request"
     else:
         payload['response'] = "You must be authenticated to decline a friend request"
-    
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
-def cancel_friend_request(request):
+def cancel_friend_request(request) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
@@ -391,14 +403,13 @@ def cancel_friend_request(request):
             payload['response'] = "Unable to cancel that friend request"
     else:
             payload['response'] = "You must be authenticated to cancel a friend requests"
-    
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
-def remove_friend(request, *args, **kwargs):
+def remove_friend(request) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
-        user_id = kwargs.get("receiver_user_id")
+        user_id = request.POST.get("receiver_user_id")
         if user_id:
             try:
                 removee = User.objects.get(pk=user_id)
@@ -413,7 +424,7 @@ def remove_friend(request, *args, **kwargs):
         payload['response'] = "You must be authenticated to remove a friend"
     return HttpResponse(json.dumps(payload), content_type="application/json")
 
-def blocking(request):
+def blocking(request) -> HttpResponse:
     current_user = request.user
     blocklist = current_user.profile.blocklist
     action = request.GET.get("action")

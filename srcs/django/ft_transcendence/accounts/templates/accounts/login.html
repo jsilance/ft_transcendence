@@ -16,9 +16,9 @@
         <div class="form">
             <div>
                 <h1>Welcome Back</h1>
-                <p>Not registered yet? <a href="{% url 'accounts:signup' %}">Sign up</a></p>
+                <p>Not registered yet? <a href="{% url 'accounts:signup'%}">Sign up</a></p>
                 <hr>
-                <form method="post">
+                <form hx-post="{% url 'accounts:login' %}" hx-target="#app-body" hx-push-url="true">
                     <div class="form_inputs">
                         {% csrf_token %}
                         {{ form | crispy }}
@@ -31,10 +31,14 @@
                         </a>
                     </div>
                 </form>
-                <!-- {% if form.errors %}
-                <p>Your username and password didn't match. Please try again.</p>
-                {% endif %} -->
             </div>
         </div>
     </main>
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            // Add the CSRF token to htmx requests
+            var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            event.detail.headers['X-CSRFToken'] = csrfToken;
+        });
+    </script>
 {% endblock %}

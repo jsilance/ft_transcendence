@@ -13,7 +13,7 @@
 {% block body %}
 	<div>
 		<h1 style="margin-bottom: 30px;">Edit Page</h1>
-		<form method="POST" enctype="multipart/form-data">
+		<form hx-post="{% url 'accounts:profile_edit' %}" hx-encoding="multipart/form-data" hx-target="#app-body">
 			{% csrf_token %}
 			{{ u_form | crispy }}
 			{{ p_form | crispy }}
@@ -21,7 +21,7 @@
 				Update
 			</button>	
 		</form>
-		<a href="/accounts/profile/{{ user.username }}/delete/">
+		<a href="/accounts/profile/{{ request.user.username }}/delete/">
 			<button style="margin: 10px 0 0 0; padding: 5px 0;" class="btn_discrete text-danger">
 				Delete your account
 			</button>

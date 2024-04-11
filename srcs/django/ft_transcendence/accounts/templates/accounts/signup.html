@@ -17,25 +17,10 @@
 			<p>Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
 			<hr>
 			<div>
-				<form method="post">
+				<form hx-post="{% url 'accounts:signup' %}" hx-target="#app-body" hx-push-url="true">
 					<div class="signin_form_inputs">
 						{% csrf_token %}
-						
 						{{ form | crispy }}	
-
-						<!-- {{ form.as_p }}
-						{{ form.username.label_tag }}
-						{{ form.username }}
-						<br>
-						{{ form.email.label_tag }}
-						{{ form.email }}
-						<br>
-						{{ form.password1.label_tag }}
-						{{ form.password1 }}
-						<br>
-						{{ form.password2.label_tag }}
-						{{ form.password2 }}
-						<br> -->
 					</div>
 					<div class="form_cta">
 						<button type="submit">Register</button>

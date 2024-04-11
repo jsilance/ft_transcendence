@@ -18,7 +18,9 @@ RUN pip install --no-cache-dir psycopg2-binary \
 				django-crispy-forms \
 				crispy-bootstrap5 \
 				# for ImageField in models
-				Pillow
+				Pillow \
+				Jinja2 \
+				django-render-block
 
 COPY ./ft_transcendence /home/django/ft_transcendence
 
